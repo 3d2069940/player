@@ -2,12 +2,23 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+
+//***********************************************************//
+// Qt5
+//***********************************************************//
 #include <QTimer>
+#include <QObject>
 #include <QFileInfoList>
 
+//***********************************************************//
+// Third-party libraries
+//***********************************************************//
 #include <gst/gst.h>
+#include <yaml-cpp/yaml.h>
 
-
+//***********************************************************//
+// Autogen
+//***********************************************************//
 #include "ui_mainwindow.h"
 
 
@@ -15,14 +26,20 @@ class Effects;
 class PresetDialogWindow;
 class PlaylistWidgetItem;
 
-class MainWindowUI : public Ui::MainWindow {  
-
+class MainWindowUI : public QObject {  
+    Q_OBJECT
+    
 public:
+    Ui::MainWindow ui;
+    
     MainWindowUI ();
     ~MainWindowUI ();
     
     QMainWindow *mainwindow ();
-    void updatePresetConfig (std::string presetType, std::string presetName);
+    
+    template <class T>
+    void updatePresetConfig (std::string presetName);
+        
 private:
 //  Effects
     std::unique_ptr<Effects> effects;
@@ -50,7 +67,7 @@ private:
     void createConfigFile (QString &path);
     
     template <class T>
-    void parsePresets           (std::string, QComboBox *);
+    void parsePresets              (std::string);
     
     void serializeEqualizerParams  (YAML::Node *);
     void serializeDelayParams      (YAML::Node *);
@@ -81,14 +98,26 @@ private:
     void connectPanoramaWidgets   ();
     
 //********Other********//
-    
-    void updateAudioState         ();
+
     void updateAudioPositionLabel (gint64, gint64);
     
     void updateVisualizingWidget  ();
-    void updatePanPosition        ();
 
     void lockWidgetFor (QWidget*, quint64);
+
+public slots:
     
+//  Player Items
+    void togglePlaylistView    ();
+    void nextButtonClicked     ();
+    void previousButtonClicked ();
+    void playlistItemClicked   (QListWidgetItem*);
+    void updateAudioState      ();
+//  Presets
+    void addNewPreset ();
+//  Effects
+    
+    void updatePanPosition ();    
+
 };
 #endif

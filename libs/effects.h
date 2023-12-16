@@ -2,6 +2,10 @@
 #ifndef EFFECTS_H
 #define EFFECTS_H
 
+
+//***********************************************************//
+// GStreamer
+//***********************************************************//
 #include <gst/gst.h>
 
 
@@ -71,7 +75,6 @@ public:
                *audioconvert1,
                *audioresample, 
                *filesrc,
-               *queue, 
                *decodebin, 
                *equalizer,
                *delay,

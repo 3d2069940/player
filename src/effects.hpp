@@ -2,6 +2,9 @@
 #ifndef EFFECT_HPP
 #define EFFECT_HPP
  
+//***********************************************************//
+// Homebrew Headers
+//***********************************************************//
 #include "effects.h"
 
 
@@ -61,15 +64,12 @@ void Effects::initGstreamer () {
     audiorate      = gst_element_factory_make("audiorate",        "audio-rate");
     pitch          = gst_element_factory_make("pitch",            "pitch");
     audiosink      = gst_element_factory_make("autoaudiosink",    "audio-sink");
-
-    if (!GST_IS_ELEMENT(pipeline)      || !GST_IS_ELEMENT(filesrc)       || 
-        !GST_IS_ELEMENT(decodebin)     || !GST_IS_ELEMENT(audioconvert1) || 
-        !GST_IS_ELEMENT(limiter)       || !GST_IS_ELEMENT(audioconvert2) || 
-        !GST_IS_ELEMENT(audioresample) || !GST_IS_ELEMENT(panorama)      || 
-        !GST_IS_ELEMENT(delay)         || !GST_IS_ELEMENT(dynamic)       || 
-        !GST_IS_ELEMENT(equalizer)     || !GST_IS_ELEMENT(volume)        || 
-        !GST_IS_ELEMENT(audiorate)     || !GST_IS_ELEMENT(pitch)         || 
-        !GST_IS_ELEMENT(audiosink)) {
+    
+    if (!pipeline      || !filesrc   || !decodebin     || 
+        !audioconvert1 || !limiter   || !audioconvert2 || 
+        !audioresample || !panorama  || !delay         || 
+        !dynamic       || !equalizer || !volume        || 
+        !audiorate     || !pitch     || !audiosink) {
         g_printerr("One of the elements can't be created. Bruh.\n");
         return;
     }
@@ -110,10 +110,6 @@ gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
     gchar   *debug_info;
     GError  *err;
     Effects *effects = static_cast<Effects*>(userdata);
-//  Spectrum
-    const gchar        *name;
-    const GValue       *magnitudes;
-    const GstStructure *s; 
     switch (GST_MESSAGE_TYPE(msg)) {
         case GST_MESSAGE_EOS:
             g_printerr("End of stream\n");

@@ -2,59 +2,70 @@
 #ifndef PRESET_TYPES_H
 #define PRESET_TYPES_H
 
-#include <yaml-cpp/yaml.h>
-#include <qmetatype.h>
+
+//***********************************************************//
+// Yaml-cpp
+//***********************************************************//
+#include <yaml-cpp/yaml.h>                                  // YAML::Node YAML::convert
+
+//***********************************************************//
+// Qt5
+//***********************************************************//
+#include <qmetatype.h>                                      // Q_DECLARE_METATYPE
 
 
+// Defining structures to be stored in QVariant
 struct EqualizerPreset {
-    int slider29Hz;
-    int slider59Hz;
-    int slider119Hz;
-    int slider237Hz;
-    int slider474Hz;
-    int slider1kHz;
-    int slider2kHz;
-    int slider4kHz;
-    int slider8kHz;
-    int slider16kHz;
+    int slider29Hz  = 0;
+    int slider59Hz  = 0;
+    int slider119Hz = 0;
+    int slider237Hz = 0;
+    int slider474Hz = 0;
+    int slider1kHz  = 0;
+    int slider2kHz  = 0;
+    int slider4kHz  = 0;
+    int slider8kHz  = 0;
+    int slider16kHz = 0;
 };
 
 struct DelayPreset {
-    int  delay;
-    bool surroundDelay;
-    int  intensity;
-    int  maxDelay;
-    int  feedback;
+    int  delay         = 1;
+    bool surroundDelay = false;
+    int  intensity     = 0;
+    int  maxDelay      = 5000;
+    int  feedback      = 0;
 };
 
 struct FilterPreset {
-    bool   mode;
-    int    cutoff;
-    double ripple;
-    int    poles;
-    bool   filterType;
+    bool   mode       = false;
+    int    cutoff     = 48000;
+    double ripple     = 0.25;
+    int    poles      = 4;
+    bool   filterType = false;
 };
 
 struct PitchPreset {
-    int tempo;
-    int pitch;
-    int rate;
-    int outputRate;
+    int tempo      = 10;
+    int pitch      = 10;
+    int rate       = 10;
+    int outputRate = 10;
 };
 
 struct CompressorPreset {
-    bool compressor;
-    bool kneeType;
-    int  ratio;
-    int  threshold;
+    bool compressor = false;
+    bool kneeType   = false;
+    int  ratio      = 10;
+    int  threshold  = 0;
 };
 
+// Registers a custom data type for QVariant
 Q_DECLARE_METATYPE(EqualizerPreset);
 Q_DECLARE_METATYPE(DelayPreset);
 Q_DECLARE_METATYPE(FilterPreset);
 Q_DECLARE_METATYPE(PitchPreset);
 Q_DECLARE_METATYPE(CompressorPreset);
 
+// Defining behaviour when converting and reading from a custom data type
 namespace YAML {
     template<>
     struct convert<EqualizerPreset> {

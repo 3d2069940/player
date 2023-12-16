@@ -9,6 +9,8 @@ set(CMAKE_AUTOMOC ON)
 # Instruct CMake to create code from Qt designer ui files
 set(CMAKE_AUTOUIC ON)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/forms)
 
 # Find the QtWidgets library
@@ -19,8 +21,9 @@ pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
 pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
 
 qt_wrap_ui(UI_FILES mainwindow.ui)
+qt_wrap_cpp(MOC_FILES libs/player.h libs/presetDialogWindow.h libs/playlistWidgetItem.h)
 
-include_directories(libs ${GSTREAMER_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIRS})
+include_directories(libs build ${GSTREAMER_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIRS})
 
 set(SRCS 
     src/main.cpp
@@ -39,7 +42,7 @@ set(HEADERS
 )
     
 # Tell CMake to create the helloworld executable
-add_executable(player ${SRCS} ${HEADERS} ${UI_FILES})
+add_executable(player ${SRCS} ${HEADERS} ${UI_FILES} ${MOC_FILES})
 
 # Use the Widgets module from Qt 5.
 target_link_libraries(player Qt5::Widgets ${GSTREAMER_LIBRARIES} ${YAML_CPP_LIBRARIES})

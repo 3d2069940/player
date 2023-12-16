@@ -1,34 +1,51 @@
 
 #pragma once
 
+//***********************************************************//
+// STL
+//***********************************************************//
+#include <type_traits>
+
+//***********************************************************//
+// Qt5
+//***********************************************************//
 #include <QDir>
 #include <QDebug>
+
+// #include <QPalette>
 #include <QStandardPaths>
 
-#include "presetTypes.h"
+//***********************************************************//
+// Homebrew Headers
+//***********************************************************//
 #include "player.h"
+#include "presetTypes.h"
 
+//***********************************************************//
+// Homebrew Classes
+//***********************************************************//
+#include "effects.hpp"
 #include "presetDialogWindow.hpp"
 #include "playlistWidgetItem.hpp"
-#include "effects.hpp"
 
 
 
 MainWindowUI::MainWindowUI () {
-    setupUi(&mainwindow_);
-    playerPlayListWidget->hide();
+    ui.setupUi(&mainwindow_);
+ 
+    ui.playerPlayListWidget->hide();
     
     effects      = std::make_unique<Effects>();
     dialogWindow = std::make_unique<PresetDialogWindow>();
    
-    parseConfigFile();
+    parseConfigFile ();
 
-    setupWidgets();
-    connectWidgets();
+    setupWidgets    ();
+    connectWidgets  ();
 }
 
 MainWindowUI::~MainWindowUI() {
-    
+    effects.reset();
 }
 
 QMainWindow* MainWindowUI::mainwindow () {
@@ -67,11 +84,11 @@ void MainWindowUI::parseConfigFile() {
         }
     }
 
-    parsePresets<EqualizerPreset>  ("Equalizer",  equalizerPresetsComboBox);
-    parsePresets<DelayPreset>      ("Delay",      delayPresetsComboBox);
-    parsePresets<FilterPreset>     ("Filter",     filterPresetsComboBox);
-    parsePresets<PitchPreset>      ("Pitch",      pitchPresetComboBox);
-    parsePresets<CompressorPreset> ("Compressor", compressorPresetComboBox);
+    parsePresets<EqualizerPreset>  ("Equalizer");
+    parsePresets<DelayPreset>      ("Delay");
+    parsePresets<FilterPreset>     ("Filter");
+    parsePresets<PitchPreset>      ("Pitch");
+    parsePresets<CompressorPreset> ("Compressor");
 }
 
 void MainWindowUI::createConfigFile (QString &configPath) {
@@ -132,36 +149,32 @@ void MainWindowUI::createConfigFile (QString &configPath) {
     configFile.close();
 }
 
-void MainWindowUI::updatePresetConfig (std::string presetType, std::string presetName) {
+template <class T>
+void MainWindowUI::updatePresetConfig (std::string presetName) {
     YAML::Node newPresetSeq (YAML::NodeType::Sequence);
     newPresetSeq.SetStyle(YAML::EmitterStyle::Flow);
-    if (presetType == "Equalizer") {
+    
+    if      constexpr (std::is_same<T, EqualizerPreset>::value)
         serializeEqualizerParams(&newPresetSeq);
-        config[presetType][presetName] = std::move(newPresetSeq);
-        parsePresets<EqualizerPreset>(presetType, equalizerPresetsComboBox);
-  } else if (presetType == "Delay") {
+    else if constexpr (std::is_same<T, DelayPreset>::value)
         serializeDelayParams(&newPresetSeq);
-        config[presetType][presetName] = std::move(newPresetSeq);
-        parsePresets<DelayPreset>(presetType, delayPresetsComboBox);
-  } else if (presetType == "Filter") {
+    else if constexpr (std::is_same<T, FilterPreset>::value)
         serializeFilterParams(&newPresetSeq);
-        config[presetType][presetName] = std::move(newPresetSeq);
-        parsePresets<FilterPreset>(presetType, filterPresetsComboBox);
-  } else if (presetType == "Pitch") {
+    else if constexpr (std::is_same<T, PitchPreset>::value)
         serializePitchParams(&newPresetSeq);
-        config[presetType][presetName] = std::move(newPresetSeq);
-        parsePresets<PitchPreset>(presetType, pitchPresetComboBox);
-  } else if (presetType == "Compressor") {
+    else if constexpr (std::is_same<T, CompressorPreset>::value)
         serializeCompressorParams(&newPresetSeq);
-        config[presetType][presetName] = std::move(newPresetSeq);
-        parsePresets<CompressorPreset>(presetType, compressorPresetComboBox);
-  }
+
+    config[currentPresetType][presetName] = std::move(newPresetSeq);
+    parsePresets<T>(currentPresetType);
+
 }
 
 template <class T>
-void MainWindowUI::parsePresets(std::string presetKeyName, QComboBox* combobox) {
+void MainWindowUI::parsePresets(std::string presetKeyName) {
     QVariant data;
     std::string presetName;
+    QComboBox *combobox;
     if (!config[presetKeyName].IsDefined()) {
         qDebug() << presetKeyName.c_str() << "does not exits. Skipping";
         return;
@@ -173,15 +186,22 @@ void MainWindowUI::parsePresets(std::string presetKeyName, QComboBox* combobox) 
             // Effects presets
             if constexpr (std::is_same<T, EqualizerPreset>::value) {
                 data = QVariant::fromValue(it->second.as<EqualizerPreset>());
+                combobox = ui.equalizerPresetsComboBox;
             // Delay presets
           } else if constexpr (std::is_same<T, DelayPreset>::value) {
                 data = QVariant::fromValue(it->second.as<DelayPreset>());
+                combobox = ui.delayPresetsComboBox;
             // Filter presets
           } else if constexpr (std::is_same<T, FilterPreset>::value) {
                 data = QVariant::fromValue(it->second.as<FilterPreset>());
+                combobox = ui.filterPresetsComboBox;
             // Compressor presets
+          } else if constexpr (std::is_same<T, PitchPreset>::value) {
+                data = QVariant::fromValue(it->second.as<PitchPreset>());
+                combobox = ui.pitchPresetComboBox;
           } else if constexpr (std::is_same<T, CompressorPreset>::value) {
                 data = QVariant::fromValue(it->second.as<CompressorPreset>());
+                combobox = ui.compressorPresetComboBox;
           }
         } catch (YAML::BadConversion &e) {
             qWarning() << "[Warning]:" << e.what();
@@ -192,99 +212,99 @@ void MainWindowUI::parsePresets(std::string presetKeyName, QComboBox* combobox) 
 }
 
 void MainWindowUI::serializeEqualizerParams  (YAML::Node *node) {
-    node->push_back(equalizer29HzSlider->value());
-    node->push_back(equalizer59HzSlider->value());
-    node->push_back(equalizer119HzSlider->value());
-    node->push_back(equalizer237HzSlider->value());
-    node->push_back(equalizer474HzSlider->value());
-    node->push_back(equalizer1000HzSlider->value());
-    node->push_back(equalizer2000HzSlider->value());
-    node->push_back(equalizer4000HzSlider->value());
-    node->push_back(equalizer8000HzSlider->value());
-    node->push_back(equalizer16000HzSlider->value());
+    node->push_back(ui.equalizer29HzSlider->value());
+    node->push_back(ui.equalizer59HzSlider->value());
+    node->push_back(ui.equalizer119HzSlider->value());
+    node->push_back(ui.equalizer237HzSlider->value());
+    node->push_back(ui.equalizer474HzSlider->value());
+    node->push_back(ui.equalizer1000HzSlider->value());
+    node->push_back(ui.equalizer2000HzSlider->value());
+    node->push_back(ui.equalizer4000HzSlider->value());
+    node->push_back(ui.equalizer8000HzSlider->value());
+    node->push_back(ui.equalizer16000HzSlider->value());
 }
 
 void MainWindowUI::serializeDelayParams      (YAML::Node *node) {
-    node->push_back(delayDelaySpinBox->value());
-    node->push_back(delaySurrounDelayButton->text() != "Off");
-    node->push_back(delayIntensityDial->value());
-    node->push_back(delayMaxDelaySpinBox->value());
-    node->push_back(delayFeedbackDial->value());
+    node->push_back(ui.delayDelaySpinBox->value());
+    node->push_back(ui.delaySurrounDelayButton->text() != "Off");
+    node->push_back(ui.delayIntensityDial->value());
+    node->push_back(ui.delayMaxDelaySpinBox->value());
+    node->push_back(ui.delayFeedbackDial->value());
 }
 
 void MainWindowUI::serializeFilterParams     (YAML::Node *node) {
-    node->push_back(filterModeToggleButton->text() != "Low Pass");
-    node->push_back(filterCutoffSpinBox->value());
-    node->push_back(filterRippleSpinBox->value());
-    node->push_back(filterPolesSpinBox->value());
-    node->push_back(filterFilterTypeButton->text() != "I");
+    node->push_back(ui.filterModeToggleButton->text() != "Low Pass");
+    node->push_back(ui.filterCutoffSpinBox->value());
+    node->push_back(ui.filterRippleSpinBox->value());
+    node->push_back(ui.filterPolesSpinBox->value());
+    node->push_back(ui.filterFilterTypeButton->text() != "I");
 }
 
 void MainWindowUI::serializePitchParams      (YAML::Node *node) {
-    node->push_back(pitchTempoDial->value());
-    node->push_back(pitchPitchDial->value());
-    node->push_back(pitchRateDial->value());
-    node->push_back(pitchOutputRateDial->value());
+    node->push_back(ui.pitchTempoDial->value());
+    node->push_back(ui.pitchPitchDial->value());
+    node->push_back(ui.pitchRateDial->value());
+    node->push_back(ui.pitchOutputRateDial->value());
 }
 
 void MainWindowUI::serializeCompressorParams (YAML::Node *node) {
-    node->push_back(compressorExpanderToggleButton->text() != "Compressor");
-    node->push_back(compressorKneeToggleButton->text() != "Hard-knee");
-    node->push_back(compressorRatioDial->value());
-    node->push_back(compressorThresholdDial->value());
+    node->push_back(ui.compressorExpanderToggleButton->text() != "Compressor");
+    node->push_back(ui.compressorKneeToggleButton->text() != "Hard-knee");
+    node->push_back(ui.compressorRatioDial->value());
+    node->push_back(ui.compressorThresholdDial->value());
 }
 
 void MainWindowUI::changeEqualizerParams (QVariant data) {
     EqualizerPreset params = data.value<EqualizerPreset>();
-    equalizer29HzSlider->setValue(params.slider29Hz);
-    equalizer59HzSlider->setValue(params.slider59Hz);
-    equalizer119HzSlider->setValue(params.slider119Hz);
-    equalizer237HzSlider->setValue(params.slider237Hz);
-    equalizer474HzSlider->setValue(params.slider474Hz);
-    equalizer1000HzSlider->setValue(params.slider1kHz);
-    equalizer2000HzSlider->setValue(params.slider2kHz);
-    equalizer4000HzSlider->setValue(params.slider4kHz);
-    equalizer8000HzSlider->setValue(params.slider8kHz);
-    equalizer16000HzSlider->setValue(params.slider16kHz);
+    ui.equalizer29HzSlider->setValue(params.slider29Hz);
+    ui.equalizer59HzSlider->setValue(params.slider59Hz);
+    ui.equalizer119HzSlider->setValue(params.slider119Hz);
+    ui.equalizer237HzSlider->setValue(params.slider237Hz);
+    ui.equalizer474HzSlider->setValue(params.slider474Hz);
+    ui.equalizer1000HzSlider->setValue(params.slider1kHz);
+    ui.equalizer2000HzSlider->setValue(params.slider2kHz);
+    ui.equalizer4000HzSlider->setValue(params.slider4kHz);
+    ui.equalizer8000HzSlider->setValue(params.slider8kHz);
+    ui.equalizer16000HzSlider->setValue(params.slider16kHz);
 }
 
 void MainWindowUI::changeDelayParams (QVariant data) {
     DelayPreset params = data.value<DelayPreset>();
-    delayDelaySpinBox->setValue(params.delay);
-    if ((delaySurrounDelayButton->text() == "On") != params.surroundDelay)
-        delaySurrounDelayButton->click();
-    delayIntensityDial->setValue(params.intensity);
-    delayMaxDelaySpinBox->setValue(params.maxDelay);
-    delayFeedbackDial->setValue(params.feedback);
+    ui.delayDelaySpinBox->setValue(params.delay);
+    if ((ui.delaySurrounDelayButton->text() == "On") != params.surroundDelay)
+        ui.delaySurrounDelayButton->click();
+    ui.delayIntensityDial->setValue(params.intensity);
+    ui.delayMaxDelaySpinBox->setValue(params.maxDelay);
+    ui.delayFeedbackDial->setValue(params.feedback);
 }
 
 void MainWindowUI::changeFilterParams (QVariant data) {
     FilterPreset params = data.value<FilterPreset>();
-    if ((filterModeToggleButton->text() == "Low Pass") == params.mode)
-        filterModeToggleButton->click();
-    filterCutoffSpinBox->setValue(params.cutoff);
-    filterRippleSpinBox->setValue(params.ripple);
-    filterPolesSpinBox->setValue(params.poles);
-    if ((filterFilterTypeButton->text() == "I") == params.filterType)
-        filterFilterTypeButton->click();
+    if ((ui.filterModeToggleButton->text() == "Low Pass") == params.mode)
+        ui.filterModeToggleButton->click();
+    ui.filterCutoffSpinBox->setValue(params.cutoff);
+    ui.filterRippleSpinBox->setValue(params.ripple);
+    ui.filterPolesSpinBox->setValue(params.poles);
+    if ((ui.filterFilterTypeButton->text() == "I") == params.filterType)
+        ui.filterFilterTypeButton->click();
 }
 
 void MainWindowUI::changePitchParams (QVariant data) {
     PitchPreset params = data.value<PitchPreset>();
-    pitchTempoDial->setValue(params.tempo);
-    pitchPitchDial->setValue(params.pitch);
-    pitchRateDial->setValue(params.rate);
-    pitchOutputRateDial->setValue(params.outputRate);
+    ui.pitchTempoDial->setValue(params.tempo);
+    ui.pitchPitchDial->setValue(params.pitch);
+    ui.pitchRateDial->setValue(params.rate);
+    ui.pitchOutputRateDial->setValue(params.outputRate);
 }
 
 void MainWindowUI::changeCompressorParams (QVariant data) {
     CompressorPreset params = data.value<CompressorPreset>();
-    if ((compressorExpanderToggleButton->text() == "Compressor") == params.compressor)
-        compressorExpanderToggleButton->click();
-    if ((compressorKneeToggleButton->text() == "Hard-knee") == params.kneeType)
-        compressorKneeToggleButton->click();
-    compressorRatioDial->setValue(params.ratio);
-    compressorThresholdDial->setValue(params.threshold);
+    if ((ui.compressorExpanderToggleButton->text() == "Compressor") == params.compressor)
+        ui.compressorExpanderToggleButton->click();
+    if ((ui.compressorKneeToggleButton->text() == "Hard-knee") == params.kneeType)
+        ui.compressorKneeToggleButton->click();
+    ui.compressorRatioDial->setValue(params.ratio);
+    ui.compressorThresholdDial->setValue(params.threshold);
 }
 
 void MainWindowUI::setupWidgets () {
@@ -300,10 +320,10 @@ void MainWindowUI::setupWidgets () {
     
     foreach (const QFileInfo &file, musicFiles) {
         QVariant value = QVariant::fromValue(file.absoluteFilePath());
-        QListWidgetItem *item = new QListWidgetItem (playerPlayListWidget);
+        QListWidgetItem *item = new QListWidgetItem (ui.playerPlayListWidget);
         PlaylistWidgetItem *playlistItem = new PlaylistWidgetItem (file.fileName(), value);
         item->setSizeHint(playlistItem->sizeHint());
-        playerPlayListWidget->setItemWidget(item, playlistItem);
+        ui.playerPlayListWidget->setItemWidget(item, playlistItem);
     }
 }
 
@@ -311,15 +331,12 @@ void MainWindowUI::connectWidgets () {
     connectEqualizerTabWidgets();
     connectPlayerTabWidgets();
     
-    QObject::connect(&audioPositionTimer,    &QTimer::timeout, [this]() {updateAudioState();});
-    QObject::connect(&audioPanningTimer,     &QTimer::timeout, [this]() {updatePanPosition();});
+    connect(&audioPositionTimer,    &QTimer::timeout, this, &MainWindowUI::updateAudioState);
+    connect(&audioPanningTimer,     &QTimer::timeout, this, &MainWindowUI::updatePanPosition);
     
-    QObject::connect(dialogWindow->dialogButtonBox, &QDialogButtonBox::accepted, [this]() {
-        this->updatePresetConfig(this->currentPresetType, dialogWindow->getLineInput());
-        dialogWindow->dialogLineEdit->clear();
-        dialogWindow->hide();
-    });
-    QObject::connect(dialogWindow->dialogButtonBox, &QDialogButtonBox::rejected, [this]() {
+    connect(dialogWindow->dialogButtonBox, &QDialogButtonBox::accepted, this, &MainWindowUI::addNewPreset);
+    
+    connect(dialogWindow->dialogButtonBox, &QDialogButtonBox::rejected, [this]() {
         dialogWindow->dialogLineEdit->clear();
         dialogWindow->hide();
     });
@@ -327,55 +344,28 @@ void MainWindowUI::connectWidgets () {
 
 //********Player********//
 void MainWindowUI::connectPlayerTabWidgets() {
-    QObject::connect(playerPlayListWidget, &QListWidget::itemClicked, [this] (QListWidgetItem* item) {
-        PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>(playerPlayListWidget->itemWidget(item));
-        effects->changePlayingAudio(playlistItem->filePath().toStdString());
-        currentAudio   = item;
-        currentAudioId = playerPlayListWidget->row(currentAudio);
-        audioPositionTimer.start();
-    });
-    QObject::connect(playerTogglePlaylistVisibilityButton, &QPushButton::clicked, [this] () {
-        if (playerPlayListWidget->isVisible())
-            playerTogglePlaylistVisibilityButton->setText("Show Playlist");
-        else
-            playerTogglePlaylistVisibilityButton->setText("Hide Playlist");
-        playerPlayListWidget->setVisible(!playerPlayListWidget->isVisible());
-    });
-    QObject::connect(playerSeekSlider, &QSlider::sliderPressed, [this] () {
-        audioPositionTimer.stop();
-    });
-    QObject::connect(playerSeekSlider, &QSlider::valueChanged, [this] (int value) {
+    connect(ui.playerPlayListWidget, &QListWidget::itemClicked, this, &MainWindowUI::playlistItemClicked);
+    
+    connect(ui.playerTogglePlaylistVisibilityButton, &QPushButton::clicked, this, &MainWindowUI::togglePlaylistView);
+    
+    connect(ui.playerSeekSlider, &QSlider::sliderPressed, &audioPositionTimer, &QTimer::stop);
+    
+    connect(ui.playerSeekSlider, &QSlider::valueChanged, [this] (int value) {
         updateAudioPositionLabel(effects->audioDuration*value/1000, effects->audioDuration);
     });
-    QObject::connect(playerSeekSlider, &QSlider::sliderReleased, [this]() {
-        effects->seekPlayingPosition(playerSeekSlider->value());
+    connect(ui.playerSeekSlider, &QSlider::sliderReleased, [this]() {
+        effects->seekPlayingPosition(ui.playerSeekSlider->value());
         audioPositionTimer.start();
     });
-    QObject::connect(playerPauseButton, &QPushButton::released, [this]() {
-         effects->togglePipelineState();
-        if (playerPauseButton->text() == "Play")
-            playerPauseButton->setText("Pause");
+    connect(ui.playerPauseButton, &QPushButton::released, [this]() {
+        effects->togglePipelineState();
+        if (ui.playerPauseButton->text() == "Play")
+            ui.playerPauseButton->setText("Pause");
         else
-            playerPauseButton->setText("Play");
+            ui.playerPauseButton->setText("Play");
     });
-    QObject::connect(playerNextButton, &QPushButton::pressed, [this]() {
-        if (currentAudioId < playerPlayListWidget->count()-1) {
-            currentAudioId += 1;
-            currentAudio = playerPlayListWidget->item(currentAudioId);
-            PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>(playerPlayListWidget->itemWidget(currentAudio));
-            effects->changePlayingAudio(playlistItem->filePath().toStdString());
-            playerPlayListWidget->setCurrentRow(currentAudioId);
-        }
-    });
-    QObject::connect(playerPreviousButton, &QPushButton::pressed, [this]() {
-        if (currentAudioId > 0) {
-            currentAudioId -= 1;
-            currentAudio = playerPlayListWidget->item(currentAudioId);
-            PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>(playerPlayListWidget->itemWidget(currentAudio));
-            effects->changePlayingAudio(playlistItem->filePath().toStdString());
-            playerPlayListWidget->setCurrentRow(currentAudioId);
-        }
-    });
+    connect(ui.playerNextButton, &QPushButton::pressed, this, &MainWindowUI::nextButtonClicked);
+    connect(ui.playerPreviousButton, &QPushButton::pressed, this, &MainWindowUI::previousButtonClicked);
 }
 
 //********Effects*******//
@@ -389,194 +379,194 @@ void MainWindowUI::connectEqualizerTabWidgets () {
 }
 
 void MainWindowUI::connectEqualizerWidgets () {
-    QObject::connect(equalizerDefaultPresetButton, &QPushButton::clicked, [this]() {
-        EqualizerPreset defaultPreset = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    connect(ui.equalizerDefaultPresetButton, &QPushButton::clicked, [this]() {
+        EqualizerPreset defaultPreset;
         QVariant defaultData = QVariant::fromValue(defaultPreset);
         changeEqualizerParams(defaultData);
     });
-    QObject::connect(equalizerPresetsComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
-        this->changeEqualizerParams(equalizerPresetsComboBox->itemData(id));
+    connect(ui.equalizerPresetsComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
+        this->changeEqualizerParams(ui.equalizerPresetsComboBox->itemData(id));
     });
-    QObject::connect(equalizerSavePresetButton, &QPushButton::clicked, [this]() {
+    connect(ui.equalizerSavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Equalizer";
-        dialogWindow->exec();
+        dialogWindow->show();
     });
     
     using namespace CODES;
-    QObject::connect(equalizer29HzSlider,   &QSlider::valueChanged, [this](int value) {
+    connect(ui.equalizer29HzSlider,   &QSlider::valueChanged, [this](int value) {
         effects->changeEqualizerProps(EQUALIZER::Slider29Hz,  value);
     });
-    QObject::connect(equalizer59HzSlider,   &QSlider::valueChanged, [this](int value) {
+    connect(ui.equalizer59HzSlider,   &QSlider::valueChanged, [this](int value) {
         effects->changeEqualizerProps(EQUALIZER::Slider59Hz,  value);
     });
-    QObject::connect(equalizer119HzSlider,  &QSlider::valueChanged, [this](int value) {
+    connect(ui.equalizer119HzSlider,  &QSlider::valueChanged, [this](int value) {
         effects->changeEqualizerProps(EQUALIZER::Slider119Hz, value);
     });
-    QObject::connect(equalizer237HzSlider,  &QSlider::valueChanged, [this](int value) {
+    connect(ui.equalizer237HzSlider,  &QSlider::valueChanged, [this](int value) {
         effects->changeEqualizerProps(EQUALIZER::Slider237Hz, value);
     });
-    QObject::connect(equalizer474HzSlider,  &QSlider::valueChanged, [this](int value) {
+    connect(ui.equalizer474HzSlider,  &QSlider::valueChanged, [this](int value) {
         effects->changeEqualizerProps(EQUALIZER::Slider474Hz, value);
     });
-    QObject::connect(equalizer1000HzSlider, &QSlider::valueChanged, [this](int value) {
+    connect(ui.equalizer1000HzSlider, &QSlider::valueChanged, [this](int value) {
         effects->changeEqualizerProps(EQUALIZER::Slider1kHz,  value);
     });
-    QObject::connect(equalizer2000HzSlider, &QSlider::valueChanged, [this](int value) {
+    connect(ui.equalizer2000HzSlider, &QSlider::valueChanged, [this](int value) {
         effects->changeEqualizerProps(EQUALIZER::Slider2kHz,  value);
     });
-    QObject::connect(equalizer4000HzSlider, &QSlider::valueChanged, [this](int value) {
+    connect(ui.equalizer4000HzSlider, &QSlider::valueChanged, [this](int value) {
         effects->changeEqualizerProps(EQUALIZER::Slider4kHz,  value);
     });
-    QObject::connect(equalizer8000HzSlider, &QSlider::valueChanged, [this](int value) {
+    connect(ui.equalizer8000HzSlider, &QSlider::valueChanged, [this](int value) {
         effects->changeEqualizerProps(EQUALIZER::Slider8kHz,  value);
     });
-    QObject::connect(equalizer16000HzSlider,&QSlider::valueChanged, [this](int value) {
+    connect(ui.equalizer16000HzSlider,&QSlider::valueChanged, [this](int value) {
         effects->changeEqualizerProps(EQUALIZER::Slider16kHz, value);
     });
-    QObject::connect(equalizerVolumeSlider, &QSlider::valueChanged, [this](int value) {
+    connect(ui.equalizerVolumeSlider, &QSlider::valueChanged, [this](int value) {
         effects->changeEqualizerProps(EQUALIZER::Volume,      value);
     });
 }
 
 void MainWindowUI::connectDelayWidgets() {
-    QObject::connect(delayDefaultPresetButton, &QPushButton::clicked, [this]() {
-        DelayPreset defaultPreset = {1, false, 0, 5000, 0};
+    connect(ui.delayDefaultPresetButton, &QPushButton::clicked, [this]() {
+        DelayPreset defaultPreset;
         QVariant defaultData = QVariant::fromValue(defaultPreset);
         this->changeDelayParams(defaultData);
     });
-    QObject::connect(delayPresetsComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
-        this->changeDelayParams(delayPresetsComboBox->itemData(id));
+    connect(ui.delayPresetsComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
+        this->changeDelayParams(ui.delayPresetsComboBox->itemData(id));
     });
-    QObject::connect(delaySavePresetButton, &QPushButton::clicked, [this]() {
+    connect(ui.delaySavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Delay";
-        dialogWindow->exec();
+        dialogWindow->show();
     });
     
     using namespace CODES;
-    QObject::connect(delayDelaySpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+    connect(ui.delayDelaySpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
         effects->changeDelayProps(CODES::Delay, (gdouble)value);
     });
-    QObject::connect(delaySurrounDelayButton, &QPushButton::clicked, [this]() {
+    connect(ui.delaySurrounDelayButton, &QPushButton::clicked, [this]() {
         effects->changeDelayProps(CODES::SurroundDelay);
-        if (delaySurrounDelayButton->text() == "Off")
-            delaySurrounDelayButton->setText("On");
+        if (ui.delaySurrounDelayButton->text() == "Off")
+            ui.delaySurrounDelayButton->setText("On");
         else
-            delaySurrounDelayButton->setText("Off");
+            ui.delaySurrounDelayButton->setText("Off");
     });
-    QObject::connect(delayIntensityDial, &QDial::valueChanged, [this](int value) {
+    connect(ui.delayIntensityDial, &QDial::valueChanged, [this](int value) {
         effects->changeDelayProps(CODES::Intensity, value);
     });
-    QObject::connect(delayMaxDelaySpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+    connect(ui.delayMaxDelaySpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
         effects->changeDelayProps(CODES::MaxDelay, value);
     });
-    QObject::connect(delayFeedbackDial, &QDial::valueChanged, [this](int value) {
+    connect(ui.delayFeedbackDial, &QDial::valueChanged, [this](int value) {
         effects->changeDelayProps(CODES::Feedback, value);
     });
 }
 
 void MainWindowUI::connectFilterWidgets() {
-    QObject::connect(filterPresetSavePresetButton, &QPushButton::clicked, [this]() {
+    connect(ui.filterPresetSavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Filter";
-        dialogWindow->exec();
+        dialogWindow->show();
     });
-    QObject::connect(filterDefaultPresetButton, &QPushButton::clicked, [this]() {
-        FilterPreset defaultPreset = {false, 48000, 0.25, 4, false};
+    connect(ui.filterDefaultPresetButton, &QPushButton::clicked, [this]() {
+        FilterPreset defaultPreset;
         QVariant defaultData = QVariant::fromValue(defaultPreset);
         changeFilterParams(defaultData);
     });
-    QObject::connect(filterPresetsComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
-        this->changeFilterParams(filterPresetsComboBox->itemData(id));
+    connect(ui.filterPresetsComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
+        this->changeFilterParams(ui.filterPresetsComboBox->itemData(id));
     });
     
     using namespace CODES;
-    QObject::connect(filterModeToggleButton, &QPushButton::clicked, [this]() {
+    connect(ui.filterModeToggleButton, &QPushButton::clicked, [this]() {
         effects->changeFilterProps(FILTER::Mode);
-        if (filterModeToggleButton->text() == "Low Pass")
-            filterModeToggleButton->setText("High Pass");
+        if (ui.filterModeToggleButton->text() == "Low Pass")
+            ui.filterModeToggleButton->setText("High Pass");
         else
-            filterModeToggleButton->setText("Low Pass");
+            ui.filterModeToggleButton->setText("Low Pass");
     });
-    QObject::connect(filterCutoffSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+    connect(ui.filterCutoffSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
         effects->changeFilterProps(FILTER::Cutoff, (gfloat)value);
     });
-    QObject::connect(filterRippleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
+    connect(ui.filterRippleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value) {
         effects->changeFilterProps(FILTER::Ripple, (gfloat)value);
     });
-    QObject::connect(filterPolesSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+    connect(ui.filterPolesSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
         effects->changeFilterProps(FILTER::Poles, (gfloat)value);
     });
-    QObject::connect(filterFilterTypeButton, &QPushButton::clicked, [this]() {
+    connect(ui.filterFilterTypeButton, &QPushButton::clicked, [this]() {
         effects->changeFilterProps(FILTER::FilterType);
-        if (filterFilterTypeButton->text() == "I")
-            filterFilterTypeButton->setText("II");
+        if (ui.filterFilterTypeButton->text() == "I")
+            ui.filterFilterTypeButton->setText("II");
         else
-            filterFilterTypeButton->setText("I");
+            ui.filterFilterTypeButton->setText("I");
     });
 }
 
 void MainWindowUI::connectPitchWidgets () {
-    QObject::connect(pitchSavePresetButton, &QPushButton::clicked, [this]() {
+    connect(ui.pitchSavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Pitch";
-        dialogWindow->exec();
+        dialogWindow->show();
     });
-    QObject::connect(pitchDefaultPresetButton, &QPushButton::clicked, [this]() {
-        PitchPreset defaultPreset = {10, 10, 10, 10};
+    connect(ui.pitchDefaultPresetButton, &QPushButton::clicked, [this]() {
+        PitchPreset defaultPreset;
         QVariant data = QVariant::fromValue(defaultPreset);
         this->changePitchParams(data);
     });
-    QObject::connect(pitchPresetComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
-        this->changePitchParams(pitchPresetComboBox->itemData(id));
+    connect(ui.pitchPresetComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
+        this->changePitchParams(ui.pitchPresetComboBox->itemData(id));
     });
     
     using namespace CODES;
-    QObject::connect(pitchTempoDial, &QDial::valueChanged, [this](int value) {
+    connect(ui.pitchTempoDial, &QDial::valueChanged, [this](int value) {
         effects->changePitchProps(PITCH::Tempo, value/10.0);
     });
-    QObject::connect(pitchPitchDial, &QDial::valueChanged, [this](int value) {
+    connect(ui.pitchPitchDial, &QDial::valueChanged, [this](int value) {
         effects->changePitchProps(PITCH::Pitch, value/10.0);
     });
-    QObject::connect(pitchRateDial, &QDial::valueChanged, [this](int value) {
+    connect(ui.pitchRateDial, &QDial::valueChanged, [this](int value) {
         effects->changePitchProps(PITCH::Rate, value/10.0);
     });
-    QObject::connect(pitchOutputRateDial,&QDial::valueChanged, [this](int value) {
+    connect(ui.pitchOutputRateDial,&QDial::valueChanged, [this](int value) {
         effects->changePitchProps(PITCH::OutputRate, value/10.0);
     });
 }
 
 void MainWindowUI::connectCompressorWidgets () {
-    QObject::connect(compressorSavePresetButton, &QPushButton::clicked, [this]() {
+    connect(ui.compressorSavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Compressor";
-        dialogWindow->exec();
+        dialogWindow->show();
     });
     
-    QObject::connect(compressorDefaultPresetButton, &QPushButton::clicked, [this]() {
-        CompressorPreset defaultPreset = {false, false, 10, 0};
+    connect(ui.compressorDefaultPresetButton, &QPushButton::clicked, [this]() {
+        CompressorPreset defaultPreset;
         QVariant data = QVariant::fromValue(defaultPreset);
         this->changeCompressorParams(data);
     });
-    QObject::connect(compressorPresetComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
-        this->changeCompressorParams(compressorPresetComboBox->itemData(id));
+    connect(ui.compressorPresetComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
+        this->changeCompressorParams(ui.compressorPresetComboBox->itemData(id));
     });
     
     using namespace CODES;
-    QObject::connect(compressorExpanderToggleButton, &QPushButton::clicked, [this]() {
+    connect(ui.compressorExpanderToggleButton, &QPushButton::clicked, [this]() {
         effects->changeCompressorProps(COMPRESSOR::Compressor);
-        if (compressorExpanderToggleButton->text() == "Compressor")
-            compressorExpanderToggleButton->setText("Expander");
+        if (ui.compressorExpanderToggleButton->text() == "Compressor")
+            ui.compressorExpanderToggleButton->setText("Expander");
         else
-            compressorExpanderToggleButton->setText("Compressor");
+            ui.compressorExpanderToggleButton->setText("Compressor");
     });
-    QObject::connect(compressorKneeToggleButton, &QPushButton::clicked, [this]() {
+    connect(ui.compressorKneeToggleButton, &QPushButton::clicked, [this]() {
         effects->changeCompressorProps(COMPRESSOR::Knee);
-        if (compressorKneeToggleButton->text() == "Hard-knee")
-            compressorKneeToggleButton->setText("Soft-knee");
+        if (ui.compressorKneeToggleButton->text() == "Hard-knee")
+            ui.compressorKneeToggleButton->setText("Soft-knee");
         else
-            compressorKneeToggleButton->setText("Hard-knee");
+            ui.compressorKneeToggleButton->setText("Hard-knee");
     });
-    QObject::connect(compressorRatioDial, &QDial::valueChanged, [this](int value) {
+    connect(ui.compressorRatioDial, &QDial::valueChanged, [this](int value) {
         effects->changeCompressorProps(COMPRESSOR::Ratio, value);
     });
-    QObject::connect(compressorThresholdDial, &QDial::valueChanged, [this](int value) {
+    connect(ui.compressorThresholdDial, &QDial::valueChanged, [this](int value) {
         effects->changeCompressorProps(COMPRESSOR::Threshold, value);
     });
 }
@@ -584,30 +574,30 @@ void MainWindowUI::connectCompressorWidgets () {
 void MainWindowUI::connectPanoramaWidgets () {
     using namespace CODES;
     
-    QObject::connect(panoramaPanningMethodButton, &QPushButton::clicked, [this]() {
+    connect(ui.panoramaPanningMethodButton, &QPushButton::clicked, [this]() {
         effects->changePanoramaProps(PANORAMA::Method);
-        if (panoramaPanningMethodButton->text() == "Simple")
-            panoramaPanningMethodButton->setText("Psychoacoustic");
+        if (ui.panoramaPanningMethodButton->text() == "Simple")
+            ui.panoramaPanningMethodButton->setText("Psychoacoustic");
         else
-            panoramaPanningMethodButton->setText("Simple");
+            ui.panoramaPanningMethodButton->setText("Simple");
     });
-    QObject::connect(panoramaPositionDial, &QDial::valueChanged, [this](int value) {
+    connect(ui.panoramaPositionDial, &QDial::valueChanged, [this](int value) {
         effects->changePanoramaProps(PANORAMA::Position, value);
     });
-    QObject::connect(panoramaAutoPanoramaButton, &QPushButton::clicked, [this]() {
+    connect(ui.panoramaAutoPanoramaButton, &QPushButton::clicked, [this]() {
         if (audioPanningTimer.isActive()) {
-            panoramaAutoPanoramaButton->setText("Off");
+            ui.panoramaAutoPanoramaButton->setText("Off");
             audioPanningTimer.stop();
         }
         else {
-            panoramaAutoPanoramaButton->setText("On");
+            ui.panoramaAutoPanoramaButton->setText("On");
             audioPanningTimer.start();
         }
-        panoramaSpeedDial->setEnabled(!panoramaSpeedDial->isEnabled());
+        ui.panoramaSpeedDial->setEnabled(!ui.panoramaSpeedDial->isEnabled());
     });
-    QObject::connect(panoramaSpeedDial, &QDial::valueChanged, [this](int value) {
+    connect(ui.panoramaSpeedDial, &QDial::valueChanged, [this](int value) {
         audioPanningTimer.stop();
-        audioPanningTimer.setInterval(panoramaSpeedDial->maximum()+10-value);
+        audioPanningTimer.setInterval(ui.panoramaSpeedDial->maximum()+10-value);
         audioPanningTimer.start();
     });
 }
@@ -617,24 +607,6 @@ void MainWindowUI::lockWidgetFor (QWidget *widget, quint64 time) {
     widget->blockSignals(true);
     QTimer::singleShot(time, [widget]() {widget->blockSignals(false);});
 };
-
-void MainWindowUI::updateAudioState () {
-    effects->updateAudioDuration();
-    effects->updateAudioPosition();
-    
-    if (!effects->isEOSReached()) {
-        updateAudioPositionLabel(effects->audioPosition, effects->audioDuration);
-        playerSeekSlider->setValue(1000*effects->audioPosition/effects->audioDuration);
-    }
-        
-    if (currentAudioId < playerPlayListWidget->count()-1 && effects->isEOSReached()) {
-        currentAudioId += 1;
-        currentAudio = playerPlayListWidget->item(currentAudioId);
-        PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>(playerPlayListWidget->itemWidget(currentAudio));
-        effects->changePlayingAudio(playlistItem->filePath().toStdString());
-        playerPlayListWidget->setCurrentRow(currentAudioId);
-    }
-}
 
 void MainWindowUI::updateAudioPositionLabel(gint64 position, gint64 duration) {
     long long hours_dur, minutes_dur, seconds_dur, 
@@ -650,7 +622,7 @@ void MainWindowUI::updateAudioPositionLabel(gint64 position, gint64 duration) {
     string = string.arg(hours_pos).arg(minutes_pos, 2, 10, QChar('0')).arg(seconds_pos % 60, 2, 10, QChar('0'))
                    .arg(hours_dur).arg(minutes_dur, 2, 10, QChar('0')).arg(seconds_dur % 60, 2, 10, QChar('0'));
     
-    playerProgressLabel->setText(string);
+    ui.playerProgressLabel->setText(string);
 }
 
 void MainWindowUI::updateVisualizingWidget () {
@@ -669,11 +641,90 @@ void MainWindowUI::updateVisualizingWidget () {
 //     scene->addItem(rectangle);
 }
 
+//**************SLOTS**************//
+
+void MainWindowUI::togglePlaylistView () {
+    if (ui.playerPlayListWidget->isVisible()) {
+        ui.playerTogglePlaylistVisibilityButton->setText("Show Playlist");
+        ui.playerPlayListWidget->setVisible(false);
+  } else {
+        ui.playerTogglePlaylistVisibilityButton->setText("Hide Playlist");
+        ui.playerPlayListWidget->setVisible(true);
+  }
+}
+
+void MainWindowUI::nextButtonClicked () {
+    if (currentAudioId < ui.playerPlayListWidget->count()-1) {
+        currentAudioId += 1;
+        currentAudio = ui.playerPlayListWidget->item(currentAudioId);
+        PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
+            (ui.playerPlayListWidget->itemWidget(currentAudio));
+        effects->changePlayingAudio(playlistItem->filePath());
+        ui.playerPlayListWidget->setCurrentRow(currentAudioId);
+    }
+}
+
+void MainWindowUI::previousButtonClicked () {
+    if (currentAudioId > 0) {
+        currentAudioId -= 1;
+        currentAudio = ui.playerPlayListWidget->item(currentAudioId);
+        PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
+            (ui.playerPlayListWidget->itemWidget(currentAudio));
+        effects->changePlayingAudio(playlistItem->filePath());
+        ui.playerPlayListWidget->setCurrentRow(currentAudioId);
+    }    
+}
+
+void MainWindowUI::playlistItemClicked (QListWidgetItem *item) {
+    PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
+        (ui.playerPlayListWidget->itemWidget(item));
+    effects->changePlayingAudio(playlistItem->filePath());
+    currentAudio   = item;
+    currentAudioId = ui.playerPlayListWidget->row(currentAudio);
+    audioPositionTimer.start();
+}
+
+void MainWindowUI::addNewPreset () {
+    if      (this->currentPresetType == "Equalizer")
+        this->updatePresetConfig<EqualizerPreset>(dialogWindow->getLineInput());
+    else if (this->currentPresetType == "Delay")
+        this->updatePresetConfig<DelayPreset>(dialogWindow->getLineInput());
+    else if (this->currentPresetType == "Filter")
+        this->updatePresetConfig<FilterPreset>(dialogWindow->getLineInput());
+    else if (this->currentPresetType == "Pitch")
+        this->updatePresetConfig<PitchPreset>(dialogWindow->getLineInput());
+    else if (this->currentPresetType == "Compressor")
+        this->updatePresetConfig<CompressorPreset>(dialogWindow->getLineInput());
+    dialogWindow->dialogLineEdit->clear();
+    dialogWindow->hide();
+}
+
+void MainWindowUI::updateAudioState () {
+    effects->updateAudioDuration();
+    effects->updateAudioPosition();
+    
+    if (!effects->isEOSReached()) {
+        updateAudioPositionLabel(effects->audioPosition, effects->audioDuration);
+        ui.playerSeekSlider->setValue(1000*effects->audioPosition/effects->audioDuration);
+    }
+        
+    if (currentAudioId < ui.playerPlayListWidget->count()-1 && effects->isEOSReached()) {
+        currentAudioId += 1;
+        currentAudio = ui.playerPlayListWidget->item(currentAudioId);
+        PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>(ui.playerPlayListWidget->itemWidget(currentAudio));
+        effects->changePlayingAudio(playlistItem->filePath());
+        ui.playerPlayListWidget->setCurrentRow(currentAudioId);
+    }
+}
+
 void MainWindowUI::updatePanPosition () {
     static bool direction = true;
-    int panPosition = panoramaPositionDial->value();
-    direction = (panPosition + 10 > panoramaPositionDial->maximum() || 
-                 panPosition - 10 < panoramaPositionDial->minimum()) ? 
+    int panPosition = ui.panoramaPositionDial->value();
+    direction = (panPosition + 10 > ui.panoramaPositionDial->maximum() || 
+                 panPosition - 10 < ui.panoramaPositionDial->minimum()) ? 
                  !direction : direction;
-    panoramaPositionDial->setValue(panPosition + (direction ? 10 : -10));
+    ui.panoramaPositionDial->setValue(panPosition + (direction ? 10 : -10));
 }
+
+
+
