@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(player)
 
+set(CMAKE_CXX_STANDARD 17)
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
@@ -8,19 +9,40 @@ set(CMAKE_AUTOMOC ON)
 # Instruct CMake to create code from Qt designer ui files
 set(CMAKE_AUTOUIC ON)
 
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/forms)
+
 # Find the QtWidgets library
+find_package(PkgConfig REQUIRED)    
 find_package(Qt5Widgets CONFIG REQUIRED)
 
-set(player_SRC
-  src/main.cpp
-  src/player.cpp
+pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
+pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
+
+qt_wrap_ui(UI_FILES mainwindow.ui)
+
+include_directories(libs ${GSTREAMER_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIRS})
+
+set(SRCS 
+    src/main.cpp
+    src/player.hpp
+    src/effects.hpp
+    src/playlistWidgetItem.hpp
+    src/presetDialogWindow.hpp
 )
 
+set(HEADERS
+    libs/player.h
+    libs/effects.h
+    libs/playlistWidgetItem.h
+    libs/presetDialogWindow.h
+    libs/presetTypes.h
+)
+    
 # Tell CMake to create the helloworld executable
-add_executable(player ${player_SRC})
+add_executable(player ${SRCS} ${HEADERS} ${UI_FILES})
 
 # Use the Widgets module from Qt 5.
-target_link_libraries(player Qt5::Widgets)
+target_link_libraries(player Qt5::Widgets ${GSTREAMER_LIBRARIES} ${YAML_CPP_LIBRARIES})
 
 # Install the executable
 install(TARGETS player DESTINATION bin)

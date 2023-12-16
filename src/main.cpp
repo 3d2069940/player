@@ -1,12 +1,12 @@
-#include "player.h"
-#include <QApplication>
 
-int main(int argc, char *argv[])
-{
+#include "player.hpp"
+
+int main (int argc, char** argv) {
     QApplication app(argc, argv);
-    player w;
-    w.show();
-
+        
+    MainWindowUI ui;
+    ui.mainwindow()->show();
+    
     return app.exec();
 }
 
