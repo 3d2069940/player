@@ -10,6 +10,7 @@
 * Audio panorama
 * Audio visualization (still in development)
 * Saving presets for any of the effects
+* Memory-hungry (about 1Gb of RAM)
 
 ## Installation
 
