@@ -47,63 +47,74 @@ void Effects::togglePipelineState () {
     gst_element_set_state(pipeline, (state == GST_STATE_PLAYING ? GST_STATE_PAUSED : GST_STATE_PLAYING));
 }
 
+void Effects::waitForPipelineState () {
+    gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
+}
+
 void Effects::initGstreamer () {
-    pipeline       = gst_pipeline_new("audio-player");
+    pipeline  = gst_pipeline_new         ("audio-player");
     
-    filesrc        = gst_element_factory_make("filesrc",          "file-source");
-    decodebin      = gst_element_factory_make("decodebin",        "decoder");
-    audioconvert1  = gst_element_factory_make("audioconvert",     "audio-convert");
-    limiter        = gst_element_factory_make("audiocheblimit",   "limiter");
-    audioconvert2  = gst_element_factory_make("audioconvert",     "audio-convert2");
-    audioresample  = gst_element_factory_make("audioresample",    "resample");
-    panorama       = gst_element_factory_make("audiopanorama",    "panorama");
-    delay          = gst_element_factory_make("audioecho",        "audio-echo");
-    dynamic        = gst_element_factory_make("audiodynamic",     "dynamic");
-    equalizer      = gst_element_factory_make("equalizer-10bands","equalizer");
-    volume         = gst_element_factory_make("volume",           "volume");
-    audiorate      = gst_element_factory_make("audiorate",        "audio-rate");
-    pitch          = gst_element_factory_make("pitch",            "pitch");
-    audiosink      = gst_element_factory_make("autoaudiosink",    "audio-sink");
+    filesrc   = gst_element_factory_make ("filesrc",          "file-source");
+    decodebin = gst_element_factory_make ("decodebin",        "decoder");
+    convert1  = gst_element_factory_make ("audioconvert",     "audio-convert");
+    limiter   = gst_element_factory_make ("audiocheblimit",   "limiter");
+    convert2  = gst_element_factory_make ("audioconvert",     "audio-convert2");
+    panorama  = gst_element_factory_make ("audiopanorama",    "panorama");
+    delay     = gst_element_factory_make ("audioecho",        "audio-echo");
+    dynamic   = gst_element_factory_make ("audiodynamic",     "dynamic");
+    equalizer = gst_element_factory_make ("equalizer-10bands","equalizer");
+    volume    = gst_element_factory_make ("volume",           "volume");
+    pitch     = gst_element_factory_make ("pitch",            "pitch");
+    audiosink = gst_element_factory_make ("autoaudiosink",    "audio-sink");
     
-    if (!pipeline      || !filesrc   || !decodebin     || 
-        !audioconvert1 || !limiter   || !audioconvert2 || 
-        !audioresample || !panorama  || !delay         || 
-        !dynamic       || !equalizer || !volume        || 
-        !audiorate     || !pitch     || !audiosink) {
+    if (!pipeline  || !filesrc   || !decodebin || 
+        !convert1  || !limiter   || !convert2  ||
+        !panorama  || !delay     || !dynamic   || 
+        !equalizer || !volume    || !pitch     ||
+        !audiosink) {
         g_printerr("One of the elements can't be created. Bruh.\n");
         return;
     }
     
-    g_object_set(G_OBJECT(limiter),  "mode", 0, "cutoff", 48000.0, NULL);
-    g_object_set(G_OBJECT(delay),    "max-delay", 5000000000, NULL);
+    g_object_set (G_OBJECT(limiter), "mode", 0, "cutoff", 48000.0, NULL);
+    g_object_set (G_OBJECT(delay),   "max-delay", 5000000000, NULL);
     
-    gst_bin_add_many(GST_BIN(pipeline), 
-                        filesrc, decodebin, 
-                        audioconvert1, limiter,
-                        audioconvert2, audioresample, 
-                        panorama, delay, 
-                        dynamic, equalizer,
-                        volume, audiorate, 
-                        pitch, audiosink, NULL);
+    gst_bin_add_many (GST_BIN(pipeline), 
+                        filesrc, 
+                        decodebin, 
+                        convert1, 
+                        limiter,
+                        convert2, 
+                        panorama, 
+                        delay, 
+                        dynamic, 
+                        equalizer,
+                        volume, 
+                        pitch, 
+                        audiosink, NULL);
     
-    g_signal_connect(decodebin, "pad-added",  G_CALLBACK(padAddedCallback),  audioconvert1);
+    g_signal_connect (decodebin, "pad-added",  G_CALLBACK(padAddedCallback),  convert1);
     
-    if (!gst_element_link(filesrc, decodebin) || 
-        !gst_element_link_many(
-                        audioconvert1, limiter,
-                        audioconvert2, audioresample, 
-                        panorama, delay, 
-                        dynamic, equalizer, 
-                        volume, audiorate, 
-                        pitch, audiosink, NULL)) {
-        g_printerr("Element linking error. Bruh.\n");
-        gst_object_unref(pipeline);
+    if (!gst_element_link (filesrc, decodebin) || 
+        !gst_element_link_many (
+                        convert1, 
+                        limiter,
+                        convert2, 
+                        panorama, 
+                        delay, 
+                        dynamic, 
+                        equalizer,
+                        volume, 
+                        pitch, 
+                        audiosink, NULL)) {
+        g_printerr ("Element linking error. Bruh.\n");
+        gst_object_unref (pipeline);
         return;
     }
 
-    bus = gst_element_get_bus(pipeline);
-    gst_bus_add_watch(bus, busCallback, this);
-    gst_object_unref(bus);
+    bus = gst_element_get_bus (pipeline);
+    gst_bus_add_watch (bus, busCallback, this);
+    gst_object_unref (bus);
 }
 
 gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
@@ -113,7 +124,8 @@ gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
     switch (GST_MESSAGE_TYPE(msg)) {
         case GST_MESSAGE_EOS:
             g_printerr("End of stream\n");
-            gst_element_set_state(effects->pipeline, GST_STATE_NULL);
+            gst_element_set_state(effects->pipeline, GST_STATE_PAUSED);
+            effects->waitForPipelineState();
             effects->reachedEOS = true;
             break;
         case GST_MESSAGE_ERROR:
@@ -123,9 +135,11 @@ gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
             g_clear_error(&err);
             g_free(debug_info);
             gst_element_set_state(effects->pipeline, GST_STATE_NULL);
+            effects->waitForPipelineState();
             effects->reachedEOS = true;
             break;
         case GST_MESSAGE_STREAM_START:
+            effects->waitForPipelineState();
             effects->reachedEOS = false;
             break;
         default:
@@ -154,25 +168,20 @@ void Effects::updateAudioPosition () {
     }
 }
 
-void Effects::seekPlayingPosition (int value) {
-    gint64 duration, position;
-    GstSeekFlags seekFlags = (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT);
-    if (!gst_element_query_duration(pipeline, GST_FORMAT_TIME, &duration)) {
-        g_printerr("Unable to retrieve current position & duration. Bruh\n");
-        return;
-    }
-    position = gst_util_uint64_scale_int(duration, value, 1000);
-    
+void Effects::seekPlayingPosition (gint64 position) {
+    GstSeekFlags seekFlags = (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT);    
     gst_element_set_state   (pipeline, GST_STATE_PAUSED);
     gst_element_seek_simple (pipeline, GST_FORMAT_TIME, seekFlags, position);
-    gst_element_get_state   (pipeline, nullptr, nullptr, GST_CLOCK_TIME_NONE);
     gst_element_set_state   (pipeline, GST_STATE_PLAYING);
+    waitForPipelineState    ();
 }
 
 void Effects::changePlayingAudio (std::string filePath) {
     gst_element_set_state(pipeline, GST_STATE_NULL);
+    gst_element_set_state(filesrc, GST_STATE_NULL);
     g_object_set(filesrc, "location", filePath.c_str(), NULL);
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
+    waitForPipelineState ();
 }
 
 void Effects::changeEqualizerProps(CODES::EQUALIZER code, int newValue) {
@@ -268,14 +277,18 @@ void Effects::changeFilterProps (CODES::FILTER code, gfloat newValue) {
 void Effects::changePitchProps (CODES::PITCH code, gfloat value) {
     using namespace CODES;
     switch (code) {
-        case Tempo: 
+        case Tempo:
+            updateAudioPosition ();
             g_object_set(G_OBJECT(pitch), "tempo", value, NULL);
+            seekPlayingPosition(this->audioPosition);
             break;
         case Pitch:
             g_object_set(G_OBJECT(pitch), "pitch", value, NULL);
             break;
         case Rate:
+            updateAudioPosition ();
             g_object_set(G_OBJECT(pitch), "rate", value, NULL);
+            seekPlayingPosition(this->audioPosition);
             break;
         case OutputRate:
             g_object_set(G_OBJECT(pitch), "output-rate", value, NULL);

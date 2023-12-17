@@ -10,6 +10,7 @@
 // Qt5
 //***********************************************************//
 #include <QDir>
+#include <QIcon>
 #include <QDebug>
 
 // #include <QPalette>
@@ -31,12 +32,10 @@
 
 
 MainWindowUI::MainWindowUI () {
-    ui.setupUi(&mainwindow_);
- 
-    ui.playerPlayListWidget->hide();
+    ui.setupUi(this);
     
-    effects      = std::make_unique<Effects>();
-    dialogWindow = std::make_unique<PresetDialogWindow>();
+    effects            = std::make_unique<Effects>();
+    dialogWindow       = std::make_unique<PresetDialogWindow>();
    
     parseConfigFile ();
 
@@ -46,10 +45,9 @@ MainWindowUI::MainWindowUI () {
 
 MainWindowUI::~MainWindowUI() {
     effects.reset();
-}
-
-QMainWindow* MainWindowUI::mainwindow () {
-    return &mainwindow_;
+    dialogWindow.reset();
+    audioPositionTimer.stop();
+    audioPanningTimer.stop();
 }
 
 void MainWindowUI::parseMusic (QFileInfoList& musicFiles) {
@@ -64,26 +62,66 @@ void MainWindowUI::parseMusic (QFileInfoList& musicFiles) {
     musicFiles = musicDir.entryInfoList(QDir::Files);
 }
 
+void MainWindowUI::setupWidgets () {
+    
+    audioPositionTimer.setInterval(300);
+    audioPanningTimer.setInterval(100);
+    
+    ui.playerPlayListWidget->hide();
+    
+    QIcon previousIcon (":icons/previous_white_32x32.png"),
+          repeatIcon   (":icons/repeat_white_32x32.png"), 
+          playIcon     (":icons/play_white_32x32.png"),
+          shuffleIcon  (":icons/shuffle_white_32x32.png"), 
+          nextIcon     (":icons/next_white_32x32.png");
+          
+    ui.playerPreviousButton->setIcon (previousIcon);
+    ui.playerRepeatButton->setIcon   (repeatIcon);
+    ui.playerPauseButton->setIcon    (playIcon);
+    ui.playerShuffleButton->setIcon  (shuffleIcon);
+    ui.playerNextButton->setIcon     (nextIcon);
+    
+    dialogWindow->setFixedSize(250, 100);
+    
+    QFileInfoList musicFiles;
+    
+    parseMusic(musicFiles);
+    
+    foreach (const QFileInfo &file, musicFiles) {
+        QVariant value = QVariant::fromValue(file.absoluteFilePath());
+            QListWidgetItem *item = new QListWidgetItem (ui.playerPlayListWidget);
+            PlaylistWidgetItem *playlistItem = new PlaylistWidgetItem (file.fileName(), value);
+            item->setSizeHint(playlistItem->sizeHint());
+            ui.playerPlayListWidget->setItemWidget(item, playlistItem);
+    }
+}
+
 void MainWindowUI::parseConfigFile() {
-    QString configPath = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).at(0) +
+    configPath = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).at(0) +
                          "/gstreamer_player/presets.yaml";
     QFile configFile (configPath);
     
     if (!configFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << configFile.errorString() << '\n';
-        createConfigFile(configPath);
-    } 
-    else {
-        QString configString = configFile.readAll();
-        configFile.close();
-        try {
-            config = YAML::Load(configString.toStdString());
-        } catch (YAML::ParserException &e) {
-            qWarning() << "[Warning]:" << "bad file data. Updating";
-            createConfigFile(configPath);
-        }
+        qWarning() << "parseConfigFile" <<  configFile.errorString() << '\n';
+        createConfigFile();
     }
-
+    if (configFile.size() == 0) {
+        qWarning() << "[Warning]:" << "Empty config file. Creating new one";
+        createConfigFile();
+    }
+    QString configString = configFile.readAll();
+    configFile.close();
+        
+    try {
+        config = YAML::Load(configString.toStdString());
+    } catch (YAML::ParserException &e) {
+        qWarning() << "[Warning]:" << "Bad config file data. Creating new one";
+        createConfigFile ();
+    } catch (...) {
+        qWarning() << "[Warning]:" << "Unknown error. Creating config file";
+        createConfigFile ();
+    }
+    
     parsePresets<EqualizerPreset>  ("Equalizer");
     parsePresets<DelayPreset>      ("Delay");
     parsePresets<FilterPreset>     ("Filter");
@@ -91,62 +129,37 @@ void MainWindowUI::parseConfigFile() {
     parsePresets<CompressorPreset> ("Compressor");
 }
 
-void MainWindowUI::createConfigFile (QString &configPath) {
-    YAML::Emitter out;
-    out << YAML::BeginDoc;
-    
-    out << YAML::BeginMap;
-    out << YAML::Key << "Equalizer" << 
-             YAML::BeginMap << 
-               YAML::Key << "Default" << 
-               YAML::BeginSeq << YAML::Flow << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0 << YAML::EndSeq << 
-               YAML::Key << "Bass" << 
-               YAML::BeginSeq << YAML::Flow << 30 << 30 << 20 << 10 << 0 << 0 << 0 << 0 << 0 << 0 << YAML::EndSeq << 
-               YAML::Key << "Treble" << 
-               YAML::BeginSeq << YAML::Flow << 0 << 0 << 0 << 0 << 0 << 10 << 20 << 30 << 30 << 30 << YAML::EndSeq << 
-               YAML::Key << "Midrange" << 
-               YAML::BeginSeq << YAML::Flow << 0 << 10 << 20 << 30 << 30 << 30 << 20 << 10 << 0 << 0 << YAML::EndSeq << 
-               YAML::Key << "Soft" << 
-               YAML::BeginSeq << YAML::Flow << -20 << -10 << -10 << 0 << 10 << 10 << 0 << -10 << -20 << -20 << YAML::EndSeq << 
-               YAML::Key << "Bright" << 
-               YAML::BeginSeq << YAML::Flow << 0 << 0 << 10 << 20 << 30 << 30 << 20 << 10 << 0 << 0 << YAML::EndSeq << 
-               YAML::Key << "Full Bass" << 
-               YAML::BeginSeq << YAML::Flow << 40 << 30 << 20 << 10 << 0 << -10 << -20 << -30 << -40 << -40 << YAML::EndSeq << 
-               YAML::Key << "High-pitched" << 
-               YAML::BeginSeq << YAML::Flow << 0 << -10 << -20 << -20 << -10 << 10 << 20 << 20 << 10 << 0 << YAML::EndSeq << 
-               YAML::Key << "Bass boost" << 
-               YAML::BeginSeq << YAML::Flow << 10 << 20 << 20 << 10 << -10 << -20 << -20 << -10 << 10 << 20 << YAML::EndSeq << 
-               YAML::Key << "All" << 
-               YAML::BeginSeq << YAML::Flow << 20 << 20 << 20 << 20 << 20 << 20 << 20 << 20 << 20 << 20 << YAML::EndSeq << 
-             YAML::EndMap;
-    out << YAML::Key << "Delay" <<
-             YAML::BeginMap << 
-               YAML::Null << 
-             YAML::EndMap;
-    out << YAML::Key << "Filter" <<
-             YAML::BeginMap <<
-               YAML::Null << 
-             YAML::EndMap;
-    out << YAML::Key << "Pitch" <<
-             YAML::BeginMap << 
-               YAML::Null << 
-             YAML::EndMap;
-    out << YAML::Key << "Compressor" <<
-             YAML::BeginMap << 
-               YAML::Null << 
-             YAML::EndMap;
-    out << YAML::EndMap;
-    out << YAML::EndDoc;
-    
-    config = YAML::Load(out.c_str());
+void MainWindowUI::createConfigFile () {
+    std::string configString = R"~(---
+Equalizer:
+  Default: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  Bass: [30, 30, 20, 10, 0, 0, 0, 0, 0, 0]
+  Treble: [0, 0, 0, 0, 0, 10, 20, 30, 30, 30]
+  Midrange: [0, 10, 20, 30, 30, 30, 20, 10, 0, 0]
+  Soft: [-20, -10, -10, 0, 10, 10, 0, -10, -20, -20]
+  Bright: [0, 0, 10, 20, 30, 30, 20, 10, 0, 0]
+  Full Bass: [40, 30, 20, 10, 0, -10, -20, -30, -40, -40]
+  High-pitched: [0, -10, -20, -20, -10, 10, 20, 20, 10, 0]
+  Bass boost: [10, 20, 20, 10, -10, -20, -20, -10, 10, 20]
+  All boost: [20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
+Delay:
+  null
+Filter:
+  null
+Pitch:
+  null
+Compressor:
+  null
+...
+)~";    
+    config = YAML::Load(configString.c_str());
     
     QFile configFile (configPath);
-    if (!configFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << configFile.errorString() << '\n';
-        return;
+    if (!configFile.open (QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning () << "[Warning]:" << "Unable to open preset file. Skipping";
     }
-    configFile.write(out.c_str(), out.size());
-    configFile.close();
+    configFile.write (configString.c_str(), configString.size());
+    configFile.close ();
 }
 
 template <class T>
@@ -167,7 +180,7 @@ void MainWindowUI::updatePresetConfig (std::string presetName) {
 
     config[currentPresetType][presetName] = std::move(newPresetSeq);
     parsePresets<T>(currentPresetType);
-
+    savePresets();
 }
 
 template <class T>
@@ -209,6 +222,32 @@ void MainWindowUI::parsePresets(std::string presetKeyName) {
         }
         combobox->addItem(QString::fromStdString(presetName), data);
     }
+}
+
+void MainWindowUI::savePresets () {
+    QFile configFile (configPath);
+
+    if (!configFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning() << configFile.errorString() << '\n';
+        return;
+    }
+    
+    YAML::Emitter out;
+    
+    out << config;
+    
+    configFile.write(out.c_str(), out.size());
+    configFile.close();
+}
+
+void MainWindowUI::removePreset (std::string presetType, QComboBox* combobox) {
+    int         currentItemId   = combobox->currentIndex();
+    std::string currentItemText = combobox->currentText().toStdString();
+    combobox->removeItem(currentItemId);
+    
+    if (config[presetType].IsDefined()) 
+        config[presetType].remove(currentItemText);
+    savePresets();
 }
 
 void MainWindowUI::serializeEqualizerParams  (YAML::Node *node) {
@@ -307,28 +346,8 @@ void MainWindowUI::changeCompressorParams (QVariant data) {
     ui.compressorThresholdDial->setValue(params.threshold);
 }
 
-void MainWindowUI::setupWidgets () {
-    
-    audioPositionTimer.setInterval(300);
-    audioPanningTimer.setInterval(100);
-    
-    dialogWindow->setFixedSize(250, 100);
-    
-    QFileInfoList musicFiles;
-    
-    parseMusic(musicFiles);
-    
-    foreach (const QFileInfo &file, musicFiles) {
-        QVariant value = QVariant::fromValue(file.absoluteFilePath());
-        QListWidgetItem *item = new QListWidgetItem (ui.playerPlayListWidget);
-        PlaylistWidgetItem *playlistItem = new PlaylistWidgetItem (file.fileName(), value);
-        item->setSizeHint(playlistItem->sizeHint());
-        ui.playerPlayListWidget->setItemWidget(item, playlistItem);
-    }
-}
-
 void MainWindowUI::connectWidgets () {
-    connectEqualizerTabWidgets();
+    connectEffectsTabWidgets();
     connectPlayerTabWidgets();
     
     connect(&audioPositionTimer,    &QTimer::timeout, this, &MainWindowUI::updateAudioState);
@@ -342,6 +361,7 @@ void MainWindowUI::connectWidgets () {
     });
 }
 
+
 //********Player********//
 void MainWindowUI::connectPlayerTabWidgets() {
     connect(ui.playerPlayListWidget, &QListWidget::itemClicked, this, &MainWindowUI::playlistItemClicked);
@@ -354,22 +374,21 @@ void MainWindowUI::connectPlayerTabWidgets() {
         updateAudioPositionLabel(effects->audioDuration*value/1000, effects->audioDuration);
     });
     connect(ui.playerSeekSlider, &QSlider::sliderReleased, [this]() {
-        effects->seekPlayingPosition(ui.playerSeekSlider->value());
+        effects->updateAudioDuration();
+        int value = ui.playerSeekSlider->value(), 
+            maxValue = ui.playerSeekSlider->maximum();
+        gint64 currentPosition = effects->audioDuration * value / maxValue;
+        effects->seekPlayingPosition(currentPosition);
         audioPositionTimer.start();
     });
-    connect(ui.playerPauseButton, &QPushButton::released, [this]() {
-        effects->togglePipelineState();
-        if (ui.playerPauseButton->text() == "Play")
-            ui.playerPauseButton->setText("Pause");
-        else
-            ui.playerPauseButton->setText("Play");
-    });
+    connect(ui.playerPauseButton, &QPushButton::released, this, &MainWindowUI::pauseButtonClicked);
+
     connect(ui.playerNextButton, &QPushButton::pressed, this, &MainWindowUI::nextButtonClicked);
     connect(ui.playerPreviousButton, &QPushButton::pressed, this, &MainWindowUI::previousButtonClicked);
 }
 
 //********Effects*******//
-void MainWindowUI::connectEqualizerTabWidgets () {
+void MainWindowUI::connectEffectsTabWidgets () {
     connectEqualizerWidgets  ();
     connectDelayWidgets      ();
     connectFilterWidgets     ();
@@ -379,13 +398,16 @@ void MainWindowUI::connectEqualizerTabWidgets () {
 }
 
 void MainWindowUI::connectEqualizerWidgets () {
+    connect(ui.equalizerPresetsComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
+        this->changeEqualizerParams(ui.equalizerPresetsComboBox->itemData(id));
+    });
     connect(ui.equalizerDefaultPresetButton, &QPushButton::clicked, [this]() {
         EqualizerPreset defaultPreset;
         QVariant defaultData = QVariant::fromValue(defaultPreset);
         changeEqualizerParams(defaultData);
     });
-    connect(ui.equalizerPresetsComboBox, QOverload<int>::of(&QComboBox::activated), [this](int id) {
-        this->changeEqualizerParams(ui.equalizerPresetsComboBox->itemData(id));
+    connect(ui.equalizerDeletePresetButton, &QPushButton::clicked, [this] () {
+        this->removePreset("Equalizer", ui.equalizerPresetsComboBox);
     });
     connect(ui.equalizerSavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Equalizer";
@@ -441,6 +463,9 @@ void MainWindowUI::connectDelayWidgets() {
         currentPresetType = "Delay";
         dialogWindow->show();
     });
+    connect(ui.delayDeletePresetButton, &QPushButton::clicked, [this]() {
+        this->removePreset("Delay", ui.delayPresetsComboBox);
+    });
     
     using namespace CODES;
     connect(ui.delayDelaySpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
@@ -468,6 +493,9 @@ void MainWindowUI::connectFilterWidgets() {
     connect(ui.filterPresetSavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Filter";
         dialogWindow->show();
+    });
+    connect(ui.filterDeletePresetButton, &QPushButton::clicked, [this]() {
+        this->removePreset("Filter", ui.filterPresetsComboBox);
     });
     connect(ui.filterDefaultPresetButton, &QPushButton::clicked, [this]() {
         FilterPreset defaultPreset;
@@ -509,6 +537,9 @@ void MainWindowUI::connectPitchWidgets () {
         currentPresetType = "Pitch";
         dialogWindow->show();
     });
+    connect(ui.pitchDeletePresetButton, &QPushButton::clicked, [this]() {
+        removePreset("Pitch", ui.pitchPresetComboBox);
+    });
     connect(ui.pitchDefaultPresetButton, &QPushButton::clicked, [this]() {
         PitchPreset defaultPreset;
         QVariant data = QVariant::fromValue(defaultPreset);
@@ -538,7 +569,9 @@ void MainWindowUI::connectCompressorWidgets () {
         currentPresetType = "Compressor";
         dialogWindow->show();
     });
-    
+    connect(ui.compressorDeletePresetButton, &QPushButton::clicked, [this]() {
+        removePreset("Compressor", ui.compressorPresetComboBox);
+    });
     connect(ui.compressorDefaultPresetButton, &QPushButton::clicked, [this]() {
         CompressorPreset defaultPreset;
         QVariant data = QVariant::fromValue(defaultPreset);
@@ -601,6 +634,7 @@ void MainWindowUI::connectPanoramaWidgets () {
         audioPanningTimer.start();
     });
 }
+
 //********Others********//
 
 void MainWindowUI::lockWidgetFor (QWidget *widget, quint64 time) {
@@ -642,7 +676,6 @@ void MainWindowUI::updateVisualizingWidget () {
 }
 
 //**************SLOTS**************//
-
 void MainWindowUI::togglePlaylistView () {
     if (ui.playerPlayListWidget->isVisible()) {
         ui.playerTogglePlaylistVisibilityButton->setText("Show Playlist");
@@ -651,17 +684,6 @@ void MainWindowUI::togglePlaylistView () {
         ui.playerTogglePlaylistVisibilityButton->setText("Hide Playlist");
         ui.playerPlayListWidget->setVisible(true);
   }
-}
-
-void MainWindowUI::nextButtonClicked () {
-    if (currentAudioId < ui.playerPlayListWidget->count()-1) {
-        currentAudioId += 1;
-        currentAudio = ui.playerPlayListWidget->item(currentAudioId);
-        PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
-            (ui.playerPlayListWidget->itemWidget(currentAudio));
-        effects->changePlayingAudio(playlistItem->filePath());
-        ui.playerPlayListWidget->setCurrentRow(currentAudioId);
-    }
 }
 
 void MainWindowUI::previousButtonClicked () {
@@ -673,6 +695,40 @@ void MainWindowUI::previousButtonClicked () {
         effects->changePlayingAudio(playlistItem->filePath());
         ui.playerPlayListWidget->setCurrentRow(currentAudioId);
     }    
+}
+
+void MainWindowUI::pauseButtonClicked () {
+    static bool state = 0;                               // 0 - Paused, 1 - Playing
+    static QIcon playIcon  (":icons/play_white_32x32.png"),
+                 pauseIcon (":icons/pause_white_32x32.png");
+
+    if (ui.playerPlayListWidget->count() > 0 && currentAudioId == -1) {
+        currentAudio = ui.playerPlayListWidget->item(0);
+        ui.playerPlayListWidget->itemClicked(currentAudio);
+        ui.playerPlayListWidget->setCurrentRow(0);
+        ui.playerPauseButton->setIcon(pauseIcon);
+        state = 1;
+        return; 
+    }
+    effects->togglePipelineState();
+    ui.playerPauseButton->setIcon(state ? playIcon : pauseIcon);
+    if (state) 
+        audioPositionTimer.stop();
+    else 
+        audioPositionTimer.start();
+    state = !state;
+
+}
+
+void MainWindowUI::nextButtonClicked () {
+    if (currentAudioId < ui.playerPlayListWidget->count()-1) {
+        currentAudioId += 1;
+        currentAudio = ui.playerPlayListWidget->item(currentAudioId);
+        PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
+            (ui.playerPlayListWidget->itemWidget(currentAudio));
+        effects->changePlayingAudio(playlistItem->filePath());
+        ui.playerPlayListWidget->setCurrentRow(currentAudioId);
+    }
 }
 
 void MainWindowUI::playlistItemClicked (QListWidgetItem *item) {
@@ -726,5 +782,9 @@ void MainWindowUI::updatePanPosition () {
     ui.panoramaPositionDial->setValue(panPosition + (direction ? 10 : -10));
 }
 
+void MainWindowUI::closeEvent (QCloseEvent *event) {
+    dialogWindow->hide();
+    event->accept();
+}
 
 

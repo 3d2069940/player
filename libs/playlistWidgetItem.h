@@ -22,9 +22,6 @@ public:
     
     std::string filePath () const;
     
-signals:
-    void buttonClicked ();
-    
 private:
     QVariant m_data;
     

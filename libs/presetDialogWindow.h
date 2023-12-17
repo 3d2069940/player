@@ -21,7 +21,6 @@
 
 
 class PresetDialogWindow : public QDialog {
-    Q_OBJECT
     
 private:
     QLabel           dialogNameLabel;

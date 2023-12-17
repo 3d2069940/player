@@ -64,41 +64,40 @@ private:
 //  FUNCTIONS 
     void initGstreamer ();
 //  CALLBACKS
-    static gboolean          busCallback      (GstBus*,     GstMessage*,      gpointer);
-    static void              padAddedCallback (GstElement*, GstPad*,          gpointer);
+    static gboolean busCallback      (GstBus*,     GstMessage*,      gpointer);
+    static void     padAddedCallback (GstElement*, GstPad*,          gpointer);
 
 public:
     Effects ();
     ~Effects ();
     
     GstElement *pipeline, 
-               *audioconvert1,
-               *audioresample, 
                *filesrc,
                *decodebin, 
-               *equalizer,
-               *delay,
+               *convert1,
                *limiter,
-               *audioconvert2, 
-               *dynamic,
-               *pitch,
-               *audiorate,
-               *volume,
+               *convert2, 
                *panorama,
+               *delay,
+               *dynamic,
+               *equalizer,
+               *volume,
+               *pitch,
                *audiosink;
                
     GstPadProbeInfo  probeInfo;
                
     gint64 audioDuration, audioPosition;
     
-    bool isEOSReached        ();
-    bool isPipelineRunning   ();
-    void togglePipelineState ();
+    bool isEOSReached         (); 
+    bool isPipelineRunning    ();
+    void togglePipelineState  ();
+    void waitForPipelineState ();
     
     void updateAudioDuration ();
     void updateAudioPosition ();
     
-    void seekPlayingPosition (int);
+    void seekPlayingPosition (gint64);
     
     void changePlayingAudio  (std::string);
     

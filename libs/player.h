@@ -8,6 +8,9 @@
 //***********************************************************//
 #include <QTimer>
 #include <QObject>
+#include <QPixmap>
+#include <QCloseEvent>
+#include <QMainWindow>
 #include <QFileInfoList>
 
 //***********************************************************//
@@ -25,8 +28,9 @@
 class Effects;
 class PresetDialogWindow;
 class PlaylistWidgetItem;
+class EqualizerTabWidget;
 
-class MainWindowUI : public QObject {  
+class MainWindowUI : public QMainWindow {  
     Q_OBJECT
     
 public:
@@ -47,27 +51,27 @@ private:
     QTimer         audioPositionTimer,
                    audioPanningTimer;
     
-    QMainWindow    mainwindow_;
-    
     std::unique_ptr<PresetDialogWindow> dialogWindow;
     
     YAML::Node     config;
-    QString        musicFolderPath;
+    QString        musicFolderPath,
+                   configPath;
     
     QListWidgetItem *currentAudio;
-    int              currentAudioId;
+    int              currentAudioId = -1;
     
     std::string currentPresetType;
-    
     
     void parseMusic (QFileInfoList&);
 
 //********Config********//
     void parseConfigFile  ();    
-    void createConfigFile (QString &path);
+    void createConfigFile ();
     
     template <class T>
-    void parsePresets              (std::string);
+    void parsePresets (std::string);
+    void savePresets  ();
+    void removePreset (std::string, QComboBox*);
     
     void serializeEqualizerParams  (YAML::Node *);
     void serializeDelayParams      (YAML::Node *);
@@ -88,8 +92,8 @@ private:
     void connectPlayerTabWidgets ();
     
 //********Effects*******//
-    void connectEqualizerTabWidgets ();
-    
+    void connectEffectsTabWidgets ();
+     
     void connectEqualizerWidgets  ();
     void connectDelayWidgets      ();
     void connectFilterWidgets     ();
@@ -106,11 +110,11 @@ private:
     void lockWidgetFor (QWidget*, quint64);
 
 public slots:
-    
 //  Player Items
     void togglePlaylistView    ();
-    void nextButtonClicked     ();
     void previousButtonClicked ();
+    void pauseButtonClicked    ();
+    void nextButtonClicked     ();
     void playlistItemClicked   (QListWidgetItem*);
     void updateAudioState      ();
 //  Presets
@@ -119,5 +123,8 @@ public slots:
     
     void updatePanPosition ();    
 
+protected:
+    void closeEvent (QCloseEvent *event) override;
+    
 };
 #endif
