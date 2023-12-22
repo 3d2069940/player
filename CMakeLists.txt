@@ -22,7 +22,7 @@ pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
 pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
 
 qt5_wrap_ui(UI_FILES mainwindow.ui)
-qt5_wrap_cpp(MOC_FILES libs/player.h libs/playlistWidgetItem.h)
+qt5_wrap_cpp(MOC_FILES libs/player.h libs/playlistWidgetItem.h libs/toggleButton.h)
 qt5_add_resources(RESOURCES icons.qrc)
 
 include_directories(libs build ${GSTREAMER_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIRS})
@@ -31,6 +31,7 @@ set(SRCS
     src/main.cpp
     src/player.hpp
     src/effects.hpp
+    src/toggleButton.hpp
     src/playlistWidgetItem.hpp
     src/presetDialogWindow.hpp
 )
@@ -40,7 +41,8 @@ set(HEADERS
     libs/effects.h
     libs/playlistWidgetItem.h
     libs/presetDialogWindow.h
-    libs/presetTypes.h
+    libs/toggleButton.h
+    libs/metaTypes.h
 )
 
 # Tell CMake to create the helloworld executable

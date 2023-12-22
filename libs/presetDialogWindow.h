@@ -32,7 +32,7 @@ public:
     QLineEdit        *dialogLineEdit;
     QDialogButtonBox *dialogButtonBox;
     
-    PresetDialogWindow (QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    explicit PresetDialogWindow (QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~PresetDialogWindow ();
     
     void setup ();

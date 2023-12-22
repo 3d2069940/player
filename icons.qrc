@@ -1,16 +1,10 @@
 <RCC>
     <qresource>
-        <file>icons/previous_black_32x32.png</file>
-        <file>icons/repeat_black_32x32.png</file>
-        <file>icons/play_black_32x32.png</file>
-        <file>icons/pause_black_32x32.png</file>
-        <file>icons/shuffle_black_32x32.png</file>
-        <file>icons/next_black_32x32.png</file>
-        <file>icons/previous_white_32x32.png</file>
-        <file>icons/repeat_white_32x32.png</file>
-        <file>icons/play_white_32x32.png</file>
-        <file>icons/pause_white_32x32.png</file>
-        <file>icons/shuffle_white_32x32.png</file>
-        <file>icons/next_white_32x32.png</file>
+        <file>icons/previous_black.svg</file>
+        <file>icons/repeat_black.svg</file>
+        <file>icons/pause_black.svg</file>
+        <file>icons/play_black.svg</file>
+        <file>icons/shuffle_black.svg</file>
+        <file>icons/next_black.svg</file>
     </qresource>
 </RCC>

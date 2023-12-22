@@ -169,7 +169,7 @@ void Effects::updateAudioPosition () {
 }
 
 void Effects::seekPlayingPosition (gint64 position) {
-    GstSeekFlags seekFlags = (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT);    
+    GstSeekFlags seekFlags = (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE);    
     gst_element_set_state   (pipeline, GST_STATE_PAUSED);
     gst_element_seek_simple (pipeline, GST_FORMAT_TIME, seekFlags, position);
     gst_element_set_state   (pipeline, GST_STATE_PLAYING);

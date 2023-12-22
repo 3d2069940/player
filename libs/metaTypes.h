@@ -11,10 +11,20 @@
 //***********************************************************//
 // Qt5
 //***********************************************************//
+#include <QString>
+#include <QListWidget>
 #include <qmetatype.h>                                      // Q_DECLARE_METATYPE
 
 
+class MainWindowUI;
 // Defining structures to be stored in QVariant
+struct PlaylistButtonValue {
+    QString          filePath;
+    QListWidget     *listWidget;
+    MainWindowUI    *mainwindow;
+    QListWidgetItem *item;
+};
+
 struct EqualizerPreset {
     int slider29Hz  = 0;
     int slider59Hz  = 0;
@@ -59,6 +69,7 @@ struct CompressorPreset {
 };
 
 // Registers a custom data type for QVariant
+Q_DECLARE_METATYPE(PlaylistButtonValue);
 Q_DECLARE_METATYPE(EqualizerPreset);
 Q_DECLARE_METATYPE(DelayPreset);
 Q_DECLARE_METATYPE(FilterPreset);

@@ -5,7 +5,7 @@
 
 
 PresetDialogWindow::PresetDialogWindow(QWidget* parent, Qt::WindowFlags f) 
-  : QDialog(parent, f), dialogNameLabel("Preset Name:") {
+  : QDialog (parent, f), dialogNameLabel("Preset Name:") {
     setup();
 }
 

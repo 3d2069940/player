@@ -5,6 +5,7 @@
 // STL
 //***********************************************************//
 #include <type_traits>
+#include <algorithm>
 
 //***********************************************************//
 // Qt5
@@ -20,12 +21,12 @@
 // Homebrew Headers
 //***********************************************************//
 #include "player.h"
-#include "presetTypes.h"
 
 //***********************************************************//
 // Homebrew Classes
 //***********************************************************//
 #include "effects.hpp"
+#include "toggleButton.hpp"
 #include "presetDialogWindow.hpp"
 #include "playlistWidgetItem.hpp"
 
@@ -34,18 +35,22 @@
 MainWindowUI::MainWindowUI () {
     ui.setupUi(this);
     
+    ToggleButton *toggleButton = new ToggleButton ();
+    
     effects            = std::make_unique<Effects>();
-    dialogWindow       = std::make_unique<PresetDialogWindow>();
+    presetDialogWindow = std::make_unique<PresetDialogWindow>();
    
     parseConfigFile ();
 
     setupWidgets    ();
     connectWidgets  ();
+    
+    delete toggleButton;
 }
 
 MainWindowUI::~MainWindowUI() {
     effects.reset();
-    dialogWindow.reset();
+    presetDialogWindow.reset();
     audioPositionTimer.stop();
     audioPanningTimer.stop();
 }
@@ -63,36 +68,44 @@ void MainWindowUI::parseMusic (QFileInfoList& musicFiles) {
 }
 
 void MainWindowUI::setupWidgets () {
-    
     audioPositionTimer.setInterval(300);
     audioPanningTimer.setInterval(100);
     
     ui.playerPlayListWidget->hide();
     
-    QIcon previousIcon (":icons/previous_white_32x32.png"),
-          repeatIcon   (":icons/repeat_white_32x32.png"), 
-          playIcon     (":icons/play_white_32x32.png"),
-          shuffleIcon  (":icons/shuffle_white_32x32.png"), 
-          nextIcon     (":icons/next_white_32x32.png");
-          
-    ui.playerPreviousButton->setIcon (previousIcon);
-    ui.playerRepeatButton->setIcon   (repeatIcon);
-    ui.playerPauseButton->setIcon    (playIcon);
-    ui.playerShuffleButton->setIcon  (shuffleIcon);
-    ui.playerNextButton->setIcon     (nextIcon);
+//     ui.playerPreviousButton->setIcon (previousIcon);
+    ui.playerPreviousButton->setText ("Prev");
+//     ui.playerRepeatButton->setIcon   (repeatIcon);
+    ui.playerRepeatButton->setText ("Repeat");
+//     ui.playerPauseButton->setIcon    (playIcon);
+    ui.playerPauseButton->setText ("Play");
+//     ui.playerShuffleButton->setIcon  (shuffleIcon);
+    ui.playerShuffleButton->setText ("Shuffle");
+//     ui.playerNextButton->setIcon     (nextIcon);
+    ui.playerNextButton->setText ("Next");
     
-    dialogWindow->setFixedSize(250, 100);
+    presetDialogWindow->setFixedSize(250, 100);
     
     QFileInfoList musicFiles;
-    
     parseMusic(musicFiles);
     
+    QSize               size (ui.playerPlayListWidget->width(), 40);
+    PlaylistButtonValue playlistValue;
+    
     foreach (const QFileInfo &file, musicFiles) {
-        QVariant value = QVariant::fromValue(file.absoluteFilePath());
-            QListWidgetItem *item = new QListWidgetItem (ui.playerPlayListWidget);
-            PlaylistWidgetItem *playlistItem = new PlaylistWidgetItem (file.fileName(), value);
-            item->setSizeHint(playlistItem->sizeHint());
-            ui.playerPlayListWidget->setItemWidget(item, playlistItem);
+        QListWidgetItem *item         = new QListWidgetItem (ui.playerPlayListWidget);
+        playlistItems.append(item);
+        
+        playlistValue.filePath   = file.absoluteFilePath ();
+        playlistValue.listWidget = ui.playerPlayListWidget;
+        playlistValue.mainwindow = this;
+        playlistValue.item       = item;
+        
+        QVariant value = QVariant::fromValue(playlistValue);
+        PlaylistWidgetItem *playlistItem = new PlaylistWidgetItem (file.fileName(), value);
+        
+        item->setSizeHint(size);
+        ui.playerPlayListWidget->setItemWidget(item, playlistItem);
     }
 }
 
@@ -293,7 +306,7 @@ void MainWindowUI::serializeCompressorParams (YAML::Node *node) {
     node->push_back(ui.compressorThresholdDial->value());
 }
 
-void MainWindowUI::changeEqualizerParams (QVariant data) {
+void MainWindowUI::changeEqualizerParams  (QVariant data) {
     EqualizerPreset params = data.value<EqualizerPreset>();
     ui.equalizer29HzSlider->setValue(params.slider29Hz);
     ui.equalizer59HzSlider->setValue(params.slider59Hz);
@@ -307,7 +320,7 @@ void MainWindowUI::changeEqualizerParams (QVariant data) {
     ui.equalizer16000HzSlider->setValue(params.slider16kHz);
 }
 
-void MainWindowUI::changeDelayParams (QVariant data) {
+void MainWindowUI::changeDelayParams      (QVariant data) {
     DelayPreset params = data.value<DelayPreset>();
     ui.delayDelaySpinBox->setValue(params.delay);
     if ((ui.delaySurrounDelayButton->text() == "On") != params.surroundDelay)
@@ -317,7 +330,7 @@ void MainWindowUI::changeDelayParams (QVariant data) {
     ui.delayFeedbackDial->setValue(params.feedback);
 }
 
-void MainWindowUI::changeFilterParams (QVariant data) {
+void MainWindowUI::changeFilterParams     (QVariant data) {
     FilterPreset params = data.value<FilterPreset>();
     if ((ui.filterModeToggleButton->text() == "Low Pass") == params.mode)
         ui.filterModeToggleButton->click();
@@ -328,7 +341,7 @@ void MainWindowUI::changeFilterParams (QVariant data) {
         ui.filterFilterTypeButton->click();
 }
 
-void MainWindowUI::changePitchParams (QVariant data) {
+void MainWindowUI::changePitchParams      (QVariant data) {
     PitchPreset params = data.value<PitchPreset>();
     ui.pitchTempoDial->setValue(params.tempo);
     ui.pitchPitchDial->setValue(params.pitch);
@@ -350,17 +363,16 @@ void MainWindowUI::connectWidgets () {
     connectEffectsTabWidgets();
     connectPlayerTabWidgets();
     
-    connect(&audioPositionTimer,    &QTimer::timeout, this, &MainWindowUI::updateAudioState);
-    connect(&audioPanningTimer,     &QTimer::timeout, this, &MainWindowUI::updatePanPosition);
+    connect(&audioPositionTimer, &QTimer::timeout, this, &MainWindowUI::updateAudioState);
+    connect(&audioPanningTimer,  &QTimer::timeout, this, &MainWindowUI::updatePanPosition);
     
-    connect(dialogWindow->dialogButtonBox, &QDialogButtonBox::accepted, this, &MainWindowUI::addNewPreset);
+    connect(presetDialogWindow->dialogButtonBox, &QDialogButtonBox::accepted, this, &MainWindowUI::addNewPreset);
     
-    connect(dialogWindow->dialogButtonBox, &QDialogButtonBox::rejected, [this]() {
-        dialogWindow->dialogLineEdit->clear();
-        dialogWindow->hide();
+    connect(presetDialogWindow->dialogButtonBox, &QDialogButtonBox::rejected, [this]() {
+        presetDialogWindow->dialogLineEdit->clear();
+        presetDialogWindow->hide();
     });
 }
-
 
 //********Player********//
 void MainWindowUI::connectPlayerTabWidgets() {
@@ -381,10 +393,11 @@ void MainWindowUI::connectPlayerTabWidgets() {
         effects->seekPlayingPosition(currentPosition);
         audioPositionTimer.start();
     });
-    connect(ui.playerPauseButton, &QPushButton::released, this, &MainWindowUI::pauseButtonClicked);
-
-    connect(ui.playerNextButton, &QPushButton::pressed, this, &MainWindowUI::nextButtonClicked);
-    connect(ui.playerPreviousButton, &QPushButton::pressed, this, &MainWindowUI::previousButtonClicked);
+    connect(ui.playerPreviousButton, &QPushButton::clicked, this, &MainWindowUI::previousButtonClicked);
+    connect(ui.playerRepeatButton,   &QPushButton::clicked, this, &MainWindowUI::repeatButtonClicked);
+    connect(ui.playerPauseButton,    &QPushButton::clicked, this, &MainWindowUI::pauseButtonClicked);
+    connect(ui.playerShuffleButton,  &QPushButton::clicked, this, &MainWindowUI::shuffleButtonClicked);
+    connect(ui.playerNextButton,     &QPushButton::clicked, this, &MainWindowUI::nextButtonClicked);
 }
 
 //********Effects*******//
@@ -411,7 +424,7 @@ void MainWindowUI::connectEqualizerWidgets () {
     });
     connect(ui.equalizerSavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Equalizer";
-        dialogWindow->show();
+        presetDialogWindow->show();
     });
     
     using namespace CODES;
@@ -461,7 +474,7 @@ void MainWindowUI::connectDelayWidgets() {
     });
     connect(ui.delaySavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Delay";
-        dialogWindow->show();
+        presetDialogWindow->show();
     });
     connect(ui.delayDeletePresetButton, &QPushButton::clicked, [this]() {
         this->removePreset("Delay", ui.delayPresetsComboBox);
@@ -492,7 +505,7 @@ void MainWindowUI::connectDelayWidgets() {
 void MainWindowUI::connectFilterWidgets() {
     connect(ui.filterPresetSavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Filter";
-        dialogWindow->show();
+        presetDialogWindow->show();
     });
     connect(ui.filterDeletePresetButton, &QPushButton::clicked, [this]() {
         this->removePreset("Filter", ui.filterPresetsComboBox);
@@ -535,7 +548,7 @@ void MainWindowUI::connectFilterWidgets() {
 void MainWindowUI::connectPitchWidgets () {
     connect(ui.pitchSavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Pitch";
-        dialogWindow->show();
+        presetDialogWindow->show();
     });
     connect(ui.pitchDeletePresetButton, &QPushButton::clicked, [this]() {
         removePreset("Pitch", ui.pitchPresetComboBox);
@@ -567,7 +580,7 @@ void MainWindowUI::connectPitchWidgets () {
 void MainWindowUI::connectCompressorWidgets () {
     connect(ui.compressorSavePresetButton, &QPushButton::clicked, [this]() {
         currentPresetType = "Compressor";
-        dialogWindow->show();
+        presetDialogWindow->show();
     });
     connect(ui.compressorDeletePresetButton, &QPushButton::clicked, [this]() {
         removePreset("Compressor", ui.compressorPresetComboBox);
@@ -636,7 +649,6 @@ void MainWindowUI::connectPanoramaWidgets () {
 }
 
 //********Others********//
-
 void MainWindowUI::lockWidgetFor (QWidget *widget, quint64 time) {
     widget->blockSignals(true);
     QTimer::singleShot(time, [widget]() {widget->blockSignals(false);});
@@ -687,31 +699,37 @@ void MainWindowUI::togglePlaylistView () {
 }
 
 void MainWindowUI::previousButtonClicked () {
+    int currentAudioId = playlistItems.indexOf(currentAudio);
     if (currentAudioId > 0) {
-        currentAudioId -= 1;
-        currentAudio = ui.playerPlayListWidget->item(currentAudioId);
+        currentAudio = playlistItems.at(currentAudioId-1);
         PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
             (ui.playerPlayListWidget->itemWidget(currentAudio));
         effects->changePlayingAudio(playlistItem->filePath());
-        ui.playerPlayListWidget->setCurrentRow(currentAudioId);
-    }    
+        ui.playerPlayListWidget->setCurrentItem(currentAudio);
+        audioPositionTimer.start();
+    }
+}
+
+void MainWindowUI::repeatButtonClicked () {
+    qDebug() << "repeat button clicked";
 }
 
 void MainWindowUI::pauseButtonClicked () {
     static bool state = 0;                               // 0 - Paused, 1 - Playing
-    static QIcon playIcon  (":icons/play_white_32x32.png"),
-                 pauseIcon (":icons/pause_white_32x32.png");
+//     static QIcon playIcon  (":icons/play_white_64x64.png"),
+//                  pauseIcon (":icons/pause_white_64x64.png");
 
-    if (ui.playerPlayListWidget->count() > 0 && currentAudioId == -1) {
-        currentAudio = ui.playerPlayListWidget->item(0);
+    if (ui.playerPlayListWidget->count() > 0 && currentAudio == nullptr) {
+        currentAudio = playlistItems.at(0);
+        ui.playerPlayListWidget->setCurrentItem(currentAudio);
         ui.playerPlayListWidget->itemClicked(currentAudio);
-        ui.playerPlayListWidget->setCurrentRow(0);
-        ui.playerPauseButton->setIcon(pauseIcon);
+//         ui.playerPauseButton->setIcon(pauseIcon);
+        ui.playerPauseButton->setText("Pause");
         state = 1;
         return; 
     }
     effects->togglePipelineState();
-    ui.playerPauseButton->setIcon(state ? playIcon : pauseIcon);
+    ui.playerPauseButton->setText(state ? "Play" : "Pause");
     if (state) 
         audioPositionTimer.stop();
     else 
@@ -720,14 +738,20 @@ void MainWindowUI::pauseButtonClicked () {
 
 }
 
+void MainWindowUI::shuffleButtonClicked () {
+    std::random_shuffle(playlistItems.begin(), playlistItems.end());
+    qDebug() << "shuffle button clicked";
+}
+
 void MainWindowUI::nextButtonClicked () {
-    if (currentAudioId < ui.playerPlayListWidget->count()-1) {
-        currentAudioId += 1;
-        currentAudio = ui.playerPlayListWidget->item(currentAudioId);
+    int currentAudioId = playlistItems.indexOf(currentAudio);
+    if (currentAudioId < playlistItems.size()-1 && currentAudio != stopAudio) {
+        currentAudio = playlistItems.at(currentAudioId+1);
         PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
             (ui.playerPlayListWidget->itemWidget(currentAudio));
         effects->changePlayingAudio(playlistItem->filePath());
-        ui.playerPlayListWidget->setCurrentRow(currentAudioId);
+        ui.playerPlayListWidget->setCurrentItem(currentAudio);
+        audioPositionTimer.start();
     }
 }
 
@@ -735,24 +759,24 @@ void MainWindowUI::playlistItemClicked (QListWidgetItem *item) {
     PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
         (ui.playerPlayListWidget->itemWidget(item));
     effects->changePlayingAudio(playlistItem->filePath());
+    ui.playerPauseButton->setText("Pause");
     currentAudio   = item;
-    currentAudioId = ui.playerPlayListWidget->row(currentAudio);
     audioPositionTimer.start();
 }
 
 void MainWindowUI::addNewPreset () {
     if      (this->currentPresetType == "Equalizer")
-        this->updatePresetConfig<EqualizerPreset>(dialogWindow->getLineInput());
+        this->updatePresetConfig<EqualizerPreset> (presetDialogWindow->getLineInput());
     else if (this->currentPresetType == "Delay")
-        this->updatePresetConfig<DelayPreset>(dialogWindow->getLineInput());
+        this->updatePresetConfig<DelayPreset>     (presetDialogWindow->getLineInput());
     else if (this->currentPresetType == "Filter")
-        this->updatePresetConfig<FilterPreset>(dialogWindow->getLineInput());
+        this->updatePresetConfig<FilterPreset>    (presetDialogWindow->getLineInput());
     else if (this->currentPresetType == "Pitch")
-        this->updatePresetConfig<PitchPreset>(dialogWindow->getLineInput());
+        this->updatePresetConfig<PitchPreset>     (presetDialogWindow->getLineInput());
     else if (this->currentPresetType == "Compressor")
-        this->updatePresetConfig<CompressorPreset>(dialogWindow->getLineInput());
-    dialogWindow->dialogLineEdit->clear();
-    dialogWindow->hide();
+        this->updatePresetConfig<CompressorPreset>(presetDialogWindow->getLineInput());
+    presetDialogWindow->dialogLineEdit->clear();
+    presetDialogWindow->hide();
 }
 
 void MainWindowUI::updateAudioState () {
@@ -763,13 +787,14 @@ void MainWindowUI::updateAudioState () {
         updateAudioPositionLabel(effects->audioPosition, effects->audioDuration);
         ui.playerSeekSlider->setValue(1000*effects->audioPosition/effects->audioDuration);
     }
-        
-    if (currentAudioId < ui.playerPlayListWidget->count()-1 && effects->isEOSReached()) {
-        currentAudioId += 1;
-        currentAudio = ui.playerPlayListWidget->item(currentAudioId);
-        PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>(ui.playerPlayListWidget->itemWidget(currentAudio));
+    
+    if (currentAudio != *playlistItems.end() && effects->isEOSReached()) {
+        int currentAudioId = playlistItems.indexOf(currentAudio);
+        currentAudio = playlistItems.at(currentAudioId+1);
+        PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
+            (ui.playerPlayListWidget->itemWidget(currentAudio));
         effects->changePlayingAudio(playlistItem->filePath());
-        ui.playerPlayListWidget->setCurrentRow(currentAudioId);
+        ui.playerPlayListWidget->setCurrentItem(currentAudio);
     }
 }
 
@@ -782,9 +807,20 @@ void MainWindowUI::updatePanPosition () {
     ui.panoramaPositionDial->setValue(panPosition + (direction ? 10 : -10));
 }
 
+void MainWindowUI::setStopAudio (QListWidgetItem *item) {
+    
+}
+
+void MainWindowUI::removeFromPlaylist (QListWidgetItem *item) {
+    if (currentAudio == item)
+        ui.playerNextButton->click();
+    delete item;
+}
+
 void MainWindowUI::closeEvent (QCloseEvent *event) {
-    dialogWindow->hide();
+    presetDialogWindow->hide();
     event->accept();
 }
+
 
 
