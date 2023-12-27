@@ -3,7 +3,6 @@
 #define TOGGLE_BUTTON_H
 
 #include <QList>
-#include <QPair>
 #include <QWidget>
 #include <QPushButton>
 
@@ -12,16 +11,20 @@ class ToggleButton : public QPushButton {
     Q_OBJECT
     
 public:
-    ToggleButton (QList<QPair<QString, QIcon>> states = {});
+    explicit ToggleButton (QWidget *parent = nullptr);
     ~ToggleButton ();
     
-private:
-    QList<QPair<QString, QIcon>> statesList;
+    void setStates  (QList<QIcon> states);
+    void setStateId (int);
+    
     int stateId;
+    
+private:
+    QList<QIcon> statesList;
     
 protected:
     void mousePressEvent (QMouseEvent *event) override;
 };
 
-#endif // TOGGLE_BUTTON_WIDGET_H
+#endif // TOGGLE_BUTTON_H
 

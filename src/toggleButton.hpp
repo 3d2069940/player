@@ -3,18 +3,27 @@
 
 #include "toggleButton.h"
 
-ToggleButton::ToggleButton (QList<QPair<QString, QIcon>> states) {
+
+ToggleButton::ToggleButton (QWidget *parent) : QPushButton(parent) {
     setFlat(true);
-    statesList = states;
-    if (statesList.size() > 0) {
-        stateId = 0;
-        setText(statesList.at(stateId).first);
-        setIcon(statesList.at(stateId).second);
-    }
 }
 
 ToggleButton::~ToggleButton () {
     
+}
+
+void ToggleButton::setStates (QList<QIcon> states) {
+    setFlat(true);
+    statesList = states;
+    if (statesList.size() > 0) {
+        stateId = 0;
+        setIcon(statesList.at(stateId));
+    }
+}
+
+void ToggleButton::setStateId (int newState) {
+    stateId = newState;
+    setIcon(statesList.at(stateId));
 }
 
 void ToggleButton::mousePressEvent (QMouseEvent *event) {
@@ -22,8 +31,7 @@ void ToggleButton::mousePressEvent (QMouseEvent *event) {
         stateId++;
         if (stateId >= statesList.size())
             stateId = 0;
-        setText(statesList.at(stateId).first);
-        setIcon(statesList.at(stateId).second);
+        setIcon(statesList.at(stateId));
     }
     QPushButton::mousePressEvent (event);
 }

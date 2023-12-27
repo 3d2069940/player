@@ -40,7 +40,7 @@ PlaylistWidgetItem::PlaylistWidgetItem (const QString &labelText, const QVariant
         playlistValue.mainwindow->removeFromPlaylist(playlistValue.item);
     });
     connect(stopAction,   &QAction::triggered, playlistValue.mainwindow, [=]() {
-        playlistValue.mainwindow->setStopAudio(playlistValue.item);
+        playlistValue.mainwindow->setPlaylistStopAudio(playlistValue.item);
     });
 }
 

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:svg="http://www.w3.org/2000/svg" 
+     width="48" 
+     height="48" 
+     viewBox="0 0 48 48" 
+     id="Layer_1" 
+     version="1.1"> 
+    <g id="g9" 
+       transform="matrix(1.5968187,0,0,1.5968187,-12.78692,-15.860375)"> 
+        <rect height="4" 
+              id="XMLID_30_" 
+              width="24" 
+              x="8" 
+              y="20" 
+              fill="#FFFFFF" /> 
+        <rect height="4" 
+              id="XMLID_29_" 
+              width="24" 
+              x="8" 
+              y="12" 
+              fill="#FFFFFF" /> 
+        <rect height="4" 
+              id="XMLID_28_" 
+              width="16" 
+              x="8" 
+              y="28" 
+              fill="#FFFFFF" /> 
+        <polygon id="XMLID_27_" 
+                 points="28,40 38,34 28,28" 
+                 fill="#FFFFFF" /> 
+    </g> 
+</svg>

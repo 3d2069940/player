@@ -1,10 +1,19 @@
 <RCC>
     <qresource>
-        <file>icons/previous_black.svg</file>
-        <file>icons/repeat_black.svg</file>
-        <file>icons/pause_black.svg</file>
-        <file>icons/play_black.svg</file>
-        <file>icons/shuffle_black.svg</file>
-        <file>icons/next_black.svg</file>
+        <file>icons/white/playlist.svg</file>
+        <file>icons/white/previous_track.svg</file>
+        <file>icons/white/repeat_all.svg</file>
+        <file>icons/white/play_music.svg</file>
+        <file>icons/white/pause_music.svg</file>
+        <file>icons/white/shuffle_playlist.svg</file>
+        <file>icons/white/next_track.svg</file>
+        
+        <file>icons/black/playlist.svg</file>
+        <file>icons/black/previous_track.svg</file>
+        <file>icons/black/repeat_all.svg</file>
+        <file>icons/black/play_music.svg</file>
+        <file>icons/black/pause_music.svg</file>
+        <file>icons/black/shuffle_playlist.svg</file>
+        <file>icons/black/next_track.svg</file>
     </qresource>
 </RCC>

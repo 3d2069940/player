@@ -1,6 +1,5 @@
 
-#ifndef EFFECT_HPP
-#define EFFECT_HPP
+#pragma once
  
 //***********************************************************//
 // Homebrew Headers
@@ -54,18 +53,18 @@ void Effects::waitForPipelineState () {
 void Effects::initGstreamer () {
     pipeline  = gst_pipeline_new         ("audio-player");
     
-    filesrc   = gst_element_factory_make ("filesrc",          "file-source");
+    filesrc   = gst_element_factory_make ("filesrc",          "source");
     decodebin = gst_element_factory_make ("decodebin",        "decoder");
-    convert1  = gst_element_factory_make ("audioconvert",     "audio-convert");
+    convert1  = gst_element_factory_make ("audioconvert",     "convert");
     limiter   = gst_element_factory_make ("audiocheblimit",   "limiter");
-    convert2  = gst_element_factory_make ("audioconvert",     "audio-convert2");
+    convert2  = gst_element_factory_make ("audioconvert",     "convert2");
     panorama  = gst_element_factory_make ("audiopanorama",    "panorama");
-    delay     = gst_element_factory_make ("audioecho",        "audio-echo");
+    delay     = gst_element_factory_make ("audioecho",        "echo");
     dynamic   = gst_element_factory_make ("audiodynamic",     "dynamic");
     equalizer = gst_element_factory_make ("equalizer-10bands","equalizer");
     volume    = gst_element_factory_make ("volume",           "volume");
     pitch     = gst_element_factory_make ("pitch",            "pitch");
-    audiosink = gst_element_factory_make ("autoaudiosink",    "audio-sink");
+    audiosink = gst_element_factory_make ("autoaudiosink",    "sink");
     
     if (!pipeline  || !filesrc   || !decodebin || 
         !convert1  || !limiter   || !convert2  ||
@@ -121,9 +120,9 @@ gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
     gchar   *debug_info;
     GError  *err;
     Effects *effects = static_cast<Effects*>(userdata);
+    
     switch (GST_MESSAGE_TYPE(msg)) {
         case GST_MESSAGE_EOS:
-            g_printerr("End of stream\n");
             gst_element_set_state(effects->pipeline, GST_STATE_PAUSED);
             effects->waitForPipelineState();
             effects->reachedEOS = true;
@@ -333,5 +332,3 @@ void Effects::changePanoramaProps (CODES::PANORAMA code, int newValue) {
     }
     g_value_unset(&value);
 }
-
-#endif // EFFECT_HPP

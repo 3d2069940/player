@@ -18,6 +18,7 @@
 #include <QCloseEvent>
 #include <QMainWindow>
 #include <QFileInfoList>
+#include <QSharedPointer>
 
 //***********************************************************//
 // Third-party libraries
@@ -31,7 +32,9 @@
 #include "ui_mainwindow.h"
 
 
+
 class Effects;
+class ToggleButton;
 class PresetDialogWindow;
 class PlaylistWidgetItem;
 class EqualizerTabWidget;
@@ -46,41 +49,74 @@ public:
     MainWindowUI ();
     ~MainWindowUI ();
     
-    QMainWindow *mainwindow ();
-    
     template <class T>
     void updatePresetConfig (std::string presetName);
         
 private:
-//  Effects
-    std::unique_ptr<Effects>              effects;
-    std::unique_ptr<PresetDialogWindow>   presetDialogWindow;
+
+    std::unique_ptr<Effects>           effects;
+    QSharedPointer<PresetDialogWindow> presetDialogWindow;
+    
+    QSharedPointer<ToggleButton> previousButton,
+                                 repeatButton,
+                                 pauseButton,
+                                 shuffleButton,
+                                 nextButton;
     
     QList<QListWidgetItem*> playlistItems;
     
     QTimer audioPositionTimer,
            audioPanningTimer;
     
-    YAML::Node config;
-    QString    musicFolderPath,
-               configPath;
+    YAML::Node configYaml,
+               presetYaml;
+               
+    QString     configPath,
+                presetPath;
+    QStringList musicFolders;
     
     QListWidgetItem *currentAudio = nullptr,
                     *stopAudio    = nullptr;
-    
+                    
     std::string currentPresetType;
     
-    
-    void parseMusic (QFileInfoList&);
+//********Init********//
+    void createWidgets  ();
+    void setupWidgets   ();
+        void setupIcons ();
+//  Connecting All Widgets
+    void connectWidgets ();
+//      Connect Player Tab Widgets
+        void connectPlayerTabWidgets ();
+//      Connect Effects Tab Widgets
+        void connectEffectsTabWidgets ();
+            void connectEqualizerWidgets  ();
+            void connectDelayWidgets      ();
+            void connectFilterWidgets     ();
+            void connectPitchWidgets      ();
+            void connectCompressorWidgets ();
+            void connectPanoramaWidgets   ();
+//      Connect Visualizing Tab Widgets
+        void connectVisualizingTabWidgets ();
+//      Connect Settings Tab Widgets
+        void connectSettingsTabWidgets    ();
+            
 //********Config********//
-    void parseConfigFile  ();    
-    void createConfigFile ();
+    void createConfigFile      ();
+    void parseConfigFile       ();
+        template <class T>
+        void extractConfigInfo (std::string);
     
-    template <class T>
-    void parsePresets (std::string);
+//********Parse********//
+    void createPresetFile ();
+    void parsePresetFile  ();
+        template <class T>
+        void parsePresets (std::string);
     void savePresets  ();
     void removePreset (std::string, QComboBox*);
-    
+    void parseMusic (QFileInfoList&);
+        
+//********Effects*******//    
     void serializeEqualizerParams  (YAML::Node *);
     void serializeDelayParams      (YAML::Node *);
     void serializeFilterParams     (YAML::Node *);
@@ -92,23 +128,7 @@ private:
     void changeFilterParams     (QVariant);
     void changePitchParams      (QVariant);
     void changeCompressorParams (QVariant);
-    
-    void setupWidgets ();
-    void connectWidgets ();
-    
-//********Player********//
-    void connectPlayerTabWidgets ();
-    
-//********Effects*******//
-    void connectEffectsTabWidgets ();
-     
-    void connectEqualizerWidgets  ();
-    void connectDelayWidgets      ();
-    void connectFilterWidgets     ();
-    void connectPitchWidgets      ();
-    void connectCompressorWidgets ();
-    void connectPanoramaWidgets   ();
-    
+        
 //********Other********//
 
     void updateAudioPositionLabel (gint64, gint64);
@@ -118,7 +138,9 @@ private:
     void lockWidgetFor (QWidget*, quint64);
 
 public slots:
-//  Player Items
+//  Presets manipulation
+    void addNewPreset          ();
+//  Player slots
     void togglePlaylistView    ();
     void previousButtonClicked ();
     void repeatButtonClicked   ();
@@ -128,13 +150,13 @@ public slots:
     
     void playlistItemClicked   (QListWidgetItem*);
     void updateAudioState      ();
-//  Presets
-    void addNewPreset          ();
 //  Effects
     void updatePanPosition     ();    
 //  Playlist
-    void setStopAudio          (QListWidgetItem*);
+    void setPlaylistStopAudio  (QListWidgetItem*);
     void removeFromPlaylist    (QListWidgetItem*);
+//  Settings
+    void themeComboBoxClicked  (const QString &theme);
     
 protected:
     void closeEvent  (QCloseEvent *event) override;

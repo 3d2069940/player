@@ -10,7 +10,6 @@
 * Audio panorama
 * Audio visualization (still in development)
 * Saving presets for any of the effects
-* Memory-hungry (about 1Gb of RAM)
 
 ## Installation
 
@@ -20,7 +19,7 @@
 sudo apt-get update && sudo apt-get upgrade -y 
 ```
 ```
-sudo apt-get install qt5-default libgstreamer1.0-dev yaml-cpp gstreamer1.0-plugins-bad gstreamer1.0-plugins-good gstreamer1.0-plugins-base
+sudo apt-get install pkg-config qt5-default libgstreamer1.0-dev yaml-cpp gstreamer1.0-plugins-bad gstreamer1.0-plugins-good gstreamer1.0-plugins-base
 ```
 ```
 git clone https://github.com/3d2069940/gstreamer-media-player.git

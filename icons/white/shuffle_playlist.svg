@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" 
+     class="feather feather-shuffle" 
+     fill="none" 
+     height="20" 
+     stroke="#FFF" 
+     stroke-linecap="round" 
+     stroke-linejoin="round" 
+     stroke-width="2" 
+     width="19">
+    <path d="M13 1h5v5M1 18 18 1M18 14v5h-5M12 13l6 6M1 2l5 5"/>
+</svg>

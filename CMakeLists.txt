@@ -10,20 +10,20 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
 #set(CMAKE_AUTORCC ON)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/forms)
 
 # Find the QtWidgets library
 find_package(PkgConfig REQUIRED)    
-find_package(Qt5Widgets CONFIG COMPONENTS Core Widgets REQUIRED)
+find_package(Qt5Widgets CONFIG COMPONENTS Core Widgets Gui REQUIRED)
 
 pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
 pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
 
-qt5_wrap_ui(UI_FILES mainwindow.ui)
-qt5_wrap_cpp(MOC_FILES libs/player.h libs/playlistWidgetItem.h libs/toggleButton.h)
-qt5_add_resources(RESOURCES icons.qrc)
+qt_wrap_ui(UI_FILES mainwindow.ui)
+qt_wrap_cpp(MOC_FILES libs/player.h libs/playlistWidgetItem.h libs/toggleButton.h)
+qt_add_resources(RESOURCES icons.qrc)
 
 include_directories(libs build ${GSTREAMER_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIRS})
 
