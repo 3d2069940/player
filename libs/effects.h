@@ -62,14 +62,20 @@ private:
     GstBus *bus;
     bool   reachedEOS;
 //  FUNCTIONS 
-    void initGstreamer ();
+    void initEffects ();
 //  CALLBACKS
     static gboolean busCallback      (GstBus*,     GstMessage*,      gpointer);
     static void     padAddedCallback (GstElement*, GstPad*,          gpointer);
 
 public:
-    Effects ();
-    ~Effects ();
+    
+    enum {
+        ARTIST_ID = 0, 
+        ALBUM_ID,
+        CODEC_ID, 
+        IMAGE_ID, 
+        TITLE_ID
+    };
     
     GstElement *pipeline, 
                *filesrc,
@@ -85,9 +91,12 @@ public:
                *pitch,
                *audiosink;
                
-    GstPadProbeInfo  probeInfo;
-               
     gint64 audioDuration, audioPosition;
+    
+    guint imageLength;
+
+    Effects ();
+    ~Effects ();
     
     bool isEOSReached         (); 
     bool isPipelineRunning    ();
@@ -96,6 +105,8 @@ public:
     
     void updateAudioDuration ();
     void updateAudioPosition ();
+    void updateAudioInfo     ();
+    void updateAudioTags     ();
     
     void seekPlayingPosition (gint64);
     

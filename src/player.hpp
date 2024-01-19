@@ -19,6 +19,21 @@
 #include <QStandardPaths>
 
 //***********************************************************//
+// Third-party libs
+//***********************************************************//
+#include <tag.h>
+#include <taglib.h>
+#include <fileref.h>
+#include <wavfile.h>
+// #include <modfile.h> ??
+#include <oggfile.h>
+#include <mpegfile.h>
+#include <opusfile.h>
+#include <flacfile.h>
+#include <aifffile.h>
+#include <tpropertymap.h>
+
+//***********************************************************//
 // Homebrew Headers
 //***********************************************************//
 #include "player.h"
@@ -27,9 +42,11 @@
 // Homebrew Classes
 //***********************************************************//
 #include "effects.hpp"
-#include "toggleButton.hpp"
+#include "toggleButtonWidget.hpp"
 #include "presetDialogWindow.hpp"
 #include "playlistWidgetItem.hpp"
+#include "directoryViewList.hpp"
+#include "directoryViewWidget.hpp"
 
 
 
@@ -59,52 +76,35 @@ MainWindowUI::~MainWindowUI() {
 
 /**
  * @brief
- * Parses tracks from specified directories 
- *      and adds them to a playlist (ui.playerPlayListWidget)
- * Also initializes the player's control buttons
  * @return Does not return any value
  */
 void MainWindowUI::createWidgets () {
-//  Add playlist items
-    QFileInfoList musicFiles;
-    parseMusic(musicFiles);
-    
-    QSize               size (ui.playerPlayListWidget->width(), 40);
-    PlaylistButtonValue playlistValue;
-    foreach (const QFileInfo &file, musicFiles) {
-        QListWidgetItem *item         = new QListWidgetItem (ui.playerPlayListWidget);
-        playlistItems.append(item);
-        
-        playlistValue.filePath   = file.absoluteFilePath ();
-        playlistValue.listWidget = ui.playerPlayListWidget;
-        playlistValue.mainwindow = this;
-        playlistValue.item       = item;
-        
-        QVariant value = QVariant::fromValue(playlistValue);
-        PlaylistWidgetItem *playlistItem = new PlaylistWidgetItem (file.fileName(), value);
-        
-        item->setSizeHint(size);
-        ui.playerPlayListWidget->setItemWidget(item, playlistItem);
-    }
 //  Initializes the control buttons
     previousButton = QSharedPointer<ToggleButton>::create();
     repeatButton   = QSharedPointer<ToggleButton>::create();
     pauseButton    = QSharedPointer<ToggleButton>::create();
     shuffleButton  = QSharedPointer<ToggleButton>::create();
     nextButton     = QSharedPointer<ToggleButton>::create();
+//  
+    directoryView  = QSharedPointer<DirectoryViewWidget>::create(ui.settingsMediaFoldersListWidget);
+//      
+    updatePlaylistWidget();
 }
 
 void MainWindowUI::setupWidgets () {
     audioPositionTimer.setInterval(300);
     audioPanningTimer.setInterval(100);
     
+    ui.playerTagListFrame->hide();
     ui.playerPlayListWidget->hide();
+    
+    ui.settingsMediaFoldersListWidget->hide();
+    
+    directoryView->setCurrentDirectory(QDir::homePath());
         
     presetDialogWindow->setFixedSize(250, 100);
       
     setupIcons ();
-      
-    ui.playerTogglePlaylistVisibilityButton->setFlat(true);
     
     ui.playerControlHLayout->addWidget(previousButton.data());
     ui.playerControlHLayout->addWidget(repeatButton  .data());
@@ -118,6 +118,8 @@ void MainWindowUI::setupWidgets () {
     //  Set current theme
     QStyle *style = QApplication::style();
     ui.settingsColorThemeComboBox->setCurrentText(style->objectName());
+    
+    ui.scrollAreaWidgetContents->layout()->addWidget(directoryView.data());
 }
 
 void MainWindowUI::setupIcons () {
@@ -130,10 +132,12 @@ void MainWindowUI::setupIcons () {
     repeatButton  ->setStates ({QIcon(iconPath+"repeat_all.svg"      )});
     pauseButton   ->setStates ({QIcon(iconPath+"play_music.svg"      ), 
                                 QIcon(iconPath+"pause_music.svg"     )});
+    pauseButton   ->setStateId (pauseButton->stateId);
     shuffleButton ->setStates ({QIcon(iconPath+"shuffle_playlist.svg")});
     nextButton    ->setStates ({QIcon(iconPath+"next_track.svg"      )});
     
-    ui.playerTogglePlaylistVisibilityButton->setIcon(QIcon(iconPath+"playlist.svg"));
+    ui.playerTagListVisibilityButton->setIcon(QIcon(iconPath+"previous_track.svg"));
+    ui.playerPlaylistVisibilityButton->setIcon(QIcon(iconPath+"playlist_hide.svg"));
 }
 
 void MainWindowUI::connectWidgets () {
@@ -157,7 +161,9 @@ void MainWindowUI::connectPlayerTabWidgets() {
             
     connect(ui.playerPlayListWidget, &QListWidget::itemClicked, this, &MainWindowUI::playlistItemClicked);
     
-    connect(ui.playerTogglePlaylistVisibilityButton, &QPushButton::clicked, this, &MainWindowUI::togglePlaylistView);
+    connect(ui.playerPlaylistVisibilityButton, &QPushButton::clicked, this, &MainWindowUI::togglePlaylistView);
+    
+    connect(ui.playerTagListVisibilityButton, &QPushButton::clicked, this, &MainWindowUI::closeTagListWidget);
     
     connect(ui.playerSeekSlider, &QSlider::sliderPressed, &audioPositionTimer, &QTimer::stop);
     
@@ -431,7 +437,9 @@ void MainWindowUI::connectVisualizingTabWidgets () {
 }
 
 void MainWindowUI::connectSettingsTabWidgets () {
-    connect(ui.settingsColorThemeComboBox, &QComboBox::currentTextChanged, this, &MainWindowUI::themeComboBoxClicked); 
+    connect(ui.settingsColorThemeComboBox, &QComboBox::currentTextChanged,          this, &MainWindowUI::themeComboBoxClicked);
+    connect(ui.settingsMediaFoldersButton, &QPushButton::clicked,                   this, &MainWindowUI::showSettingsTreeWidget);
+    connect(directoryView.data(),          &DirectoryViewWidget::newFolderSelected, this, &MainWindowUI::newFolderSelected);
 }
 
 void MainWindowUI::createConfigFile () {
@@ -489,14 +497,10 @@ void MainWindowUI::extractConfigInfo (std::string key) {
     }
     const YAML::Node &element = configYaml[key];
     try {
-        if      constexpr (std::is_same<T, QString>::value) {
+        if      constexpr (std::is_same<T, QString>::value)
             presetPath = element.as<T>();
-            qDebug() << presetPath;
-        } 
-        else if constexpr (std::is_same<T, QStringList>::value) {
+        else if constexpr (std::is_same<T, QStringList>::value)
             musicFolders = element.as<T>();
-            qDebug() << musicFolders;
-        }
     } catch (YAML::BadConversion &e) {
         qWarning() << "[Warning]:" << e.what();
     } catch (...) {
@@ -665,19 +669,44 @@ void MainWindowUI::parseMusic (QFileInfoList& musicFiles) {
     QStringList nameFilters;
     nameFilters << "*.mp3" << ".flac" << "*.opus" << "*.wav";
     
+    ui.playerPlayListWidget->clear();
+    
+    foreach (const QString &folder, musicFolders) {
+            QDir musicDir (folder);
+            musicDir.setNameFilters(nameFilters);
+            musicFiles += musicDir.entryInfoList(QDir::Files);
+    }
     if (musicFolders.size() == 0) {
         QDir musicDir (QStandardPaths::standardLocations(QStandardPaths::MusicLocation).at(0));
         musicDir.setNameFilters(nameFilters);
         musicFiles += musicDir.entryInfoList(QDir::Files);
     }
-    else 
-        foreach (const QString &folder, musicFolders) {
-            QDir musicDir (folder);
-            musicDir.setNameFilters(nameFilters);
-            musicFiles += musicDir.entryInfoList(QDir::Files);
-        }
 }
 
+void MainWindowUI::updatePlaylistWidget () {
+    //  Add playlist items
+    QFileInfoList musicFiles;
+    parseMusic(musicFiles);
+    
+    QSize               size (ui.playerPlayListWidget->width(), 40);
+    PlaylistButtonValue playlistValue;
+    foreach (const QFileInfo &file, musicFiles) {
+        QListWidgetItem *item         = new QListWidgetItem (ui.playerPlayListWidget);
+        playlistItems.append(item);
+        
+        playlistValue.filePath   = file.absoluteFilePath ();
+        playlistValue.listWidget = ui.playerPlayListWidget;
+        playlistValue.mainwindow = this;
+        playlistValue.item       = item;
+        
+        QVariant value = QVariant::fromValue(playlistValue);
+        PlaylistWidgetItem *playlistItem = new PlaylistWidgetItem (file.fileName(), value);
+        connect(playlistItem, &PlaylistWidgetItem::infoActionShow, this, &MainWindowUI::showTagListWidget);
+        
+        item->setSizeHint(size);
+        ui.playerPlayListWidget->setItemWidget(item, playlistItem);
+    }
+}
 
 void MainWindowUI::serializeEqualizerParams  (YAML::Node *node) {
     node->push_back(ui.equalizer29HzSlider->value());
@@ -781,7 +810,11 @@ void MainWindowUI::lockWidgetFor (QWidget *widget, quint64 time) {
     QTimer::singleShot(time, [widget]() {widget->blockSignals(false);});
 };
 
-void MainWindowUI::updateAudioPositionLabel(gint64 position, gint64 duration) {
+void MainWindowUI::setupPlayerMusicIcons () {
+
+}
+
+void MainWindowUI::updateAudioPositionLabel (gint64 position, gint64 duration) {
     long long hours_dur, minutes_dur, seconds_dur, 
               hours_pos, minutes_pos, seconds_pos;
     QString string = "%1:%2:%3/%4:%5:%6";
@@ -792,8 +825,12 @@ void MainWindowUI::updateAudioPositionLabel(gint64 position, gint64 duration) {
     seconds_dur = GST_TIME_AS_SECONDS(duration);
     minutes_dur = seconds_dur/60;
     hours_dur   = seconds_dur/3600;
-    string = string.arg(hours_pos).arg(minutes_pos, 2, 10, QChar('0')).arg(seconds_pos % 60, 2, 10, QChar('0'))
-                   .arg(hours_dur).arg(minutes_dur, 2, 10, QChar('0')).arg(seconds_dur % 60, 2, 10, QChar('0'));
+    
+    string = string.arg(hours_pos), 
+    string = string.arg(minutes_pos, 2, 10, QChar('0')), 
+    string = string.arg(seconds_pos % 60, 2, 10, QChar('0')), 
+    string = string.arg(hours_dur).arg(minutes_dur, 2, 10, QChar('0')), 
+    string = string.arg(seconds_dur % 60, 2, 10, QChar('0'));
     
     ui.playerProgressLabel->setText(string);
 }
@@ -815,6 +852,82 @@ void MainWindowUI::updateVisualizingWidget () {
 }
 
 //**************SLOTS**************//
+
+void MainWindowUI::addNewPreset () {
+    if      (this->currentPresetType == "Equalizer")
+        this->updatePresetConfig<EqualizerPreset> (presetDialogWindow->getLineInput());
+    else if (this->currentPresetType == "Delay")
+        this->updatePresetConfig<DelayPreset>     (presetDialogWindow->getLineInput());
+    else if (this->currentPresetType == "Filter")
+        this->updatePresetConfig<FilterPreset>    (presetDialogWindow->getLineInput());
+    else if (this->currentPresetType == "Pitch")
+        this->updatePresetConfig<PitchPreset>     (presetDialogWindow->getLineInput());
+    else if (this->currentPresetType == "Compressor")
+        this->updatePresetConfig<CompressorPreset>(presetDialogWindow->getLineInput());
+    presetDialogWindow->dialogLineEdit->clear();
+    presetDialogWindow->hide();
+}
+
+void MainWindowUI::showTagListWidget (const QString& filePath) {
+    ui.playerTagListAuthorLabel->clear();
+    ui.playerTagListAuthorLabel->hide();
+    
+    ui.playerTagListAlbumLabel->clear();
+    ui.playerTagListAlbumLabel->hide();
+    
+    ui.playerTagListTitleLabel->clear();
+    ui.playerTagListTitleLabel->hide();
+    
+    ui.playerTagListSizeLabel->clear();
+    ui.playerTagListChannelsLabel->clear();
+    ui.playerTagListSampleRateLabel->clear();
+    ui.playerTagListBitRateLabel->clear();
+    
+    QString authorStr     = "Author: %1", 
+            albumStr      = "Album: %1", 
+            titleStr      = "Title: %1", 
+            sizeStr       = "File size: %1 MB", 
+            channelStr    = "Channels: %1", 
+            sampleRateStr = "Sample rate: %1 Hz", 
+            bitRateStr    = "Bitrate: %1 KB/s";
+    
+    TagLib::FileRef file (filePath.toStdString().c_str());
+        
+    if (!file.isNull() && file.tag()) {
+        TagLib::Tag *tag = file.tag();
+        TagLib::AudioProperties *audioProperties = file.audioProperties();
+
+        if (tag->artist().size()) {
+            ui.playerTagListAuthorLabel->setText(authorStr.arg(tag->artist().toCString()));
+            ui.playerTagListAuthorLabel->show();
+        }
+        if (tag->album().size()) {
+            ui.playerTagListAlbumLabel->setText(albumStr.arg(tag->album().toCString()));
+            ui.playerTagListAlbumLabel->show();
+        }
+        if (tag->title().size()) {
+            ui.playerTagListTitleLabel->setText(titleStr.arg(tag->title().toCString()));
+            ui.playerTagListTitleLabel->show();
+        }
+        
+        ui.playerTagListSizeLabel      ->setText(sizeStr      .arg(file.file()->length() / 1048576.0, 0, 'f', 2));
+        ui.playerTagListChannelsLabel  ->setText(channelStr   .arg(audioProperties->channels()));
+        ui.playerTagListSampleRateLabel->setText(sampleRateStr.arg(audioProperties->sampleRate()));
+        ui.playerTagListBitRateLabel   ->setText(bitRateStr   .arg(audioProperties->bitrate()));
+    }
+    ui.playerTagListFrame->show();
+    
+    ui.playerPlayListWidget->hide();
+    ui.playerPlaylistVisibilityButton->hide();
+}
+
+void MainWindowUI::closeTagListWidget () {
+    ui.playerTagListFrame->hide();
+    
+    ui.playerPlayListWidget->show();
+    ui.playerPlaylistVisibilityButton->show();
+}
+
 void MainWindowUI::togglePlaylistView () {
     if (ui.playerPlayListWidget->isVisible())
         ui.playerPlayListWidget->setVisible(false);
@@ -841,11 +954,13 @@ void MainWindowUI::repeatButtonClicked () {
 void MainWindowUI::pauseButtonClicked () {
     if (playlistItems.size() == 0)
         return;
+        
     if (currentAudio == nullptr) {
         currentAudio = playlistItems.at(0);
         PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
             (ui.playerPlayListWidget->itemWidget(currentAudio));
         effects->changePlayingAudio(playlistItem->filePath());
+        qDebug() << "done";
         ui.playerPlayListWidget->setCurrentItem(currentAudio);
         audioPositionTimer.start();
         return;
@@ -883,21 +998,6 @@ void MainWindowUI::playlistItemClicked (QListWidgetItem *item) {
     pauseButton.data()->setStateId(1);
 }
 
-void MainWindowUI::addNewPreset () {
-    if      (this->currentPresetType == "Equalizer")
-        this->updatePresetConfig<EqualizerPreset> (presetDialogWindow->getLineInput());
-    else if (this->currentPresetType == "Delay")
-        this->updatePresetConfig<DelayPreset>     (presetDialogWindow->getLineInput());
-    else if (this->currentPresetType == "Filter")
-        this->updatePresetConfig<FilterPreset>    (presetDialogWindow->getLineInput());
-    else if (this->currentPresetType == "Pitch")
-        this->updatePresetConfig<PitchPreset>     (presetDialogWindow->getLineInput());
-    else if (this->currentPresetType == "Compressor")
-        this->updatePresetConfig<CompressorPreset>(presetDialogWindow->getLineInput());
-    presetDialogWindow->dialogLineEdit->clear();
-    presetDialogWindow->hide();
-}
-
 void MainWindowUI::updateAudioState () {
     effects->updateAudioDuration();
     effects->updateAudioPosition();
@@ -926,6 +1026,13 @@ void MainWindowUI::updatePanPosition () {
     ui.panoramaPositionDial->setValue(panPosition + (direction ? 10 : -10));
 }
 
+void MainWindowUI::infoActionClicked () {
+    ui.playerPlayListWidget->hide();
+    ui.playerPlaylistVisibilityButton->hide();
+    
+    ui.playerTagListFrame->show();
+}
+
 void MainWindowUI::setPlaylistStopAudio (QListWidgetItem *item) {
     stopAudio = item;
 }
@@ -946,9 +1053,25 @@ void MainWindowUI::themeComboBoxClicked (const QString &theme) {
     setupIcons ();                                          
 }
 
+void MainWindowUI::newFolderSelected (const QStringList& folders) {
+    qDebug() << folders;
+    musicFolders = folders;
+    updatePlaylistWidget();
+}
+
+void MainWindowUI::showSettingsTreeWidget () {
+    ui.settingsMediaFoldersListWidget->setVisible(!ui.settingsMediaFoldersListWidget->isVisible());
+}
+
+void MainWindowUI::changeEvent (QEvent *event) {
+    if (event->type() == QEvent::PaletteChange)
+        setupIcons();
+    QMainWindow::changeEvent(event);
+}
+
 void MainWindowUI::closeEvent (QCloseEvent *event) {
     presetDialogWindow->hide();
-    event->accept();
+    QMainWindow::closeEvent(event);
 }
 
 

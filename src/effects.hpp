@@ -9,7 +9,7 @@
 
 Effects::Effects () {
     gst_init(nullptr, nullptr);
-    initGstreamer ();
+    initEffects ();
 }
 
 Effects::~Effects () {
@@ -50,7 +50,7 @@ void Effects::waitForPipelineState () {
     gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
 }
 
-void Effects::initGstreamer () {
+void Effects::initEffects () {
     pipeline  = gst_pipeline_new         ("audio-player");
     
     filesrc   = gst_element_factory_make ("filesrc",          "source");
@@ -138,9 +138,11 @@ gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
             effects->reachedEOS = true;
             break;
         case GST_MESSAGE_STREAM_START:
-            effects->waitForPipelineState();
             effects->reachedEOS = false;
             break;
+//         case GST_MESSAGE_TAG:
+//             effects->updateAudioTags(msg);
+//             break;
         default:
             break;
     }
@@ -167,6 +169,70 @@ void Effects::updateAudioPosition () {
     }
 }
 
+void Effects::updateAudioInfo () {
+//     GstPad  *pad  = gst_element_get_static_pad(GST_ELEMENT(convert1), "sink");
+//     if (pad == nullptr)
+//         return;
+//     GstCaps *caps = gst_pad_get_current_caps(pad);
+//     if (caps == nullptr)
+//         return;
+//     GstStructure *structure = gst_caps_get_structure(caps, 0);
+//     if (structure == nullptr)
+//         return;
+//     
+//     
+//     format = gst_structure_get_string (structure, "format");
+//     
+//     gst_structure_get_int (structure, "channels", &channels);
+//     gst_structure_get_int (structure, "rate", &sampleRate);
+//         
+//     gst_caps_unref(caps);
+//     gst_object_unref(pad);
+}
+
+void Effects::updateAudioTags () {
+//     GstTagList *tagList = nullptr;
+//     g_object_get(G_OBJECT(decodebin), "tags", &tagList, nullptr); 
+//     gst_message_parse_tag(msg, &tagList);
+   
+//     g_printerr("Artist: %s\n",        gst_element_get_metadata (filesrc, GST_TAG_ARTIST));
+//     g_printerr("Album: %s\n",         gst_element_get_metadata (filesrc, GST_TAG_ALBUM));
+//     g_printerr("Audio codec: %s\n\n", gst_element_get_metadata (filesrc, GST_TAG_AUDIO_CODEC));
+   
+//     const gchar *tagNames [5] = {GST_TAG_ARTIST, GST_TAG_ALBUM, GST_TAG_AUDIO_CODEC, GST_TAG_IMAGE, GST_TAG_TITLE};
+//     
+//     for (size_t i = 0; i < 5; ++i) {
+//         GValue val = G_VALUE_INIT;
+//         g_free(tags[i]);
+//         tags[i] = nullptr;
+//         if (gst_tag_list_copy_value(&val, tagList, tagNames[i])) {
+//             gchar *valueStr = gst_value_serialize(&val);
+//             tags[i] = g_strdup(valueStr);
+//             g_free(valueStr);
+//             g_value_unset(&val);
+//         }
+//     }
+//     
+//     imageLength = (tags[IMAGE_ID] ? strlen(tags[IMAGE_ID]) : 0);
+//     for (size_t i = 0; i < 5; ++i) {
+//         g_printerr("%s : %s\n", tagNames[i], tags[i]);
+//     }
+     
+//     for (guint i = 0; i < gst_tag_list_n_tags(tagList); ++i) {
+//         const gchar *tagName = gst_tag_list_nth_tag_name(tagList, i);
+//         GValue val = G_VALUE_INIT;
+//         gst_tag_list_copy_value(&val, tagList, tagName);
+//         gchar *valueString = gst_value_serialize(&val);
+//         
+//         g_print("%s : %s\n", tagName, valueString);
+//         
+//         g_free(valueString);
+//         g_value_unset(&val);
+//     }
+    
+//     gst_tag_list_unref(tagList);
+}
+
 void Effects::seekPlayingPosition (gint64 position) {
     GstSeekFlags seekFlags = (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE);    
     gst_element_set_state   (pipeline, GST_STATE_PAUSED);
@@ -176,10 +242,12 @@ void Effects::seekPlayingPosition (gint64 position) {
 }
 
 void Effects::changePlayingAudio (std::string filePath) {
-    gst_element_set_state(pipeline, GST_STATE_NULL);
-    gst_element_set_state(filesrc, GST_STATE_NULL);
-    g_object_set(filesrc, "location", filePath.c_str(), NULL);
+    gst_element_set_state (pipeline, GST_STATE_READY);
+    gst_element_set_state (filesrc, GST_STATE_NULL);
+    
+    g_object_set (filesrc, "location", filePath.c_str(), NULL);
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
     waitForPipelineState ();
 }
 
@@ -248,9 +316,8 @@ void Effects::changeDelayProps (CODES::DELAY code, int newValue) {
 }
 
 void Effects::changeFilterProps (CODES::FILTER code, gfloat newValue) {
-    using namespace CODES;
     GValue value = G_VALUE_INIT;
-
+    using namespace CODES;
     switch (code) {
         case Mode:
             g_object_get_property(G_OBJECT(limiter), "mode", &value);
@@ -273,32 +340,35 @@ void Effects::changeFilterProps (CODES::FILTER code, gfloat newValue) {
     g_value_unset(&value);
 }
 
-void Effects::changePitchProps (CODES::PITCH code, gfloat value) {
+void Effects::changePitchProps (CODES::PITCH code, gfloat newValue) {
+    GValue value = G_VALUE_INIT;
     using namespace CODES;
     switch (code) {
         case Tempo:
             updateAudioPosition ();
-            g_object_set(G_OBJECT(pitch), "tempo", value, NULL);
-            seekPlayingPosition(this->audioPosition);
+            g_object_get_property(G_OBJECT(pitch), "tempo", &value);
+            g_object_set(G_OBJECT(pitch), "tempo", newValue, NULL);
+            seekPlayingPosition(this->audioPosition/newValue*g_value_get_float(&value));
             break;
         case Pitch:
-            g_object_set(G_OBJECT(pitch), "pitch", value, NULL);
+            g_object_set(G_OBJECT(pitch), "pitch", newValue, NULL);
             break;
         case Rate:
             updateAudioPosition ();
-            g_object_set(G_OBJECT(pitch), "rate", value, NULL);
-            seekPlayingPosition(this->audioPosition);
+            g_object_get_property(G_OBJECT(pitch), "rate", &value);
+            g_object_set(G_OBJECT(pitch), "rate", newValue, NULL);
+            seekPlayingPosition(this->audioPosition/newValue*g_value_get_float(&value));
             break;
         case OutputRate:
-            g_object_set(G_OBJECT(pitch), "output-rate", value, NULL);
+            g_object_set(G_OBJECT(pitch), "output-rate", newValue, NULL);
             break;
     }
+    g_value_unset(&value);
 }
 
 void Effects::changeCompressorProps (CODES::COMPRESSOR code, int newValue) {
-    using namespace CODES;
     GValue value = G_VALUE_INIT;
-    
+    using namespace CODES;
     switch (code) {
         case Compressor:
             g_object_get_property(G_OBJECT(dynamic), "mode", &value);
@@ -319,8 +389,8 @@ void Effects::changeCompressorProps (CODES::COMPRESSOR code, int newValue) {
 } 
 
 void Effects::changePanoramaProps (CODES::PANORAMA code, int newValue) {
-    using namespace CODES;
     GValue value = G_VALUE_INIT;
+    using namespace CODES;
     switch (code) {
         case Method:
             g_object_get_property(G_OBJECT(panorama), "method", &value);

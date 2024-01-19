@@ -1,7 +1,8 @@
 
 #pragma once
 
-#include "toggleButton.h"
+
+#include "toggleButtonWidget.h"
 
 
 ToggleButton::ToggleButton (QWidget *parent) : QPushButton(parent) {
@@ -15,10 +16,8 @@ ToggleButton::~ToggleButton () {
 void ToggleButton::setStates (QList<QIcon> states) {
     setFlat(true);
     statesList = states;
-    if (statesList.size() > 0) {
-        stateId = 0;
+    if (statesList.size() > 0)
         setIcon(statesList.at(stateId));
-    }
 }
 
 void ToggleButton::setStateId (int newState) {

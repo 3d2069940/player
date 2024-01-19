@@ -20,9 +20,11 @@ PlaylistWidgetItem::PlaylistWidgetItem (const QString &labelText, const QVariant
     label       = new QLabel(labelText);
     contextMenu = new QMenu ();
     
-    QAction *infoAction   = contextMenu->addAction("Info");
-    QAction *removeAction = contextMenu->addAction("Remove");
-    QAction *stopAction   = contextMenu->addAction("Stop After");
+    infoAction   = contextMenu->addAction("Info");
+    removeAction = contextMenu->addAction("Remove");    
+    stopAction   = contextMenu->addAction("Stop After");
+    
+    updateIcons ();
     
     button->setFixedWidth(25);
     button->setMenu(contextMenu);
@@ -34,8 +36,9 @@ PlaylistWidgetItem::PlaylistWidgetItem (const QString &labelText, const QVariant
     
     PlaylistButtonValue playlistValue = m_data.value<PlaylistButtonValue>();
     
-    connect(button, &QPushButton::clicked, this, &PlaylistWidgetItem::contextMenuShow);
-//     connect(infoAction,   &QAction::triggered, m_data.value<PlaylistButtonValue>().mainwindow, &MainWindowUI::);
+    connect(button,       &QPushButton::clicked, this, &PlaylistWidgetItem::contextMenuShow);
+//     connect(infoAction,   &QAction::triggered, m_data.value<PlaylistButtonValue>().mainwindow, &MainWindowUI::infoActionClicked);
+    connect(infoAction,   &QAction::triggered, this, &PlaylistWidgetItem::infoActionClicked);
     connect(removeAction, &QAction::triggered, playlistValue.mainwindow, [=]() {
         playlistValue.mainwindow->removeFromPlaylist(playlistValue.item);
     });
@@ -55,8 +58,26 @@ std::string PlaylistWidgetItem::filePath () const {
     return m_data.value<PlaylistButtonValue>().filePath.toStdString();
 }
 
+void PlaylistWidgetItem::updateIcons () {
+    QPalette palette = qApp->palette();
+    QColor   backgroundColor = palette.color(QPalette::Window);
+    QString iconPath = backgroundColor.value() < 128 ? ":icons/white/" : ":icons/black/";
+    
+    infoAction  ->setIcon(QIcon(iconPath+"info.svg"));
+    removeAction->setIcon(QIcon(iconPath+"remove.svg"));
+    stopAction  ->setIcon(QIcon(iconPath+"stop_after.svg"));
+}
+
+void PlaylistWidgetItem::changeEvent (QEvent *event) {
+    if (event->type() == QEvent::PaletteChange)
+        updateIcons();
+    QWidget::changeEvent(event);
+}
+
 void PlaylistWidgetItem::contextMenuShow () {
     contextMenu->exec(button->mapToGlobal(QPoint(0, button->height())));
 }
 
-
+void PlaylistWidgetItem::infoActionClicked () {
+    emit infoActionShow(m_data.value<PlaylistButtonValue>().filePath);
+}

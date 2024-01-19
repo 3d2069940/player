@@ -32,12 +32,12 @@
 #include "ui_mainwindow.h"
 
 
-
 class Effects;
 class ToggleButton;
+class QListWidgetItem;
 class PresetDialogWindow;
-class PlaylistWidgetItem;
 class EqualizerTabWidget;
+class DirectoryViewWidget;
 class PlaylistDialogWindow;
 
 class MainWindowUI : public QMainWindow {  
@@ -57,11 +57,14 @@ private:
     std::unique_ptr<Effects>           effects;
     QSharedPointer<PresetDialogWindow> presetDialogWindow;
     
-    QSharedPointer<ToggleButton> previousButton,
+    QSharedPointer<ToggleButton> playlistButton,
+                                 previousButton,
                                  repeatButton,
                                  pauseButton,
                                  shuffleButton,
                                  nextButton;
+    
+    QSharedPointer<DirectoryViewWidget> directoryView;
     
     QList<QListWidgetItem*> playlistItems;
     
@@ -114,7 +117,9 @@ private:
         void parsePresets (std::string);
     void savePresets  ();
     void removePreset (std::string, QComboBox*);
+    
     void parseMusic (QFileInfoList&);
+    void updatePlaylistWidget ();
         
 //********Effects*******//    
     void serializeEqualizerParams  (YAML::Node *);
@@ -130,7 +135,7 @@ private:
     void changeCompressorParams (QVariant);
         
 //********Other********//
-
+    void setupPlayerMusicIcons    ();
     void updateAudioPositionLabel (gint64, gint64);
     
     void updateVisualizingWidget  ();
@@ -141,6 +146,8 @@ public slots:
 //  Presets manipulation
     void addNewPreset          ();
 //  Player slots
+    void showTagListWidget     (const QString&);
+    void closeTagListWidget    ();
     void togglePlaylistView    ();
     void previousButtonClicked ();
     void repeatButtonClicked   ();
@@ -153,12 +160,16 @@ public slots:
 //  Effects
     void updatePanPosition     ();    
 //  Playlist
+    void infoActionClicked     ();
     void setPlaylistStopAudio  (QListWidgetItem*);
     void removeFromPlaylist    (QListWidgetItem*);
 //  Settings
-    void themeComboBoxClicked  (const QString &theme);
+    void themeComboBoxClicked   (const QString &theme);
+    void newFolderSelected      (const QStringList&);
+    void showSettingsTreeWidget ();
     
 protected:
+    void changeEvent (QEvent *event) override;
     void closeEvent  (QCloseEvent *event) override;
     
 };

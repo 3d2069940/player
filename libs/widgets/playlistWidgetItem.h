@@ -8,6 +8,7 @@
 //***********************************************************//
 #include <QMenu>
 #include <QLabel>
+#include <QAction>
 #include <QWidget>
 #include <QString>
 #include <QVariant>
@@ -30,11 +31,24 @@ public:
     QLabel      *label;
     
     QMenu       *contextMenu;
+    QAction     *infoAction,
+                *removeAction,
+                *stopAction;
     QHBoxLayout *layout;
     QPushButton *button;
-
+    
+private:
+    void updateIcons ();
+    
+protected:
+    void changeEvent (QEvent *event) override;
+    
 public slots:
-    void contextMenuShow ();
+    void contextMenuShow       ();
+    void infoActionClicked ();
+    
+signals:
+    void infoActionShow (const QString&);
     
 };
 

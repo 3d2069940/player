@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" 
+     width="48" 
+     height="48" 
+     viewBox="0 0 48 48"> 
+    <rect height="6.3872747" 
+          width="38.32365" 
+          x="-0.0123704" 
+          y="16.075998" 
+          fill="#FFF" 
+          style="stroke-width:1.59682" /> 
+    <rect height="6.3872747"
+          width="38.32365"
+          x="-0.0123704" 
+          y="3.3014493" 
+          fill="#FFF" 
+          style="stroke-width:1.59682" /> 
+    <rect height="6.3872747" 
+          width="25.549099"
+          x="-0.0123704"
+          y="28.850548" 
+          fill="#FFF" 
+          style="stroke-width:1.59682" /> 
+    <polygon points="28,40 38,34 28,28" 
+             fill="#FFF" 
+             transform="matrix(-1.5968187,0,0,1.5968187,92.603114,-15.860375)" /> 
+</svg>
