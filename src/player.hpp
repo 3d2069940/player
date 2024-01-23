@@ -17,6 +17,7 @@
 #include <QPalette>
 #include <QStyleFactory>
 #include <QStandardPaths>
+#include <QLinearGradient>
 
 //***********************************************************//
 // Third-party libs
@@ -32,7 +33,6 @@
 #include <flacfile.h>
 #include <aifffile.h>
 #include <tpropertymap.h>
-
 //***********************************************************//
 // Homebrew Headers
 //***********************************************************//
@@ -42,12 +42,13 @@
 // Homebrew Classes
 //***********************************************************//
 #include "effects.hpp"
-#include "toggleButtonWidget.hpp"
-#include "presetDialogWindow.hpp"
-#include "playlistWidgetItem.hpp"
-#include "directoryViewList.hpp"
-#include "directoryViewWidget.hpp"
 
+#include "widgets/player/toggleButton.hpp"
+#include "widgets/player/playlistWidgetItem.hpp"
+
+#include "widgets/effects/presetDialogWindow.hpp"
+
+#include "widgets/settings/directoryListView.hpp"
 
 
 MainWindowUI::MainWindowUI () {
@@ -55,21 +56,19 @@ MainWindowUI::MainWindowUI () {
     
     setWindowTitle("Player");
     
-    effects            = std::make_unique<Effects>();
-    presetDialogWindow = QSharedPointer<PresetDialogWindow>::create();
+    effects = std::make_unique<Effects>();
    
     parseConfigFile ();
-
     parsePresetFile ();
-    
     createWidgets   ();
     setupWidgets    ();
     connectWidgets  ();
+    
+    audioVisualizingTime.start();
 }
 
 MainWindowUI::~MainWindowUI() {
     effects.reset();
-    presetDialogWindow.reset();
     audioPositionTimer.stop();
     audioPanningTimer.stop();
 }
@@ -79,39 +78,25 @@ MainWindowUI::~MainWindowUI() {
  * @return Does not return any value
  */
 void MainWindowUI::createWidgets () {
-//  Initializes the control buttons
-    previousButton = QSharedPointer<ToggleButton>::create();
-    repeatButton   = QSharedPointer<ToggleButton>::create();
-    pauseButton    = QSharedPointer<ToggleButton>::create();
-    shuffleButton  = QSharedPointer<ToggleButton>::create();
-    nextButton     = QSharedPointer<ToggleButton>::create();
 //  
-    directoryView  = QSharedPointer<DirectoryViewWidget>::create(ui.settingsMediaFoldersListWidget);
+    presetDialogWindow = QSharedPointer<PresetDialogWindow>::create();
+
 //      
     updatePlaylistWidget();
 }
 
 void MainWindowUI::setupWidgets () {
+    // 
     audioPositionTimer.setInterval(300);
     audioPanningTimer.setInterval(100);
+    audioVisualizingTime.setInterval(100);
     
     ui.playerTagListFrame->hide();
     ui.playerPlayListWidget->hide();
-    
-    ui.settingsMediaFoldersListWidget->hide();
-    
-    directoryView->setCurrentDirectory(QDir::homePath());
         
     presetDialogWindow->setFixedSize(250, 100);
-      
+            
     setupIcons ();
-    
-    ui.playerControlHLayout->addWidget(previousButton.data());
-    ui.playerControlHLayout->addWidget(repeatButton  .data());
-    ui.playerControlHLayout->addWidget(pauseButton   .data());
-    ui.playerControlHLayout->addWidget(shuffleButton .data());
-    ui.playerControlHLayout->addWidget(nextButton    .data());
-    
     //  Add installed themes to settings combobox
     QStringList styleNames = QStyleFactory::keys();
     ui.settingsColorThemeComboBox->addItems(styleNames);
@@ -119,7 +104,30 @@ void MainWindowUI::setupWidgets () {
     QStyle *style = QApplication::style();
     ui.settingsColorThemeComboBox->setCurrentText(style->objectName());
     
-    ui.scrollAreaWidgetContents->layout()->addWidget(directoryView.data());
+    ui.visualizingCustomPlot->xAxis->setVisible(false);
+    ui.visualizingCustomPlot->yAxis->setVisible(false);
+    ui.visualizingCustomPlot->axisRect()->setAutoMargins(QCP::msNone);
+    ui.visualizingCustomPlot->axisRect()->setMargins(QMargins(0, 0, 0, 0));
+
+    ui.visualizingCustomPlot->yAxis->setRange(0, 120);
+    ui.visualizingCustomPlot->xAxis->setRange(0, 10);
+    
+    ui.visualizingCustomPlot->setBackground(palette().color(QPalette::Window));
+    
+    gradient.setStart (width()/2, height()/2);
+    gradient.setFinalStop(width()/2, height());
+      
+    gradient.setColorAt(1, qApp->palette().color(QPalette::Window));
+    gradient.setColorAt(0, qApp->palette().color(QPalette::Highlight));
+      
+    brush = QSharedPointer<QBrush>::create(gradient);
+    bars  = QSharedPointer<QCPBars>::create(ui.visualizingCustomPlot->xAxis, ui.visualizingCustomPlot->yAxis);
+    
+    bars->setPen(Qt::NoPen);
+    bars->setWidth(1);
+    bars->setBrush(*brush.data());
+    
+    ui.settingsDirectoryListView->hide();
 }
 
 void MainWindowUI::setupIcons () {
@@ -128,14 +136,13 @@ void MainWindowUI::setupIcons () {
     
     QString iconPath = backgroundColor.value() < 128 ? ":icons/white/" : ":icons/black/";
     
-    previousButton->setStates ({QIcon(iconPath+"previous_track.svg"  )});
-    repeatButton  ->setStates ({QIcon(iconPath+"repeat_all.svg"      )});
-    pauseButton   ->setStates ({QIcon(iconPath+"play_music.svg"      ), 
-                                QIcon(iconPath+"pause_music.svg"     )});
-    pauseButton   ->setStateId (pauseButton->stateId);
-    shuffleButton ->setStates ({QIcon(iconPath+"shuffle_playlist.svg")});
-    nextButton    ->setStates ({QIcon(iconPath+"next_track.svg"      )});
-    
+    ui.playerPreviousButton->setIcon(QIcon(iconPath+"previous_track.svg"));
+    ui.playerRepeatButton->setStates({QIcon(iconPath+"repeat_all.svg")});
+    ui.playerPauseButton->setStates({QIcon(iconPath+"play_music.svg"), 
+                                     QIcon(iconPath+"pause_music.svg")});
+    ui.playerShuffleButton->setIcon(QIcon(iconPath+"shuffle_playlist.svg"));
+    ui.playerNextButton->setIcon(QIcon(iconPath+"next_track.svg"));
+        
     ui.playerTagListVisibilityButton->setIcon(QIcon(iconPath+"previous_track.svg"));
     ui.playerPlaylistVisibilityButton->setIcon(QIcon(iconPath+"playlist_hide.svg"));
 }
@@ -146,19 +153,19 @@ void MainWindowUI::connectWidgets () {
     connectVisualizingTabWidgets();
     connectSettingsTabWidgets();
     
-    connect(&audioPositionTimer, &QTimer::timeout, this, &MainWindowUI::updateAudioState);
-    connect(&audioPanningTimer,  &QTimer::timeout, this, &MainWindowUI::updatePanPosition);
+    connect(&audioPositionTimer,   &QTimer::timeout, this, &MainWindowUI::updateAudioState);
+    connect(&audioPanningTimer,    &QTimer::timeout, this, &MainWindowUI::updatePanPosition);
+    connect(&audioVisualizingTime, &QTimer::timeout, this, &MainWindowUI::updateVisualizingWidget);
     
     connect(presetDialogWindow->dialogButtonBox, &QDialogButtonBox::accepted, this, &MainWindowUI::addNewPreset);
     
-    connect(presetDialogWindow->dialogButtonBox, &QDialogButtonBox::rejected, [this]() {
+    connect(presetDialogWindow->dialogButtonBox, &QDialogButtonBox::rejected, [=]() {
         presetDialogWindow->dialogLineEdit->clear();
         presetDialogWindow->hide();
     });
 }
 
-void MainWindowUI::connectPlayerTabWidgets() {
-            
+void MainWindowUI::connectPlayerTabWidgets() {            
     connect(ui.playerPlayListWidget, &QListWidget::itemClicked, this, &MainWindowUI::playlistItemClicked);
     
     connect(ui.playerPlaylistVisibilityButton, &QPushButton::clicked, this, &MainWindowUI::togglePlaylistView);
@@ -178,11 +185,11 @@ void MainWindowUI::connectPlayerTabWidgets() {
         effects->seekPlayingPosition(currentPosition);
         audioPositionTimer.start();
     });
-    connect(previousButton.data(), &QPushButton::clicked, this, &MainWindowUI::previousButtonClicked);
-    connect(repeatButton.data(),   &QPushButton::clicked, this, &MainWindowUI::repeatButtonClicked);
-    connect(pauseButton.data(),    &QPushButton::clicked, this, &MainWindowUI::pauseButtonClicked);
-    connect(shuffleButton.data(),  &QPushButton::clicked, this, &MainWindowUI::shuffleButtonClicked);
-    connect(nextButton.data(),     &QPushButton::clicked, this, &MainWindowUI::nextButtonClicked);
+    connect(ui.playerPreviousButton, &QPushButton::clicked, this, &MainWindowUI::previousButtonClicked);
+    connect(ui.playerRepeatButton,   &QPushButton::clicked, this, &MainWindowUI::repeatButtonClicked);
+    connect(ui.playerPauseButton,    &QPushButton::clicked, this, &MainWindowUI::pauseButtonClicked);
+    connect(ui.playerShuffleButton,  &QPushButton::clicked, this, &MainWindowUI::shuffleButtonClicked);
+    connect(ui.playerNextButton,     &QPushButton::clicked, this, &MainWindowUI::nextButtonClicked);
 }
 
 void MainWindowUI::connectEffectsTabWidgets () {
@@ -433,13 +440,18 @@ void MainWindowUI::connectPanoramaWidgets () {
 }
 
 void MainWindowUI::connectVisualizingTabWidgets () {
-    
+    connect(ui.visualizingBandsSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), 
+            this, &MainWindowUI::bandsChanged);
+    connect(ui.visualizingRateSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), 
+            this, &MainWindowUI::updateRateChanged);
+    connect(ui.visualizingThresholdSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), 
+            this, &MainWindowUI::thresholdChanged);
 }
 
 void MainWindowUI::connectSettingsTabWidgets () {
     connect(ui.settingsColorThemeComboBox, &QComboBox::currentTextChanged,          this, &MainWindowUI::themeComboBoxClicked);
     connect(ui.settingsMediaFoldersButton, &QPushButton::clicked,                   this, &MainWindowUI::showSettingsTreeWidget);
-    connect(directoryView.data(),          &DirectoryViewWidget::newFolderSelected, this, &MainWindowUI::newFolderSelected);
+    connect(ui.settingsDirectoryListView, &DirectoryListView::selectedFolderUpdated, this, &MainWindowUI::newFolderSelected);
 }
 
 void MainWindowUI::createConfigFile () {
@@ -805,11 +817,6 @@ void MainWindowUI::changeCompressorParams (QVariant data) {
 }
 
 //********Others********//
-void MainWindowUI::lockWidgetFor (QWidget *widget, quint64 time) {
-    widget->blockSignals(true);
-    QTimer::singleShot(time, [widget]() {widget->blockSignals(false);});
-};
-
 void MainWindowUI::setupPlayerMusicIcons () {
 
 }
@@ -835,20 +842,45 @@ void MainWindowUI::updateAudioPositionLabel (gint64 position, gint64 duration) {
     ui.playerProgressLabel->setText(string);
 }
 
+void MainWindowUI::bandsChanged (int newValue) {
+    effects->changeSpectrumProps(CODES::Bands, newValue);
+    
+    ui.visualizingCustomPlot->xAxis->setRange(0, newValue);
+//     ui.visualizingCustomPlot->rescaleAxes();
+}
+
+void MainWindowUI::updateRateChanged (int newValue) {
+    effects->changeSpectrumProps(CODES::UpdateRate, newValue);
+    
+    audioVisualizingTime.setInterval(newValue);
+}
+
+void MainWindowUI::thresholdChanged (int newValue) {
+    effects->changeSpectrumProps(CODES::AudioThreshold, newValue);
+//     ui.visualizingCustomPlot->yAxis->setRange(0, 60);
+//     ui.visualizingCustomPlot->rescaleAxes();
+}
+
+//     ui.visualizingCustomPlot->clearPlottables();
+
 void MainWindowUI::updateVisualizingWidget () {
-//     std::cerr << "update visual\n";
-//     
-//     std::cerr << visualizingGraphicsView->pos().rx() << ' '
-//               << visualizingGraphicsView->pos().ry() << '\n';
-// //     std::cerr << visualizingGraphicsView->size()
-//     
-//     QGraphicsScene *scene = visualizingGraphicsView->scene();
-//     
-//     QRectF rect (-100, 200, 150, 150);
-//     QGraphicsRectItem *rectangle = new QGraphicsRectItem();
-//     rectangle->setRect(rect);
-//     
-//     scene->addItem(rectangle);
+    if (!effects->magnitudesChanged.load())
+        return;
+                    
+    QVector<double> dataX (effects->currentMagnitudes.size()), 
+                    dataY (effects->currentMagnitudes.begin(), effects->currentMagnitudes.end());
+    
+    int thresholdValue = ui.visualizingThresholdSpinBox->value();
+    
+    for (int i = 0; i < dataX.size(); ++i) {
+        dataY[i] -= thresholdValue;
+        dataX[i] = i+0.5;
+    }
+    
+    bars->setData(dataX, dataY, true);
+    
+    ui.visualizingCustomPlot->replot();
+    effects->magnitudesChanged.store(false);
 }
 
 //**************SLOTS**************//
@@ -929,10 +961,7 @@ void MainWindowUI::closeTagListWidget () {
 }
 
 void MainWindowUI::togglePlaylistView () {
-    if (ui.playerPlayListWidget->isVisible())
-        ui.playerPlayListWidget->setVisible(false);
-    else
-        ui.playerPlayListWidget->setVisible(true);
+    ui.playerPlayListWidget->setVisible(!ui.playerPlayListWidget->isVisible());
 }
 
 void MainWindowUI::previousButtonClicked () {
@@ -960,7 +989,6 @@ void MainWindowUI::pauseButtonClicked () {
         PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
             (ui.playerPlayListWidget->itemWidget(currentAudio));
         effects->changePlayingAudio(playlistItem->filePath());
-        qDebug() << "done";
         ui.playerPlayListWidget->setCurrentItem(currentAudio);
         audioPositionTimer.start();
         return;
@@ -995,7 +1023,7 @@ void MainWindowUI::playlistItemClicked (QListWidgetItem *item) {
     effects->changePlayingAudio(playlistItem->filePath());
     audioPositionTimer.start();
     ui.playerPlayListWidget->setCurrentItem(currentAudio);
-    pauseButton.data()->setStateId(1);
+    ui.playerPauseButton->setStateId(1);
 }
 
 void MainWindowUI::updateAudioState () {
@@ -1029,7 +1057,6 @@ void MainWindowUI::updatePanPosition () {
 void MainWindowUI::infoActionClicked () {
     ui.playerPlayListWidget->hide();
     ui.playerPlaylistVisibilityButton->hide();
-    
     ui.playerTagListFrame->show();
 }
 
@@ -1054,19 +1081,30 @@ void MainWindowUI::themeComboBoxClicked (const QString &theme) {
 }
 
 void MainWindowUI::newFolderSelected (const QStringList& folders) {
-    qDebug() << folders;
     musicFolders = folders;
     updatePlaylistWidget();
 }
 
 void MainWindowUI::showSettingsTreeWidget () {
-    ui.settingsMediaFoldersListWidget->setVisible(!ui.settingsMediaFoldersListWidget->isVisible());
+    ui.settingsDirectoryListView->setVisible(!ui.settingsDirectoryListView->isVisible());
 }
 
 void MainWindowUI::changeEvent (QEvent *event) {
-    if (event->type() == QEvent::PaletteChange)
+    if (event->type() == QEvent::PaletteChange) {
+        ui.visualizingCustomPlot->setBackground(palette().color(QPalette::Window));
         setupIcons();
+    }
     QMainWindow::changeEvent(event);
+}
+
+void MainWindowUI::resizeEvent (QResizeEvent *event) {
+//     gradient.setStart (width()/2, height()/2);
+//     gradient.setFinalStop(width()/2, height());
+//     
+//     brush.release();
+//     brush = QSharedPointer<QBrush>::create(gradient);
+    
+    QMainWindow::resizeEvent(event);
 }
 
 void MainWindowUI::closeEvent (QCloseEvent *event) {

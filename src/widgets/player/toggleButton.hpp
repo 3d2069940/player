@@ -1,8 +1,9 @@
 
 #pragma once
 
+#include <QMouseEvent>
 
-#include "toggleButtonWidget.h"
+#include "toggleButton.h"
 
 
 ToggleButton::ToggleButton (QWidget *parent) : QPushButton(parent) {

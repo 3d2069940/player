@@ -64,19 +64,22 @@ void Effects::initEffects () {
     equalizer = gst_element_factory_make ("equalizer-10bands","equalizer");
     volume    = gst_element_factory_make ("volume",           "volume");
     pitch     = gst_element_factory_make ("pitch",            "pitch");
+    resample  = gst_element_factory_make ("audioresample",    "resample");
+    spectrum  = gst_element_factory_make ("spectrum",         "spectrum");
     audiosink = gst_element_factory_make ("autoaudiosink",    "sink");
     
     if (!pipeline  || !filesrc   || !decodebin || 
         !convert1  || !limiter   || !convert2  ||
         !panorama  || !delay     || !dynamic   || 
         !equalizer || !volume    || !pitch     ||
-        !audiosink) {
+        !resample  || !spectrum  || !audiosink) {
         g_printerr("One of the elements can't be created. Bruh.\n");
         return;
     }
     
-    g_object_set (G_OBJECT(limiter), "mode", 0, "cutoff", 48000.0, NULL);
-    g_object_set (G_OBJECT(delay),   "max-delay", 5000000000, NULL);
+    g_object_set (G_OBJECT(limiter),  "mode", 0, "cutoff", 48000.0, NULL);
+    g_object_set (G_OBJECT(delay),    "max-delay", 5000000000, NULL);
+    g_object_set (G_OBJECT(spectrum), "bands", 10, "interval", 25000000, NULL);
     
     gst_bin_add_many (GST_BIN(pipeline), 
                         filesrc, 
@@ -90,6 +93,8 @@ void Effects::initEffects () {
                         equalizer,
                         volume, 
                         pitch, 
+                        resample, 
+                        spectrum,
                         audiosink, NULL);
     
     g_signal_connect (decodebin, "pad-added",  G_CALLBACK(padAddedCallback),  convert1);
@@ -105,6 +110,8 @@ void Effects::initEffects () {
                         equalizer,
                         volume, 
                         pitch, 
+                        resample, 
+                        spectrum,
                         audiosink, NULL)) {
         g_printerr ("Element linking error. Bruh.\n");
         gst_object_unref (pipeline);
@@ -119,6 +126,9 @@ void Effects::initEffects () {
 gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
     gchar   *debug_info;
     GError  *err;
+    const GstStructure *structure;
+    const gchar *name;
+    
     Effects *effects = static_cast<Effects*>(userdata);
     
     switch (GST_MESSAGE_TYPE(msg)) {
@@ -140,6 +150,12 @@ gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
         case GST_MESSAGE_STREAM_START:
             effects->reachedEOS = false;
             break;
+        case GST_MESSAGE_ELEMENT:
+            structure = gst_message_get_structure(msg);
+            name = gst_structure_get_name(structure);
+            if (strcmp(name, "spectrum") == 0) 
+                effects->updateAudioSpectrum(structure);
+            break;
 //         case GST_MESSAGE_TAG:
 //             effects->updateAudioTags(msg);
 //             break;
@@ -156,6 +172,55 @@ void Effects::padAddedCallback (GstElement *, GstPad *pad, gpointer userdata) {
     gst_object_unref(sinkpad);
 }
 
+bool Effects::updateAudioInfo () {
+    GstPad  *pad  = gst_element_get_static_pad(GST_ELEMENT(convert1), "sink");
+    gboolean result;
+    
+    if (pad == nullptr)
+        return false;
+        
+    GstCaps *caps = gst_pad_get_current_caps(pad);
+    if (caps == nullptr) {
+        gst_object_unref(pad);
+        return false;
+    }
+        
+    GstStructure *structure = gst_caps_get_structure(caps, 0);
+    if (structure == nullptr) {
+        gst_caps_unref(caps);
+        gst_object_unref(pad);
+        return false;
+    }
+        
+    result  = gst_structure_get_int(structure, "rate", &sampleRate);
+    result |= gst_structure_get_int(structure, "channels", &channels);
+    
+    gst_caps_unref(caps);
+    gst_object_unref(pad);
+    
+    return result != 0;
+}
+
+void Effects::updateAudioSpectrum (const GstStructure *structure) {
+    if (!updateAudioInfo() || magnitudesChanged.load())
+        return;
+
+    previousMagnitudes = currentMagnitudes;
+    currentMagnitudes.clear();
+        
+    GValue bands = G_VALUE_INIT;
+    const GValue *mag = gst_structure_get_value(structure, "magnitude");
+    
+    g_object_get_property(G_OBJECT(spectrum), "bands", &bands);
+    spectrumBands = g_value_get_uint(&bands);
+    g_value_unset(&bands);
+    
+    for (uint i = 0; i < spectrumBands; ++i)
+        currentMagnitudes.push_back(g_value_get_float(gst_value_list_get_value(mag, i)));
+        
+    magnitudesChanged.store(true);
+}
+
 void Effects::updateAudioDuration () {
       if (!gst_element_query_duration(pipeline, GST_FORMAT_TIME, &audioDuration)) {
           g_printerr("Unable to retrieve current duration. Bruh\n");
@@ -169,7 +234,7 @@ void Effects::updateAudioPosition () {
     }
 }
 
-void Effects::updateAudioInfo () {
+// void Effects::updateAudioInfo () {
 //     GstPad  *pad  = gst_element_get_static_pad(GST_ELEMENT(convert1), "sink");
 //     if (pad == nullptr)
 //         return;
@@ -188,50 +253,7 @@ void Effects::updateAudioInfo () {
 //         
 //     gst_caps_unref(caps);
 //     gst_object_unref(pad);
-}
-
-void Effects::updateAudioTags () {
-//     GstTagList *tagList = nullptr;
-//     g_object_get(G_OBJECT(decodebin), "tags", &tagList, nullptr); 
-//     gst_message_parse_tag(msg, &tagList);
-   
-//     g_printerr("Artist: %s\n",        gst_element_get_metadata (filesrc, GST_TAG_ARTIST));
-//     g_printerr("Album: %s\n",         gst_element_get_metadata (filesrc, GST_TAG_ALBUM));
-//     g_printerr("Audio codec: %s\n\n", gst_element_get_metadata (filesrc, GST_TAG_AUDIO_CODEC));
-   
-//     const gchar *tagNames [5] = {GST_TAG_ARTIST, GST_TAG_ALBUM, GST_TAG_AUDIO_CODEC, GST_TAG_IMAGE, GST_TAG_TITLE};
-//     
-//     for (size_t i = 0; i < 5; ++i) {
-//         GValue val = G_VALUE_INIT;
-//         g_free(tags[i]);
-//         tags[i] = nullptr;
-//         if (gst_tag_list_copy_value(&val, tagList, tagNames[i])) {
-//             gchar *valueStr = gst_value_serialize(&val);
-//             tags[i] = g_strdup(valueStr);
-//             g_free(valueStr);
-//             g_value_unset(&val);
-//         }
-//     }
-//     
-//     imageLength = (tags[IMAGE_ID] ? strlen(tags[IMAGE_ID]) : 0);
-//     for (size_t i = 0; i < 5; ++i) {
-//         g_printerr("%s : %s\n", tagNames[i], tags[i]);
-//     }
-     
-//     for (guint i = 0; i < gst_tag_list_n_tags(tagList); ++i) {
-//         const gchar *tagName = gst_tag_list_nth_tag_name(tagList, i);
-//         GValue val = G_VALUE_INIT;
-//         gst_tag_list_copy_value(&val, tagList, tagName);
-//         gchar *valueString = gst_value_serialize(&val);
-//         
-//         g_print("%s : %s\n", tagName, valueString);
-//         
-//         g_free(valueString);
-//         g_value_unset(&val);
-//     }
-    
-//     gst_tag_list_unref(tagList);
-}
+// }
 
 void Effects::seekPlayingPosition (gint64 position) {
     GstSeekFlags seekFlags = (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE);    
@@ -402,3 +424,19 @@ void Effects::changePanoramaProps (CODES::PANORAMA code, int newValue) {
     }
     g_value_unset(&value);
 }
+
+void Effects::changeSpectrumProps (CODES::SPECTRUM code, int64_t newValue) {
+    using namespace CODES;
+    switch (code) {
+        case Bands:
+            g_object_set(G_OBJECT(spectrum), "bands", newValue, NULL);
+            break;
+        case UpdateRate:
+            g_object_set(G_OBJECT(spectrum), "interval", newValue*1000000, NULL);
+            break;
+        case AudioThreshold:
+            g_object_set(G_OBJECT(spectrum), "threshold", newValue, NULL);
+            break;
+    }
+}
+

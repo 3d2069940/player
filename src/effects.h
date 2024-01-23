@@ -2,6 +2,11 @@
 #ifndef EFFECTS_H
 #define EFFECTS_H
 
+//***********************************************************//
+// STL
+//***********************************************************//
+#include <atomic>
+#include <vector>
 
 //***********************************************************//
 // GStreamer
@@ -53,6 +58,11 @@ namespace CODES {
         Method = 0, 
         Position
     };
+    enum SPECTRUM {
+        Bands = 0, 
+        UpdateRate, 
+        AudioThreshold
+    };
 };
 
 class Effects {
@@ -68,15 +78,7 @@ private:
     static void     padAddedCallback (GstElement*, GstPad*,          gpointer);
 
 public:
-    
-    enum {
-        ARTIST_ID = 0, 
-        ALBUM_ID,
-        CODEC_ID, 
-        IMAGE_ID, 
-        TITLE_ID
-    };
-    
+        
     GstElement *pipeline, 
                *filesrc,
                *decodebin, 
@@ -89,11 +91,18 @@ public:
                *equalizer,
                *volume,
                *pitch,
+               *resample, 
+               *spectrum,
                *audiosink;
                
     gint64 audioDuration, audioPosition;
+    gint channels, sampleRate;
     
-    guint imageLength;
+    std::atomic<bool> magnitudesChanged {false}; 
+    guint spectrumBands = 10;
+    
+    std::vector <double> previousMagnitudes,
+                         currentMagnitudes;
 
     Effects ();
     ~Effects ();
@@ -103,22 +112,24 @@ public:
     void togglePipelineState  ();
     void waitForPipelineState ();
     
+    bool updateAudioInfo ();
+    
+    void updateAudioSpectrum (const GstStructure*);
     void updateAudioDuration ();
     void updateAudioPosition ();
-    void updateAudioInfo     ();
-    void updateAudioTags     ();
     
     void seekPlayingPosition (gint64);
     
     void changePlayingAudio  (std::string);
     
     void changeEqualizerProps  (CODES::EQUALIZER,  int);
-    void changeDelayProps      (CODES::DELAY,      int    newValue = 0);
+    void changeDelayProps      (CODES::DELAY,      int newValue = 0);
     void changeFilterProps     (CODES::FILTER,     gfloat newValue = 0);
     void changePitchProps      (CODES::PITCH,      gfloat);
-    void changeCompressorProps (CODES::COMPRESSOR, int    newValue = 0);
-    void changePanoramaProps   (CODES::PANORAMA,   int    newValue = 0);
+    void changeCompressorProps (CODES::COMPRESSOR, int newValue = 0);
+    void changePanoramaProps   (CODES::PANORAMA,   int newValue = 0);
 
+    void changeSpectrumProps   (CODES::SPECTRUM, int64_t);
 };
 
 #endif // EFFECTS_H
