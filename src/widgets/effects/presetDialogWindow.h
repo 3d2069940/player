@@ -21,7 +21,7 @@
 
 
 class PresetDialogWindow : public QDialog {
-    
+    Q_OBJECT
 private:
     QLabel           dialogNameLabel;
     QVBoxLayout      *dialogVLayout;
@@ -33,11 +33,18 @@ public:
     QDialogButtonBox *dialogButtonBox;
     
     explicit PresetDialogWindow (QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ~PresetDialogWindow ();
+    virtual ~PresetDialogWindow ();
     
     void setup ();
     
     std::string getLineInput ();
+
+public slots:
+    void rejectedClicked ();
+    void show ();
+
+signals:
+    void accepted ();
 };
 
 #endif

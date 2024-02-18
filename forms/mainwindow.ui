@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>985</width>
+    <height>711</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -18,8 +18,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>800</width>
-    <height>600</height>
+    <width>1200</width>
+    <height>800</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -49,8 +49,8 @@
       </property>
       <property name="maximumSize">
        <size>
-        <width>800</width>
-        <height>600</height>
+        <width>1200</width>
+        <height>800</height>
        </size>
       </property>
       <property name="currentIndex">
@@ -60,7 +60,7 @@
        <attribute name="title">
         <string>Player</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_8">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -73,38 +73,70 @@
         <property name="bottomMargin">
          <number>0</number>
         </property>
-        <item row="0" column="2">
-         <widget class="QListWidget" name="playerPlayListWidget">
-          <property name="focusPolicy">
-           <enum>Qt::TabFocus</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
+        <item>
          <layout class="QGridLayout" name="playerLayout">
           <item row="0" column="1">
            <layout class="QVBoxLayout" name="playerInfoLayout">
-            <item alignment="Qt::AlignRight">
-             <widget class="QPushButton" name="playerPlaylistVisibilityButton">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="focusPolicy">
-               <enum>Qt::TabFocus</enum>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="flat">
-               <bool>true</bool>
-              </property>
-             </widget>
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_11">
+              <item row="0" column="2">
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="4">
+               <widget class="QPushButton" name="showPlaylistsButton">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QPushButton" name="playerPlaylistVisibilityButton">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;All Tracks&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="flat">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="5">
+               <widget class="QLineEdit" name="playerSearchLineEdit"/>
+              </item>
+             </layout>
             </item>
             <item>
              <spacer name="playerVSpacer_3">
@@ -112,7 +144,7 @@
                <enum>Qt::Vertical</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Preferred</enum>
+               <enum>QSizePolicy::Expanding</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -126,6 +158,9 @@
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
                <widget class="QLabel" name="playerMusicPicture">
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
                 <property name="text">
                  <string>*LOGO HERE*</string>
                 </property>
@@ -142,7 +177,7 @@
                <enum>Qt::Vertical</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Preferred</enum>
+               <enum>QSizePolicy::Expanding</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -162,7 +197,7 @@
                    <string/>
                   </property>
                   <property name="flat">
-                   <bool>true</bool>
+                   <bool>false</bool>
                   </property>
                  </widget>
                 </item>
@@ -178,7 +213,7 @@
                    <string/>
                   </property>
                   <property name="flat">
-                   <bool>true</bool>
+                   <bool>false</bool>
                   </property>
                  </widget>
                 </item>
@@ -188,11 +223,21 @@
                    <string/>
                   </property>
                   <property name="flat">
-                   <bool>true</bool>
+                   <bool>false</bool>
                   </property>
                  </widget>
                 </item>
                </layout>
+              </item>
+              <item>
+               <widget class="QFrame" name="playerHLine_1">
+                <property name="frameShape">
+                 <enum>QFrame::HLine</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+               </widget>
               </item>
               <item>
                <spacer name="playerVSpacer_1">
@@ -262,7 +307,7 @@
           </item>
          </layout>
         </item>
-        <item row="0" column="1">
+        <item>
          <widget class="QFrame" name="playerTagListFrame">
           <property name="focusPolicy">
            <enum>Qt::NoFocus</enum>
@@ -292,7 +337,7 @@
               <string/>
              </property>
              <property name="flat">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -403,6 +448,58 @@
           </layout>
          </widget>
         </item>
+        <item>
+         <widget class="QFrame" name="verticalFrame">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QListWidget" name="playerPlayListWidget">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::TabFocus</enum>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="showDropIndicator" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="dragEnabled">
+              <bool>false</bool>
+             </property>
+             <property name="dragDropMode">
+              <enum>QAbstractItemView::NoDragDrop</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="effectsTab">
@@ -471,15 +568,425 @@
             <property name="bottomMargin">
              <number>0</number>
             </property>
-            <item row="4" column="0">
-             <widget class="QFrame" name="equalizerHLine_2">
-              <property name="frameShape">
-               <enum>QFrame::HLine</enum>
+            <item row="3" column="0">
+             <layout class="QHBoxLayout" name="equalizerSlidersLayout">
+              <property name="topMargin">
+               <number>6</number>
               </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
+              <property name="bottomMargin">
+               <number>15</number>
               </property>
-             </widget>
+              <item>
+               <layout class="QVBoxLayout" name="equalizer29HzLayout">
+                <item>
+                 <layout class="QHBoxLayout" name="equalizer29HzSliderLayout">
+                  <item>
+                   <widget class="QSlider" name="equalizer29HzSlider">
+                    <property name="focusPolicy">
+                     <enum>Qt::TabFocus</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-240</number>
+                    </property>
+                    <property name="maximum">
+                     <number>120</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QLabel" name="equalizer29HzLabel">
+                  <property name="text">
+                   <string>29 Hz</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="equalizer29HzGainLabel">
+                  <property name="text">
+                   <string>0.0 dB</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="equalizer59HzLayout">
+                <item>
+                 <layout class="QHBoxLayout" name="equalizer59HzSliderLayout">
+                  <item>
+                   <widget class="QSlider" name="equalizer59HzSlider">
+                    <property name="focusPolicy">
+                     <enum>Qt::TabFocus</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-240</number>
+                    </property>
+                    <property name="maximum">
+                     <number>120</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QLabel" name="equalizer59HzLabel">
+                  <property name="text">
+                   <string>59 Hz</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="equalizer59HzGainLabel">
+                  <property name="text">
+                   <string>0.0 dB</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="equalizer119HzLayout">
+                <item>
+                 <layout class="QHBoxLayout" name="equalizer119HzSliderLayout">
+                  <item>
+                   <widget class="QSlider" name="equalizer119HzSlider">
+                    <property name="focusPolicy">
+                     <enum>Qt::TabFocus</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-240</number>
+                    </property>
+                    <property name="maximum">
+                     <number>120</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QLabel" name="equalizer119HzLabel">
+                  <property name="text">
+                   <string>119 Hz</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="equalizer119HzGainLabel">
+                  <property name="text">
+                   <string>0.0 dB</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="equalizer237HzLayout">
+                <item>
+                 <layout class="QHBoxLayout" name="equalizer237HzSliderLayout">
+                  <item>
+                   <widget class="QSlider" name="equalizer237HzSlider">
+                    <property name="focusPolicy">
+                     <enum>Qt::TabFocus</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-240</number>
+                    </property>
+                    <property name="maximum">
+                     <number>120</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QLabel" name="equalizer237HzLabel">
+                  <property name="text">
+                   <string>237 Hz</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="equalizer237HzGainLabel">
+                  <property name="text">
+                   <string>0.0 dB</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="equalizer474HzLayout">
+                <item>
+                 <layout class="QHBoxLayout" name="equalizer474HzSliderLayout">
+                  <item>
+                   <widget class="QSlider" name="equalizer474HzSlider">
+                    <property name="focusPolicy">
+                     <enum>Qt::TabFocus</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-240</number>
+                    </property>
+                    <property name="maximum">
+                     <number>120</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QLabel" name="equalizer474HzLabel">
+                  <property name="text">
+                   <string>474 Hz</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="equalizer474HzGainLabel">
+                  <property name="text">
+                   <string>0.0 dB</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="equalizer1000HzLayout">
+                <item>
+                 <layout class="QHBoxLayout" name="equalizer1000HzSliderLayout">
+                  <item>
+                   <widget class="QSlider" name="equalizer1000HzSlider">
+                    <property name="focusPolicy">
+                     <enum>Qt::TabFocus</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-240</number>
+                    </property>
+                    <property name="maximum">
+                     <number>120</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QLabel" name="equalizer1000HzLabel">
+                  <property name="text">
+                   <string>1 kHz</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="equalizer1000HzGainLabel">
+                  <property name="text">
+                   <string>0.0 dB</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="equalizer2000HzLayout">
+                <item>
+                 <layout class="QHBoxLayout" name="equalizer2000HzSliderLayout">
+                  <item>
+                   <widget class="QSlider" name="equalizer2000HzSlider">
+                    <property name="focusPolicy">
+                     <enum>Qt::TabFocus</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-240</number>
+                    </property>
+                    <property name="maximum">
+                     <number>120</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QLabel" name="equalizer2000HzLabel">
+                  <property name="text">
+                   <string>2 kHz</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="equalizer2000HzGainLabel">
+                  <property name="text">
+                   <string>0.0 dB</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="equalizer4000HzLayout">
+                <item>
+                 <layout class="QHBoxLayout" name="equalizer4000HzSliderLayout">
+                  <item>
+                   <widget class="QSlider" name="equalizer4000HzSlider">
+                    <property name="focusPolicy">
+                     <enum>Qt::TabFocus</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-240</number>
+                    </property>
+                    <property name="maximum">
+                     <number>120</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QLabel" name="equalizer4000HzLabel">
+                  <property name="text">
+                   <string>4 kHz</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="equalizer4000HzGainLabel">
+                  <property name="text">
+                   <string>0.0 dB</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="equalizer8000HzLayout">
+                <item>
+                 <layout class="QHBoxLayout" name="equalizer8000HzSliderLayout">
+                  <item>
+                   <widget class="QSlider" name="equalizer8000HzSlider">
+                    <property name="focusPolicy">
+                     <enum>Qt::TabFocus</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-240</number>
+                    </property>
+                    <property name="maximum">
+                     <number>120</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QLabel" name="equalizer8000HzLabel">
+                  <property name="text">
+                   <string>8 kHz</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="equalizer8000HzGainLabel">
+                  <property name="text">
+                   <string>0.0 dB</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="equalizer16000HzLayout">
+                <item>
+                 <layout class="QHBoxLayout" name="equalizer16000HzSliderLayout">
+                  <item>
+                   <widget class="QSlider" name="equalizer16000HzSlider">
+                    <property name="focusPolicy">
+                     <enum>Qt::TabFocus</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-240</number>
+                    </property>
+                    <property name="maximum">
+                     <number>120</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QLabel" name="equalizer16000HzLabel">
+                  <property name="text">
+                   <string>16 kHz</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="equalizer16000HzGainLabel">
+                  <property name="text">
+                   <string>0.0 dB</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="equalizerEqualizerLabel">
@@ -495,6 +1002,90 @@
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
+            </item>
+            <item row="2" column="0">
+             <layout class="QGridLayout" name="equalizerVolumeLayout">
+              <property name="topMargin">
+               <number>6</number>
+              </property>
+              <property name="bottomMargin">
+               <number>6</number>
+              </property>
+              <item row="0" column="4">
+               <spacer name="equalizerHSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="equalizerGlobalVolumeLabel">
+                <property name="text">
+                 <string>Volume:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QSlider" name="equalizerVolumeSlider">
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
+                </property>
+                <property name="maximum">
+                 <number>50</number>
+                </property>
+                <property name="pageStep">
+                 <number>1</number>
+                </property>
+                <property name="value">
+                 <number>10</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <spacer name="equalizerHSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Minimum</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>10</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="0">
+               <spacer name="equalizerHSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Minimum</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
             </item>
             <item row="1" column="0">
              <layout class="QHBoxLayout" name="equalizerSettingsLayout">
@@ -615,450 +1206,6 @@
               </item>
              </layout>
             </item>
-            <item row="2" column="0">
-             <widget class="QFrame" name="equalizerHLine_1">
-              <property name="frameShape">
-               <enum>QFrame::HLine</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <layout class="QGridLayout" name="equalizerVolumeLayout">
-              <property name="topMargin">
-               <number>6</number>
-              </property>
-              <property name="bottomMargin">
-               <number>6</number>
-              </property>
-              <item row="0" column="4">
-               <spacer name="equalizerHSpacer_6">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLabel" name="equalizerGlobalVolumeLabel">
-                <property name="text">
-                 <string>Volume:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="3">
-               <widget class="QSlider" name="equalizerVolumeSlider">
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-                <property name="maximum">
-                 <number>50</number>
-                </property>
-                <property name="pageStep">
-                 <number>1</number>
-                </property>
-                <property name="value">
-                 <number>10</number>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <spacer name="equalizerHSpacer_5">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Minimum</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>10</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="0">
-               <spacer name="equalizerHSpacer_4">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Minimum</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </item>
-            <item row="5" column="0">
-             <layout class="QHBoxLayout" name="equalizerSlidersLayout">
-              <property name="topMargin">
-               <number>6</number>
-              </property>
-              <property name="bottomMargin">
-               <number>15</number>
-              </property>
-              <item>
-               <layout class="QVBoxLayout" name="equalizer29HzLayout">
-                <item>
-                 <layout class="QHBoxLayout" name="equalizer29HzSliderLayout">
-                  <item>
-                   <widget class="QSlider" name="equalizer29HzSlider">
-                    <property name="focusPolicy">
-                     <enum>Qt::TabFocus</enum>
-                    </property>
-                    <property name="minimum">
-                     <number>-240</number>
-                    </property>
-                    <property name="maximum">
-                     <number>120</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="equalizer29HzLabel">
-                  <property name="text">
-                   <string>29 Hz</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="equalizer59HzLayout">
-                <item>
-                 <layout class="QHBoxLayout" name="equalizer59HzSliderLayout">
-                  <item>
-                   <widget class="QSlider" name="equalizer59HzSlider">
-                    <property name="focusPolicy">
-                     <enum>Qt::TabFocus</enum>
-                    </property>
-                    <property name="minimum">
-                     <number>-240</number>
-                    </property>
-                    <property name="maximum">
-                     <number>120</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="equalizer59HzLabel">
-                  <property name="text">
-                   <string>59 Hz</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="equalizer119HzLayout">
-                <item>
-                 <layout class="QHBoxLayout" name="equalizer119HzSliderLayout">
-                  <item>
-                   <widget class="QSlider" name="equalizer119HzSlider">
-                    <property name="focusPolicy">
-                     <enum>Qt::TabFocus</enum>
-                    </property>
-                    <property name="minimum">
-                     <number>-240</number>
-                    </property>
-                    <property name="maximum">
-                     <number>120</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="equalizer119HzLabel">
-                  <property name="text">
-                   <string>119 Hz</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="equalizer237HzLayout">
-                <item>
-                 <layout class="QHBoxLayout" name="equalizer237HzSliderLayout">
-                  <item>
-                   <widget class="QSlider" name="equalizer237HzSlider">
-                    <property name="focusPolicy">
-                     <enum>Qt::TabFocus</enum>
-                    </property>
-                    <property name="minimum">
-                     <number>-240</number>
-                    </property>
-                    <property name="maximum">
-                     <number>120</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="equalizer237HzLabel">
-                  <property name="text">
-                   <string>237 Hz</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="equalizer474HzLayout">
-                <item>
-                 <layout class="QHBoxLayout" name="equalizer474HzSliderLayout">
-                  <item>
-                   <widget class="QSlider" name="equalizer474HzSlider">
-                    <property name="focusPolicy">
-                     <enum>Qt::TabFocus</enum>
-                    </property>
-                    <property name="minimum">
-                     <number>-240</number>
-                    </property>
-                    <property name="maximum">
-                     <number>120</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="equalizer474HzLabel">
-                  <property name="text">
-                   <string>474 Hz</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="equalizer1000HzLayout">
-                <item>
-                 <layout class="QHBoxLayout" name="equalizer1000HzSliderLayout">
-                  <item>
-                   <widget class="QSlider" name="equalizer1000HzSlider">
-                    <property name="focusPolicy">
-                     <enum>Qt::TabFocus</enum>
-                    </property>
-                    <property name="minimum">
-                     <number>-240</number>
-                    </property>
-                    <property name="maximum">
-                     <number>120</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="equalizer1000HzLabel">
-                  <property name="text">
-                   <string>1 kHz</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="equalizer2000HzLayout">
-                <item>
-                 <layout class="QHBoxLayout" name="equalizer2000HzSliderLayout">
-                  <item>
-                   <widget class="QSlider" name="equalizer2000HzSlider">
-                    <property name="focusPolicy">
-                     <enum>Qt::TabFocus</enum>
-                    </property>
-                    <property name="minimum">
-                     <number>-240</number>
-                    </property>
-                    <property name="maximum">
-                     <number>120</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="equalizer2000HzLabel">
-                  <property name="text">
-                   <string>2 kHz</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="equalizer4000HzLayout">
-                <item>
-                 <layout class="QHBoxLayout" name="equalizer4000HzSliderLayout">
-                  <item>
-                   <widget class="QSlider" name="equalizer4000HzSlider">
-                    <property name="focusPolicy">
-                     <enum>Qt::TabFocus</enum>
-                    </property>
-                    <property name="minimum">
-                     <number>-240</number>
-                    </property>
-                    <property name="maximum">
-                     <number>120</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="equalizer4000HzLabel">
-                  <property name="text">
-                   <string>4 kHz</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="equalizer8000HzLayout">
-                <item>
-                 <layout class="QHBoxLayout" name="equalizer8000HzSliderLayout">
-                  <item>
-                   <widget class="QSlider" name="equalizer8000HzSlider">
-                    <property name="focusPolicy">
-                     <enum>Qt::TabFocus</enum>
-                    </property>
-                    <property name="minimum">
-                     <number>-240</number>
-                    </property>
-                    <property name="maximum">
-                     <number>120</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="equalizer8000HzLabel">
-                  <property name="text">
-                   <string>8 kHz</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="equalizer16000HzLayout">
-                <item>
-                 <layout class="QHBoxLayout" name="equalizer16000HzSliderLayout">
-                  <item>
-                   <widget class="QSlider" name="equalizer16000HzSlider">
-                    <property name="focusPolicy">
-                     <enum>Qt::TabFocus</enum>
-                    </property>
-                    <property name="minimum">
-                     <number>-240</number>
-                    </property>
-                    <property name="maximum">
-                     <number>120</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="equalizer16000HzLabel">
-                  <property name="text">
-                   <string>16 kHz</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </item>
            </layout>
           </widget>
           <widget class="QWidget" name="delayTab">
@@ -1078,191 +1225,189 @@
             <property name="bottomMargin">
              <number>0</number>
             </property>
-            <item row="3" column="0">
-             <widget class="QFrame" name="delayFilterHLine">
-              <property name="frameShape">
-               <enum>QFrame::HLine</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="delayFilterDelayLabel">
-              <property name="font">
-               <font>
-                <pointsize>12</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Delay</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <layout class="QVBoxLayout" name="filterPreferenciesLayout">
+            <item row="1" column="0">
+             <layout class="QHBoxLayout" name="delaySettingsLayout">
               <item>
-               <layout class="QHBoxLayout" name="filterPreferenciesHLayout">
-                <item>
-                 <widget class="QPushButton" name="filterModeToggleButton">
-                  <property name="focusPolicy">
-                   <enum>Qt::TabFocus</enum>
-                  </property>
-                  <property name="toolTip">
-                   <string>Low Pass/High Pass</string>
-                  </property>
-                  <property name="text">
-                   <string>Low Pass</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSpinBox" name="filterCutoffSpinBox">
-                  <property name="focusPolicy">
-                   <enum>Qt::StrongFocus</enum>
-                  </property>
-                  <property name="toolTip">
-                   <string>Cutoff Frequency (Hz)</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="minimum">
-                   <number>20</number>
-                  </property>
-                  <property name="maximum">
-                   <number>48000</number>
-                  </property>
-                  <property name="singleStep">
-                   <number>10</number>
-                  </property>
-                  <property name="stepType">
-                   <enum>QAbstractSpinBox::DefaultStepType</enum>
-                  </property>
-                  <property name="value">
-                   <number>48000</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QDoubleSpinBox" name="filterRippleSpinBox">
-                  <property name="focusPolicy">
-                   <enum>Qt::StrongFocus</enum>
-                  </property>
-                  <property name="toolTip">
-                   <string>Amount of ripple (dB)</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="maximum">
-                   <double>200.000000000000000</double>
-                  </property>
-                  <property name="singleStep">
-                   <double>0.010000000000000</double>
-                  </property>
-                  <property name="value">
-                   <double>0.250000000000000</double>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSpinBox" name="filterPolesSpinBox">
-                  <property name="focusPolicy">
-                   <enum>Qt::StrongFocus</enum>
-                  </property>
-                  <property name="toolTip">
-                   <string>Number of poles to use, will be rounded up to the next even number</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="minimum">
-                   <number>2</number>
-                  </property>
-                  <property name="maximum">
-                   <number>22</number>
-                  </property>
-                  <property name="singleStep">
-                   <number>2</number>
-                  </property>
-                  <property name="value">
-                   <number>4</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="filterFilterTypeButton">
-                  <property name="focusPolicy">
-                   <enum>Qt::TabFocus</enum>
-                  </property>
-                  <property name="toolTip">
-                   <string>Chebyshev filter type (I or II)</string>
-                  </property>
-                  <property name="text">
-                   <string>I</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <spacer name="delayFilterHSpacer_1">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>10</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="filterLabelsHLayout">
-                <item>
-                 <widget class="QLabel" name="filterLengthLabel">
-                  <property name="text">
-                   <string>Frequency Mode</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="filterCutoffLabel">
-                  <property name="text">
-                   <string>Cutoff (Hz)</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="filterRippleLabel">
-                  <property name="text">
-                   <string>Ripple</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="filterModeLabel">
-                  <property name="text">
-                   <string>Poles</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="filterWindowLabel">
-                  <property name="text">
-                   <string>Filter Type</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <widget class="QLabel" name="delayPresetLabel">
+                <property name="text">
+                 <string>Preset:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="delayFilterHSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>10</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QComboBox" name="delayPresetsComboBox">
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="delaySavePresetButton">
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
+                </property>
+                <property name="text">
+                 <string>Save</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="delayDeletePresetButton">
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
+                </property>
+                <property name="text">
+                 <string>Delete</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="delayDefaultPresetButton">
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
+                </property>
+                <property name="text">
+                 <string>Default</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="delayFilterHSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item row="4" column="0">
+             <layout class="QHBoxLayout" name="filterSettingsLayout">
+              <item>
+               <spacer name="delayFilterHSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>10</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="filterPresetLabel">
+                <property name="text">
+                 <string>Preset:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="delayFilterHSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>10</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QComboBox" name="filterPresetsComboBox">
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="filterPresetSavePresetButton">
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
+                </property>
+                <property name="text">
+                 <string>Save</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="filterDeletePresetButton">
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
+                </property>
+                <property name="text">
+                 <string>Delete</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="filterDefaultPresetButton">
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
+                </property>
+                <property name="text">
+                 <string>Default</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="delayFilterHSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </item>
@@ -1354,15 +1499,8 @@
                   </property>
                  </spacer>
                 </item>
-                <item alignment="Qt::AlignVCenter">
-                 <widget class="QPushButton" name="delaySurrounDelayButton">
-                  <property name="focusPolicy">
-                   <enum>Qt::TabFocus</enum>
-                  </property>
-                  <property name="text">
-                   <string>Off</string>
-                  </property>
-                 </widget>
+                <item>
+                 <widget class="ToggleButton" name="delaySurroundDelayButton" native="true"/>
                 </item>
                 <item>
                  <spacer name="delayVSpacer_4">
@@ -1537,193 +1675,185 @@
               </item>
              </layout>
             </item>
-            <item row="1" column="0">
-             <layout class="QHBoxLayout" name="delaySettingsLayout">
-              <item>
-               <spacer name="delayFilterHSpacer_1">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>10</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QLabel" name="delayPresetLabel">
-                <property name="text">
-                 <string>Preset:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="delayFilterHSpacer_2">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>10</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QComboBox" name="delayPresetsComboBox">
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="delaySavePresetButton">
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-                <property name="text">
-                 <string>Save</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="delayDeletePresetButton">
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-                <property name="text">
-                 <string>Delete</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="delayDefaultPresetButton">
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-                <property name="text">
-                 <string>Default</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="delayFilterHSpacer_3">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
+            <item row="0" column="0">
+             <widget class="QLabel" name="delayFilterDelayLabel">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Delay</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
             </item>
             <item row="5" column="0">
-             <layout class="QHBoxLayout" name="filterSettingsLayout">
+             <layout class="QVBoxLayout" name="filterPreferenciesLayout">
               <item>
-               <spacer name="delayFilterHSpacer_4">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>10</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
+               <layout class="QHBoxLayout" name="filterPreferenciesHLayout">
+                <item>
+                 <widget class="QPushButton" name="filterModeToggleButton">
+                  <property name="focusPolicy">
+                   <enum>Qt::TabFocus</enum>
+                  </property>
+                  <property name="toolTip">
+                   <string>Low Pass/High Pass</string>
+                  </property>
+                  <property name="text">
+                   <string>Low Pass</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="filterCutoffSpinBox">
+                  <property name="focusPolicy">
+                   <enum>Qt::StrongFocus</enum>
+                  </property>
+                  <property name="toolTip">
+                   <string>Cutoff Frequency (Hz)</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="minimum">
+                   <number>20</number>
+                  </property>
+                  <property name="maximum">
+                   <number>48000</number>
+                  </property>
+                  <property name="singleStep">
+                   <number>10</number>
+                  </property>
+                  <property name="stepType">
+                   <enum>QAbstractSpinBox::DefaultStepType</enum>
+                  </property>
+                  <property name="value">
+                   <number>48000</number>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="filterRippleSpinBox">
+                  <property name="focusPolicy">
+                   <enum>Qt::StrongFocus</enum>
+                  </property>
+                  <property name="toolTip">
+                   <string>Amount of ripple (dB)</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="maximum">
+                   <double>200.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.010000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>0.250000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="filterPolesSpinBox">
+                  <property name="focusPolicy">
+                   <enum>Qt::StrongFocus</enum>
+                  </property>
+                  <property name="toolTip">
+                   <string>Number of poles to use, will be rounded up to the next even number</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="minimum">
+                   <number>2</number>
+                  </property>
+                  <property name="maximum">
+                   <number>22</number>
+                  </property>
+                  <property name="singleStep">
+                   <number>2</number>
+                  </property>
+                  <property name="value">
+                   <number>4</number>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="filterFilterTypeButton">
+                  <property name="focusPolicy">
+                   <enum>Qt::TabFocus</enum>
+                  </property>
+                  <property name="toolTip">
+                   <string>Chebyshev filter type (I or II)</string>
+                  </property>
+                  <property name="text">
+                   <string>I</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
-               <widget class="QLabel" name="filterPresetLabel">
-                <property name="text">
-                 <string>Preset:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="delayFilterHSpacer_5">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>10</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QComboBox" name="filterPresetsComboBox">
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="filterPresetSavePresetButton">
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-                <property name="text">
-                 <string>Save</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="filterDeletePresetButton">
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-                <property name="text">
-                 <string>Delete</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="filterDefaultPresetButton">
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-                <property name="text">
-                 <string>Default</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="delayFilterHSpacer_6">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
+               <layout class="QHBoxLayout" name="filterLabelsHLayout">
+                <item>
+                 <widget class="QLabel" name="filterLengthLabel">
+                  <property name="text">
+                   <string>Frequency Mode</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="filterCutoffLabel">
+                  <property name="text">
+                   <string>Cutoff (Hz)</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="filterRippleLabel">
+                  <property name="text">
+                   <string>Ripple</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="filterModeLabel">
+                  <property name="text">
+                   <string>Poles</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="filterWindowLabel">
+                  <property name="text">
+                   <string>Filter Type</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
             </item>
-            <item row="4" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="delayFilterFilterLabel">
               <property name="font">
                <font>
@@ -1757,7 +1887,7 @@
             <property name="bottomMargin">
              <number>0</number>
             </property>
-            <item row="5" column="0">
+            <item row="4" column="0">
              <layout class="QHBoxLayout" name="compressorSettingsLayout">
               <item>
                <spacer name="compressorPitchHSpacer_4">
@@ -1850,7 +1980,22 @@
               </item>
              </layout>
             </item>
-            <item row="4" column="0">
+            <item row="0" column="0">
+             <widget class="QLabel" name="compressorPitchPitchSpeedLabel">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Pitch &amp; Speed</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
              <widget class="QLabel" name="compressorPitchCompressorExpanderLabel">
               <property name="font">
                <font>
@@ -1862,16 +2007,6 @@
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QFrame" name="compressorPitchHLine">
-              <property name="frameShape">
-               <enum>QFrame::HLine</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Sunken</enum>
               </property>
              </widget>
             </item>
@@ -2029,20 +2164,81 @@
               </item>
              </layout>
             </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="compressorPitchPitchSpeedLabel">
-              <property name="font">
-               <font>
-                <pointsize>12</pointsize>
-               </font>
+            <item row="5" column="0">
+             <layout class="QHBoxLayout" name="compressorLayout">
+              <property name="bottomMargin">
+               <number>0</number>
               </property>
-              <property name="text">
-               <string>Pitch &amp; Speed</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
+              <item>
+               <widget class="ToggleButton" name="compressorExpanderToggleButton" native="true"/>
+              </item>
+              <item>
+               <widget class="ToggleButton" name="compressorKneeToggleButton" native="true"/>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="compressorRatioLayout">
+                <item>
+                 <widget class="QDial" name="compressorRatioDial">
+                  <property name="focusPolicy">
+                   <enum>Qt::TabFocus</enum>
+                  </property>
+                  <property name="toolTip">
+                   <string>Ratio that should be applied</string>
+                  </property>
+                  <property name="maximum">
+                   <number>100</number>
+                  </property>
+                  <property name="pageStep">
+                   <number>1</number>
+                  </property>
+                  <property name="value">
+                   <number>10</number>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="compressorRatioLabel">
+                  <property name="text">
+                   <string>Ratio</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="compressorThresholdLayout">
+                <item>
+                 <widget class="QDial" name="compressorThresholdDial">
+                  <property name="focusPolicy">
+                   <enum>Qt::TabFocus</enum>
+                  </property>
+                  <property name="toolTip">
+                   <string>Threshold until the filter is activated</string>
+                  </property>
+                  <property name="maximum">
+                   <number>10</number>
+                  </property>
+                  <property name="pageStep">
+                   <number>1</number>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="compressorThresholdLabel">
+                  <property name="text">
+                   <string>Threshold</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
             </item>
             <item row="1" column="0">
              <layout class="QHBoxLayout" name="pitchSettingsLayout">
@@ -2065,7 +2261,7 @@
               <item>
                <widget class="QLabel" name="pitchPresetLabel">
                 <property name="text">
-                 <string>Preset: </string>
+                 <string>Preset:</string>
                 </property>
                </widget>
               </item>
@@ -2134,102 +2330,6 @@
                  </size>
                 </property>
                </spacer>
-              </item>
-             </layout>
-            </item>
-            <item row="6" column="0">
-             <layout class="QHBoxLayout" name="compressorLayout">
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QPushButton" name="compressorExpanderToggleButton">
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Compressor/Expander</string>
-                </property>
-                <property name="text">
-                 <string>Compressor</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="compressorKneeToggleButton">
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>soft-knee/hard-knee mode</string>
-                </property>
-                <property name="text">
-                 <string>Hard-knee</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="compressorRatioLayout">
-                <item>
-                 <widget class="QDial" name="compressorRatioDial">
-                  <property name="focusPolicy">
-                   <enum>Qt::TabFocus</enum>
-                  </property>
-                  <property name="toolTip">
-                   <string>Ratio that should be applied</string>
-                  </property>
-                  <property name="maximum">
-                   <number>100</number>
-                  </property>
-                  <property name="pageStep">
-                   <number>1</number>
-                  </property>
-                  <property name="value">
-                   <number>10</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="compressorRatioLabel">
-                  <property name="text">
-                   <string>Ratio</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="compressorThresholdLayout">
-                <item>
-                 <widget class="QDial" name="compressorThresholdDial">
-                  <property name="focusPolicy">
-                   <enum>Qt::TabFocus</enum>
-                  </property>
-                  <property name="toolTip">
-                   <string>Threshold until the filter is activated</string>
-                  </property>
-                  <property name="maximum">
-                   <number>10</number>
-                  </property>
-                  <property name="pageStep">
-                   <number>1</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="compressorThresholdLabel">
-                  <property name="text">
-                   <string>Threshold</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
               </item>
              </layout>
             </item>
@@ -2687,6 +2787,9 @@
           <property name="focusPolicy">
            <enum>Qt::NoFocus</enum>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
@@ -2695,8 +2798,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>788</width>
-             <height>559</height>
+             <width>977</width>
+             <height>674</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_10">
@@ -2753,7 +2856,7 @@
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <layout class="QHBoxLayout" name="settingsExtensions">
                 <property name="leftMargin">
                  <number>10</number>
                 </property>
@@ -2764,23 +2867,26 @@
                  <number>5</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="label_5">
+                 <widget class="QLabel" name="settingsExtensionsLabel">
                   <property name="text">
                    <string>Audio Extensions to Parse</string>
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QPushButton" name="settingsExtensionsButton">
+                  <property name="maximumSize">
+                   <size>
+                    <width>300</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Select Extensions</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
-              </item>
-              <item>
-               <widget class="QFrame" name="frame_2">
-                <property name="frameShape">
-                 <enum>QFrame::HLine</enum>
-                </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Raised</enum>
-                </property>
-               </widget>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -2825,7 +2931,7 @@
                  <number>5</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="label">
+                 <widget class="QLabel" name="settingsAudioCoverLabel">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                     <horstretch>0</horstretch>
@@ -2838,7 +2944,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="checkBox">
+                 <widget class="QCheckBox" name="settingsAudioCoverCheckBox">
                   <property name="maximumSize">
                    <size>
                     <width>160</width>
@@ -2877,14 +2983,31 @@
                </layout>
               </item>
               <item>
-               <widget class="QFrame" name="frame">
-                <property name="frameShape">
-                 <enum>QFrame::HLine</enum>
+               <layout class="QHBoxLayout" name="horizontalLayout_10">
+                <property name="leftMargin">
+                 <number>10</number>
                 </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Raised</enum>
-                </property>
-               </widget>
+                <item>
+                 <widget class="QLabel" name="settingsFlatButtonsLabel">
+                  <property name="text">
+                   <string>Flat Buttons</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="settingsFlatButtonsCheckBox">
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -2906,7 +3029,7 @@
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_9">
+               <layout class="QHBoxLayout" name="horizontalLayout_8">
                 <property name="leftMargin">
                  <number>10</number>
                 </property>
@@ -2914,14 +3037,14 @@
                  <number>5</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="label_8">
+                 <widget class="QLabel" name="settingsPlayAtStartupLabel">
                   <property name="text">
                    <string>Start Playing at Startup</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="checkBox_3">
+                 <widget class="QCheckBox" name="settingsPlayAtStartupCheckBox">
                   <property name="maximumSize">
                    <size>
                     <width>160</width>
@@ -2947,14 +3070,14 @@
                  <number>5</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="label_2">
+                 <widget class="QLabel" name="settingsSaveLastAudioLabel">
                   <property name="text">
                    <string>Save Last Audio</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="checkBox_2">
+                 <widget class="QCheckBox" name="settingsSaveLastAudioCheckBox">
                   <property name="maximumSize">
                    <size>
                     <width>160</width>
@@ -3001,7 +3124,7 @@
                    </size>
                   </property>
                   <property name="text">
-                   <string>Select Media Search Folder</string>
+                   <string>Select Folders</string>
                   </property>
                  </widget>
                 </item>
@@ -3015,19 +3138,19 @@
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <layout class="QHBoxLayout" name="settingsConfigPathLayout">
                 <property name="leftMargin">
                  <number>10</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="label_7">
+                 <widget class="QLabel" name="settingsConfigPathlabel">
                   <property name="text">
-                   <string>Config File Path</string>
+                   <string>Preset File Path</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit">
+                 <widget class="QLineEdit" name="settingsConfigPathEdit">
                   <property name="maximumSize">
                    <size>
                     <width>300</width>

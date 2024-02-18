@@ -37,87 +37,87 @@ class Connector;
 class QCloseEvent;
 class ToggleButton;
 class QListWidgetItem;
-class DirectoryListView;
 class PresetDialogWindow;
 class EqualizerTabWidget;
 class PlaylistDialogWindow;
 
 class MainWindowUI : public QMainWindow {  
     Q_OBJECT
-    
     friend Connector;
 public:
     Ui::MainWindow ui;
     
     MainWindowUI ();
-    ~MainWindowUI ();
+    virtual ~MainWindowUI ();
     
     template <class T>
     void updatePresetConfig (std::string presetName);
         
 private:
-
     std::unique_ptr<Effects>           effects;
     QSharedPointer<PresetDialogWindow> presetDialogWindow;
+
+    QSharedPointer<QShortcut> playPauseShortcut,
+                              nextShortcut,
+                              previousShortcut,
+                              seekForwardShortcut,
+                              seekBackwardShortcut;
+
+    QSharedPointer<QMenu> extMenu;
         
     QList<QListWidgetItem*> playlistItems;
     
     QTimer audioPositionTimer,
            audioPanningTimer,
-           audioVisualizingTime;
+           audioVisualizingTimer;
     
     YAML::Node configYaml,
                presetYaml;
                
     QString     configPath,
                 presetPath;
-    QStringList musicFolders;
+
+    QStringList extensions,
+                musicFolders;
     
-    QListWidgetItem *currentAudio = nullptr,
-                    *stopAudio    = nullptr;
+    QListWidgetItem *currentAudio {nullptr},
+                    *stopAudio    {nullptr};
                     
+    bool flatButtons    {true},
+         showAudioCover {false},
+         playAtStartup  {false},
+         saveLastAudio  {false};
+
     std::string currentPresetType;
     
-    QLinearGradient         gradient;
-    QSharedPointer<QBrush>  brush;
-    QSharedPointer<QCPBars> bars;
+    QLinearGradient  gradient;
+    QCPBars         *bars {nullptr};
+
+    QImage albumCover;
+    bool albumCoverSet;
     
 //********Init********//
-    void createWidgets  ();
-    void setupWidgets   ();
-        void setupIcons ();
-//  Connecting All Widgets
-    void connectWidgets ();
-//      Connect Player Tab Widgets
-        void connectPlayerTabWidgets ();
-//      Connect Effects Tab Widgets
-        void connectEffectsTabWidgets ();
-            void connectEqualizerWidgets  ();
-            void connectDelayWidgets      ();
-            void connectFilterWidgets     ();
-            void connectPitchWidgets      ();
-            void connectCompressorWidgets ();
-            void connectPanoramaWidgets   ();
-//      Connect Visualizing Tab Widgets
-        void connectVisualizingTabWidgets ();
-//      Connect Settings Tab Widgets
-        void connectSettingsTabWidgets    ();
+    void createWidgets       ();
+    void setupWidgets        ();
+        void setupIcons      ();
+        void setupAnimations ();
             
 //********Config********//
     void createConfigFile      ();
     void parseConfigFile       ();
         template <class T>
-        void extractConfigInfo (std::string);
+        void extractConfigInfo (T *var, std::string key);
     
 //********Parse********//
-    void createPresetFile ();
-    void parsePresetFile  ();
+    void parsePresetFile    ();
+    void createPresetFile   ();
+    void loadDefaultPresets ();
         template <class T>
-        void parsePresets (std::string);
+        void parsePresets  (QComboBox *combobox, const std::string &key);
     void savePresets  ();
     void removePreset (std::string, QComboBox*);
     
-    void parseMusic (QFileInfoList&);
+    void parseMusic (const QString &path, QFileInfoList& musicFiles);
     void updatePlaylistWidget ();
         
 //********Effects*******//    
@@ -127,13 +127,14 @@ private:
     void serializePitchParams      (YAML::Node *);
     void serializeCompressorParams (YAML::Node *);
 
-    void changeEqualizerParams  (QVariant);
-    void changeDelayParams      (QVariant);
-    void changeFilterParams     (QVariant);
-    void changePitchParams      (QVariant);
-    void changeCompressorParams (QVariant);
+    void changeEqualizerParams  (const QVariant&);
+    void changeDelayParams      (const QVariant&);
+    void changeFilterParams     (const QVariant&);
+    void changePitchParams      (const QVariant&);
+    void changeCompressorParams (const QVariant&);
         
 //********Other********//
+    void updateCurrentAudioCover  (const std::string &filePath);
     void setupPlayerMusicIcons    ();
     void updateAudioPositionLabel (gint64, gint64);
 
@@ -151,6 +152,8 @@ public slots:
     void nextButtonClicked     ();
     
     void playlistItemClicked   (QListWidgetItem*);
+    void seekForward           ();
+    void seekBackward          ();
     void updateAudioState      ();
 //  Effects
     void updatePanPosition     ();    
@@ -165,6 +168,7 @@ public slots:
     void updateVisualizingWidget ();
 //  Settings
     void themeComboBoxClicked   (const QString &theme);
+    void extensionsMenuClicked  ();
     void newFolderSelected      (const QStringList&);
     void showSettingsTreeWidget ();
     

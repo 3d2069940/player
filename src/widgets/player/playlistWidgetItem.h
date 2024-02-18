@@ -22,7 +22,7 @@ class PlaylistWidgetItem : public QWidget {
     Q_OBJECT
 public:
     explicit PlaylistWidgetItem (const QString&, const QVariant &data);
-    ~PlaylistWidgetItem ();
+    virtual ~PlaylistWidgetItem ();
     
     std::string filePath () const;
     

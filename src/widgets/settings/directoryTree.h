@@ -13,7 +13,7 @@ public:
     DirectoryTree (DirectoryTree *_parent = nullptr, QString dir = QDir::rootPath());
     ~DirectoryTree ();
 
-    void setDirs ();
+    void setDirs          ();
     
     QString currentPath ();
     

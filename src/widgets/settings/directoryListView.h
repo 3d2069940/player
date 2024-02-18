@@ -19,12 +19,13 @@ class DirectoryListView : public QListWidget {
     
 public:
     explicit DirectoryListView (QWidget *parent = nullptr);
-    ~DirectoryListView ();
+    virtual ~DirectoryListView ();
     
+    void markSelectedDirs (const QStringList& dirs);
+
 private:
     DirectoryTree *tree;
-    
-    void updateList ();
+    void updateList       ();
     
 protected:
     void wheelEvent            (QWheelEvent*) override;

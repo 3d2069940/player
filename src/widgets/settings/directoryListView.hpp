@@ -27,6 +27,17 @@ DirectoryListView::~DirectoryListView () {
     delete tree;
 }
 
+void DirectoryListView::markSelectedDirs (const QStringList& paths) {
+    foreach (const QString &path, paths) {
+        auto tree_ptr = tree->root();
+        foreach (const QString &dir, path.split("/", Qt::SkipEmptyParts)) {
+            tree_ptr->isChildSelected = true;
+            tree_ptr = tree_ptr->cdDown(dir);
+        }
+        tree_ptr->isSelected = true;
+    }
+}
+
 void DirectoryListView::updateList () {
     clear();
     

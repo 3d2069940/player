@@ -8,7 +8,6 @@
 
 
 Effects::Effects () {
-    gst_init(nullptr, nullptr);
     initEffects ();
 }
 
@@ -81,22 +80,29 @@ void Effects::initEffects () {
     g_object_set (G_OBJECT(delay),    "max-delay", 5000000000, NULL);
     g_object_set (G_OBJECT(spectrum), "bands", 10, "interval", 25000000, NULL);
     
-    gst_bin_add_many (GST_BIN(pipeline), 
-                        filesrc, 
-                        decodebin, 
-                        convert1, 
-                        limiter,
-                        convert2, 
-                        panorama, 
-                        delay, 
-                        dynamic, 
-                        equalizer,
-                        volume, 
-                        pitch, 
-                        resample, 
-                        spectrum,
-                        audiosink, NULL);
+    gboolean binAdded = TRUE;
+
+    binAdded &= gst_bin_add (GST_BIN(pipeline), filesrc);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), decodebin);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), convert1);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), limiter);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), convert2);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), panorama);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), delay);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), dynamic);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), equalizer);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), volume);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), pitch);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), resample);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), spectrum);
+    binAdded &= gst_bin_add (GST_BIN(pipeline), audiosink);
     
+    if (binAdded == FALSE) {
+        g_printerr("Bin addition failed\n");
+        gst_object_unref(pipeline);
+        return;
+    }
+
     g_signal_connect (decodebin, "pad-added",  G_CALLBACK(padAddedCallback),  convert1);
     
     if (!gst_element_link (filesrc, decodebin) || 
@@ -162,12 +168,18 @@ gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
         default:
             break;
     }
+
+    if (GST_MINI_OBJECT_REFCOUNT_VALUE(msg) > 1) {
+        g_printerr("Msg cleared\n");
+        gst_message_unref(msg);
+        msg = nullptr;
+    }
     return TRUE;
 }
 
 void Effects::padAddedCallback (GstElement *, GstPad *pad, gpointer userdata) {
-    GstElement* audioconvert = (GstElement*)userdata;
-    GstPad *sinkpad = gst_element_get_static_pad(GST_ELEMENT(audioconvert), "sink");
+    auto audioconvert = (GstElement*)userdata;
+    auto sinkpad = gst_element_get_static_pad(GST_ELEMENT(audioconvert), "sink");
     gst_pad_link(pad, sinkpad); 
     gst_object_unref(sinkpad);
 }
@@ -234,29 +246,9 @@ void Effects::updateAudioPosition () {
     }
 }
 
-// void Effects::updateAudioInfo () {
-//     GstPad  *pad  = gst_element_get_static_pad(GST_ELEMENT(convert1), "sink");
-//     if (pad == nullptr)
-//         return;
-//     GstCaps *caps = gst_pad_get_current_caps(pad);
-//     if (caps == nullptr)
-//         return;
-//     GstStructure *structure = gst_caps_get_structure(caps, 0);
-//     if (structure == nullptr)
-//         return;
-//     
-//     
-//     format = gst_structure_get_string (structure, "format");
-//     
-//     gst_structure_get_int (structure, "channels", &channels);
-//     gst_structure_get_int (structure, "rate", &sampleRate);
-//         
-//     gst_caps_unref(caps);
-//     gst_object_unref(pad);
-// }
 
 void Effects::seekPlayingPosition (gint64 position) {
-    GstSeekFlags seekFlags = (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE);    
+    auto seekFlags = static_cast<GstSeekFlags>(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE);
     gst_element_set_state   (pipeline, GST_STATE_PAUSED);
     gst_element_seek_simple (pipeline, GST_FORMAT_TIME, seekFlags, position);
     gst_element_set_state   (pipeline, GST_STATE_PLAYING);
@@ -264,8 +256,8 @@ void Effects::seekPlayingPosition (gint64 position) {
 }
 
 void Effects::changePlayingAudio (std::string filePath) {
-    gst_element_set_state (pipeline, GST_STATE_READY);
-    gst_element_set_state (filesrc, GST_STATE_NULL);
+    // gst_element_set_state (pipeline, GST_STATE_READY);
+    gst_element_set_state (pipeline, GST_STATE_NULL);
     
     g_object_set (filesrc, "location", filePath.c_str(), NULL);
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
@@ -274,42 +266,46 @@ void Effects::changePlayingAudio (std::string filePath) {
 }
 
 void Effects::changeEqualizerProps(CODES::EQUALIZER code, int newValue) {
+    GValue value = G_VALUE_INIT;
+    g_value_init(&value, G_TYPE_DOUBLE);
+    g_value_set_double(&value, static_cast<double>(newValue/10.0));
     using namespace CODES;
     switch (code) {
         case Volume:
-            g_object_set(G_OBJECT(volume),    "volume", newValue/10.0, NULL);
+            g_object_set_property(G_OBJECT(volume),    "volume", &value);
             break;
         case Slider29Hz:
-            g_object_set(G_OBJECT(equalizer), "band0", newValue/10.0, NULL);
+            g_object_set_property(G_OBJECT(equalizer), "band0", &value);
             break;
         case Slider59Hz:
-            g_object_set(G_OBJECT(equalizer), "band1", newValue/10.0, NULL);
+            g_object_set_property(G_OBJECT(equalizer), "band1", &value);
             break;
         case Slider119Hz:
-            g_object_set(G_OBJECT(equalizer), "band2", newValue/10.0, NULL);
+            g_object_set_property(G_OBJECT(equalizer), "band2", &value);
             break;
         case Slider237Hz:
-            g_object_set(G_OBJECT(equalizer), "band3", newValue/10.0, NULL);
+            g_object_set_property(G_OBJECT(equalizer), "band3", &value);
             break;
         case Slider474Hz:
-            g_object_set(G_OBJECT(equalizer), "band4", newValue/10.0, NULL);
+            g_object_set_property(G_OBJECT(equalizer), "band4", &value);
             break;
         case Slider1kHz:
-            g_object_set(G_OBJECT(equalizer), "band5", newValue/10.0, NULL);
+            g_object_set_property(G_OBJECT(equalizer), "band5", &value);
             break;
         case Slider2kHz:
-            g_object_set(G_OBJECT(equalizer), "band6", newValue/10.0, NULL);
+            g_object_set_property(G_OBJECT(equalizer), "band6", &value);
             break;
         case Slider4kHz:
-            g_object_set(G_OBJECT(equalizer), "band7", newValue/10.0, NULL);
+            g_object_set_property(G_OBJECT(equalizer), "band7", &value);
             break;
         case Slider8kHz:
-            g_object_set(G_OBJECT(equalizer), "band8", newValue/10.0, NULL);
+            g_object_set_property(G_OBJECT(equalizer), "band8", &value);
             break;
         case Slider16kHz:
-            g_object_set(G_OBJECT(equalizer), "band9", newValue/10.0, NULL);
+            g_object_set_property(G_OBJECT(equalizer), "band9", &value);
             break;
     }
+    g_value_unset(&value);
 }
 
 void Effects::changeDelayProps (CODES::DELAY code, int newValue) {
@@ -318,7 +314,9 @@ void Effects::changeDelayProps (CODES::DELAY code, int newValue) {
     
     switch (code) {
         case Delay:
-            g_object_set(G_OBJECT(delay), "delay", newValue*GST_MSECOND, NULL);
+            g_value_init(&value, G_TYPE_UINT64);
+            g_value_set_uint64(&value, newValue*GST_MSECOND);
+            g_object_set_property(G_OBJECT(delay), "delay", &value);
             break;
         case SurroundDelay:
             g_object_get_property(G_OBJECT(delay), "surround-delay", &value);

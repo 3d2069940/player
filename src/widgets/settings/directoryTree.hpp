@@ -15,7 +15,8 @@ DirectoryTree::~DirectoryTree () {
 }
 
 void DirectoryTree::setDirs () {
-    foreach (const QFileInfo &fileInfo, currentDir.entryInfoList(QDir::AllDirs | QDir::NoSymLinks | QDir::NoDotAndDotDot)) {
+    QDir::Filters filter = QDir::AllDirs | QDir::NoSymLinks | QDir::NoDotAndDotDot;
+    foreach (const QFileInfo &fileInfo, currentDir.entryInfoList(filter)) {
         auto child        = new DirectoryTree(this, fileInfo.absoluteFilePath());
         child->isSelected = this->isSelected;
         children.insert(fileInfo.fileName(), child);
