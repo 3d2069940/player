@@ -8,7 +8,7 @@
 * Pitch
 * Compressor/Expander
 * Audio panorama
-* Audio visualization (still in development)
+* Audio visualization
 * Saving presets for any of the effects
 
 ## Installation
