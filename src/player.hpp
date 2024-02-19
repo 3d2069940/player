@@ -607,14 +607,6 @@ void MainWindowUI::updateCurrentAudioCover (const std::string &filePath) {
     }
     if (imageData.size() > 0) {
         albumCover.loadFromData(imageData, "JPEG");
-        // albumCover = albumCover.convertToFormat(QImage::Format_ARGB32);
-        // for (int y = 0; y < albumCover.height(); ++y) {
-        //     for (int x = 0; x < albumCover.width(); ++x) {
-        //         QRgb pixel = albumCover.pixel(x, y);
-        //         int alpha = qAlpha(pixel);
-        //         albumCover.setPixel(x, y, qRgba(qRed(pixel), qGreen(pixel), qBlue(pixel), alpha*0.5));
-        //     }
-        // }
         QImage image = albumCover.scaled(QSize(ui.playerHLine_1->width(), ui.playerHLine_1->width()), Qt::KeepAspectRatio);
         QPixmap pixmap = QPixmap::fromImage(image);
         ui.playerMusicPicture->setPixmap(pixmap);

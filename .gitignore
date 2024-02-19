@@ -4,9 +4,8 @@ player.kdev4
 .cache
 libs/qcustomplot/debug
 libs/qcustomplot/release
-libs/qcustomplot/*.so
-libs/qcustomplot/*.1
-libs/qcustomplot/*.2
+libs/qcustomplot/libqcustomplotd.*
+libs/qcustomplot.*
 libs/qcustomplot/Makefile
-libs/qcustomplot/Makefile.Debug
-libs/qcustomplot/Makefile.Release
+libs/qcustomplot/Makefile.*
+libs/qcustomplot/.qmake.stash

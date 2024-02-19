@@ -50,7 +50,6 @@ set(SRCS
     src/effects.hpp
     src/connector.cpp
     src/widgets/buttons/toggleButton.hpp
-    src/widgets/proxyStyles/proxyStyles.cpp
     src/widgets/player/playlistWidgetItem.hpp
     src/widgets/effects/presetDialogWindow.hpp
     src/widgets/delegation/playlistDelegate.cpp

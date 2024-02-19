@@ -61,7 +61,7 @@ std::string PlaylistWidgetItem::filePath () const {
 void PlaylistWidgetItem::updateIcons () {
     QPalette palette = qApp->palette();
     QColor   backgroundColor = palette.color(QPalette::Window);
-    QString iconPath = backgroundColor.value() < 128 ? ":icons/white/" : ":icons/black/";
+    QString  iconPath = backgroundColor.value() < 128 ? ":icons/white/" : ":icons/black/";
     
     infoAction  ->setIcon(QIcon(iconPath+"info.svg"));
     removeAction->setIcon(QIcon(iconPath+"remove.svg"));
