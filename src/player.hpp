@@ -28,7 +28,7 @@
 #include <taglib.h>
 #include <fileref.h>
 #include <wavfile.h>
-// #include <modfile.h> ??
+#include <modfile.h>
 #include <oggfile.h>
 #include <opusfile.h>
 #include <mpegfile.h>
@@ -37,8 +37,6 @@
 #include <oggflacfile.h>
 #include <tpropertymap.h>
 #include <attachedpictureframe.h>
-
-#include <sndfile.h>
 //***********************************************************//
 // Homebrew Headers
 //***********************************************************//

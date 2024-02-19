@@ -5,6 +5,7 @@ player.kdev4
 libs/qcustomplot/debug
 libs/qcustomplot/release
 libs/qcustomplot/libqcustomplotd.*
+libs/qcustomplot/libqcustomplot.*
 libs/qcustomplot.*
 libs/qcustomplot/Makefile
 libs/qcustomplot/Makefile.*
