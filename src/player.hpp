@@ -107,6 +107,7 @@ void MainWindowUI::setupWidgets () {
     audioPanningTimer.setInterval(100);
     audioVisualizingTimer.setInterval(100);
     
+    ui.playerSearchButton->hide();
     ui.playerTagListFrame->hide();
     ui.playerPlayListWidget->hide();
     ui.playerSearchLineEdit->hide();
@@ -178,6 +179,7 @@ void MainWindowUI::setupIcons () {
                                     QIcon(iconPath+"pause_music.svg")});
     ui.playerShuffleButton->setIcon(QIcon(iconPath+"shuffle_playlist.svg"));
     ui.playerNextButton->setIcon(QIcon(iconPath+"next_track.svg"));
+    ui.playerSearchButton->setIcon(QIcon(iconPath+"search.svg"));
         
     ui.playerTagListVisibilityButton->setIcon(QIcon(iconPath+"previous_track.svg"));
     ui.playerPlaylistVisibilityButton->setIcon(QIcon(iconPath+"playlist_hide.svg"));
@@ -191,8 +193,8 @@ void MainWindowUI::createConfigFile () {
     std::string configData = R"~(---
 PresetFilePath: ""
 Extensions: ["*.mp3","*.flac","*.opus","*.wav"]
-ShowAudioCover: false
-FlatButtons: true
+ShowAudioCover: true
+FlatButtons: false
 PlayAtStartup: false
 SaveLastAudio: false
 MusicFolders: []
@@ -581,6 +583,11 @@ void MainWindowUI::changeCompressorParams (const QVariant &data) {
 
 //********Others********//
 void MainWindowUI::updateCurrentAudioCover (const std::string &filePath) {
+    if (!showAudioCover) {
+        albumCoverSet = false;
+        ui.playerMusicPicture->setText("*LOGO HERE*");
+    }
+
     TagLib::FileRef file (filePath.c_str());
     QByteArray imageData;
     if (TagLib::MPEG::File *mpegFile = dynamic_cast<TagLib::MPEG::File*>(file.file())) {
@@ -753,24 +760,28 @@ void MainWindowUI::showTagListWidget (const QString& filePath) {
     }
     ui.playerTagListFrame->show();
     
-    ui.playerPlayListWidget->hide();
-    ui.playerPlaylistVisibilityButton->hide();
-    ui.playerSearchLineEdit->hide();
+    ui.playerSearchButton->hide();
     ui.showPlaylistsButton->hide();
+    ui.playerPlayListWidget->hide();
+    ui.playerSearchLineEdit->hide();
+    ui.playerPlaylistVisibilityButton->hide();
 }
 
 void MainWindowUI::closeTagListWidget () {
     ui.playerTagListFrame->hide();
     
-    ui.playerSearchLineEdit->show();
+    ui.playerSearchButton->show();
     ui.showPlaylistsButton->show();
+    ui.playerSearchLineEdit->show();
     ui.playerPlayListWidget->show();
     ui.playerPlaylistVisibilityButton->show();
 }
 
 void MainWindowUI::togglePlaylistView () {
-    ui.playerSearchLineEdit->setVisible(!ui.playerSearchLineEdit->isVisible());
+    ui.playerSearchButton->setVisible(!ui.playerSearchButton->isVisible());
     ui.playerPlayListWidget->setVisible(!ui.playerPlayListWidget->isVisible());
+    ui.playerSearchLineEdit->clear();
+    ui.playerSearchLineEdit->setVisible(false);
 }
 
 void MainWindowUI::previousButtonClicked () {
@@ -877,6 +888,10 @@ void MainWindowUI::searchTextChanged (const QString &searchText) {
                 item->setHidden(true);
         }
   }
+}
+
+void MainWindowUI::toggleSearchLineView () {
+    ui.playerSearchLineEdit->setVisible(!ui.playerSearchLineEdit->isVisible());
 }
 
 void MainWindowUI::playlistItemClicked (QListWidgetItem *item) {
@@ -999,6 +1014,13 @@ void MainWindowUI::newFolderSelected (const QStringList& folders) {
 
 void MainWindowUI::showSettingsTreeWidget () {
     ui.settingsDirectoryListView->setVisible(!ui.settingsDirectoryListView->isVisible());
+}
+
+void MainWindowUI::flatButtonsClicked (int state) {
+    QList<QPushButton*> buttons = this->findChildren<QPushButton*>();
+    foreach (QPushButton *button, buttons)
+        button->setFlat(state != Qt::Unchecked);
+
 }
 
 void MainWindowUI::changeEvent (QEvent *event) {

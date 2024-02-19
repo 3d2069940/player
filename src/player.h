@@ -2,7 +2,6 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-
 //***********************************************************//
 // STL
 //***********************************************************//
@@ -86,8 +85,8 @@ private:
     QListWidgetItem *currentAudio {nullptr},
                     *stopAudio    {nullptr};
                     
-    bool flatButtons    {true},
-         showAudioCover {false},
+    bool flatButtons    {false},
+         showAudioCover {true},
          playAtStartup  {false},
          saveLastAudio  {false};
 
@@ -154,7 +153,8 @@ public slots:
     void shuffleButtonClicked  ();
     void nextButtonClicked     ();
     void searchTextChanged     (const QString &searchText);
-    
+    void toggleSearchLineView  ();
+
     void playlistItemClicked   (QListWidgetItem*);
     void seekForward           ();
     void seekBackward          ();
@@ -175,6 +175,7 @@ public slots:
     void extensionsMenuClicked  ();
     void newFolderSelected      (const QStringList&);
     void showSettingsTreeWidget ();
+    void flatButtonsClicked     (int state);
     
 protected:
     void changeEvent (QEvent       *event) override;

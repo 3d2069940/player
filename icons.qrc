@@ -12,6 +12,7 @@
         <file>icons/white/info.svg</file>
         <file>icons/white/remove.svg</file>
         <file>icons/white/stop_after.svg</file>
+        <file>icons/white/search.svg</file>
         
         <file>icons/black/playlist_show.svg</file>
         <file>icons/black/playlist_hide.svg</file>
@@ -25,5 +26,6 @@
         <file>icons/black/info.svg</file>
         <file>icons/black/remove.svg</file>
         <file>icons/black/stop_after.svg</file>
+        <file>icons/black/search.svg</file>
     </qresource>
 </RCC>

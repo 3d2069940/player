@@ -8,9 +8,9 @@
 
 
 void Connector::connectWidgets(MainWindowUI* ptr) {
-    connect(&ptr->audioPositionTimer, &QTimer::timeout, ptr, &MainWindowUI::updateAudioState);
-    connect(&ptr->audioPanningTimer, &QTimer::timeout, ptr, &MainWindowUI::updatePanPosition);
-    connect(&ptr->audioVisualizingTimer, &QTimer::timeout, ptr, &MainWindowUI::updateVisualizingWidget);
+    connect(&ptr->audioPositionTimer,                 &QTimer::timeout, ptr, &MainWindowUI::updateAudioState);
+    connect(&ptr->audioPanningTimer,                  &QTimer::timeout, ptr, &MainWindowUI::updatePanPosition);
+    connect(&ptr->audioVisualizingTimer,              &QTimer::timeout, ptr, &MainWindowUI::updateVisualizingWidget);
     connect(ptr->presetDialogWindow->dialogButtonBox, &QDialogButtonBox::accepted, ptr, &MainWindowUI::addNewPreset);
 
     Connector::connectPlayerTab       (ptr);
@@ -30,6 +30,7 @@ void Connector::connectPlayerTab (MainWindowUI *ptr) {
     connect(ptr->ui.playerTagListVisibilityButton,  &QPushButton::clicked,     ptr, &MainWindowUI::closeTagListWidget);
     connect(ptr->ui.playerSeekSlider,               &QSlider::sliderPressed,   &ptr->audioPositionTimer, &QTimer::stop);
     connect(ptr->ui.playerSearchLineEdit,           &QLineEdit::textChanged,   ptr, &MainWindowUI::searchTextChanged);
+    connect(ptr->ui.playerSearchButton,             &QPushButton::clicked,     ptr, &MainWindowUI::toggleSearchLineView);
 
     connect(ptr->ui.playerSeekSlider, &QSlider::valueChanged, [ptr] (int value) {
         ptr->updateAudioPositionLabel(ptr->effects->audioDuration*value/1000, ptr->effects->audioDuration);
@@ -305,6 +306,7 @@ void Connector::connectSettingsTab(MainWindowUI* ptr) {
     connect(ptr->ui.settingsDirectoryListView, &DirectoryListView::selectedFolderUpdated, ptr, &MainWindowUI::newFolderSelected);
     foreach (QAction *action, ptr->extMenu->actions())
         connect(action, &QAction::triggered, ptr, &MainWindowUI::extensionsMenuClicked);
+    connect(ptr->ui.settingsFlatButtonsCheckBox, &QCheckBox::stateChanged, ptr, &MainWindowUI::flatButtonsClicked);
 }
 
 

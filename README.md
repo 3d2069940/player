@@ -25,5 +25,5 @@ sudo apt-get install cmake pkg-config qt5-default libgstreamer1.0-dev yaml-cpp g
 git clone https://github.com/3d2069940/gstreamer-media-player.git
 ```
 ```
-mkdir build && cd build && cmake .. && build
+mkdir build && cd build && cmake .. && make
 ```
