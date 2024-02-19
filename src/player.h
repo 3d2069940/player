@@ -37,6 +37,7 @@ class Connector;
 class QCloseEvent;
 class ToggleButton;
 class QListWidgetItem;
+class PlaylistDelegate;
 class PresetDialogWindow;
 class EqualizerTabWidget;
 class PlaylistDialogWindow;
@@ -64,8 +65,10 @@ private:
                               seekBackwardShortcut;
 
     QSharedPointer<QMenu> extMenu;
-        
+    QSharedPointer<PlaylistDelegate> playlistDelegate;
+
     QList<QListWidgetItem*> playlistItems;
+
     
     QTimer audioPositionTimer,
            audioPanningTimer,
@@ -150,6 +153,7 @@ public slots:
     void pauseButtonClicked    ();
     void shuffleButtonClicked  ();
     void nextButtonClicked     ();
+    void searchTextChanged     (const QString &searchText);
     
     void playlistItemClicked   (QListWidgetItem*);
     void seekForward           ();

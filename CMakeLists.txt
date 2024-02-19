@@ -1,5 +1,9 @@
 
 cmake_minimum_required(VERSION 3.0)
+
+include(ProcessorCount)
+
+
 project(player)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -13,6 +17,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/forms)
 
+ProcessorCount(CPU_NUM)
 
 find_program(QMAKE qmake)
 find_program(MAKE make)
@@ -52,7 +57,7 @@ set(SRCS
     src/widgets/buttons/toggleButton.hpp
     src/widgets/player/playlistWidgetItem.hpp
     src/widgets/effects/presetDialogWindow.hpp
-    src/widgets/delegation/playlistDelegate.cpp
+    src/widgets/delegation/playlistDelegate.hpp
 )
 
 set(HEADERS
@@ -65,7 +70,7 @@ set(HEADERS
 )
 
 add_custom_target(QCustomPlot
-    COMMAND qmake && make
+    COMMAND qmake && make -j ${CPU_NUM}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/libs/qcustomplot
     COMMENT "QCustomPlot compilation"
 )

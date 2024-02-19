@@ -8,6 +8,9 @@ class PlaylistDelegate : public QStyledItemDelegate {
 
 public:
     void paint (QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+        if (index.data(Qt::DisplayRole).toBool()) {
+            return;
+        }
         if ((index.row()&1) == 0)
             painter->fillRect(option.rect, QPalette().color(QPalette::Window));
         else

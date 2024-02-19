@@ -54,7 +54,7 @@
 #include "widgets/effects/presetDialogWindow.hpp"
 #include "widgets/settings/directoryListView.hpp"
 
-#include "widgets/delegation/playlistDelegate.cpp"
+#include "widgets/delegation/playlistDelegate.hpp"
 
 MainWindowUI::MainWindowUI () {
     ui.setupUi(this);
@@ -111,13 +111,14 @@ void MainWindowUI::setupWidgets () {
     ui.playerPlayListWidget->hide();
     ui.playerSearchLineEdit->hide();
 
-    ui.playerPlayListWidget->setItemDelegate(new PlaylistDelegate());
+    playlistDelegate = QSharedPointer<PlaylistDelegate>::create();
+    ui.playerPlayListWidget->setItemDelegate(playlistDelegate.data());
 
     presetDialogWindow->setFixedSize(250, 100);
 
-    ui.delaySurroundDelayButton->setLabels({"Off", "On"});
+    ui.delaySurroundDelayButton->      setLabels({"Off", "On"});
     ui.compressorExpanderToggleButton->setLabels({"Compressor", "Expander"});
-    ui.compressorKneeToggleButton->setLabels({"Hard-knee", "Soft-knee"});
+    ui.compressorKneeToggleButton->    setLabels({"Hard-knee", "Soft-knee"});
             
     setupIcons ();
     //  Add installed themes to settings combobox
@@ -129,6 +130,7 @@ void MainWindowUI::setupWidgets () {
     
     ui.visualizingCustomPlot->xAxis->setVisible(false);
     ui.visualizingCustomPlot->yAxis->setVisible(false);
+
     ui.visualizingCustomPlot->axisRect()->setAutoMargins(QCP::msNone);
     ui.visualizingCustomPlot->axisRect()->setMargins(QMargins(0, 0, 0, 0));
 
@@ -774,7 +776,15 @@ void MainWindowUI::togglePlaylistView () {
 void MainWindowUI::previousButtonClicked () {
     int currentAudioId = playlistItems.indexOf(currentAudio);
     if (currentAudioId > 0) {
-        currentAudio = playlistItems.at(currentAudioId-1);
+        int audioId = currentAudioId-1;
+        while (audioId >= 0 && playlistItems.at(audioId)->isHidden())
+            audioId--;
+
+        if (audioId >= 0) {
+            currentAudio   = playlistItems.at(audioId);
+            currentAudioId = audioId;
+        }
+
         PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
             (ui.playerPlayListWidget->itemWidget(currentAudio));
         effects->changePlayingAudio(playlistItem->filePath());
@@ -834,7 +844,15 @@ void MainWindowUI::nextButtonClicked () {
         return;
     }
     if (currentAudioId < playlistItems.size()-1 && currentAudio != stopAudio) {
-        currentAudio = playlistItems.at(currentAudioId+1);
+        int audioId = currentAudioId+1;
+        while (audioId < playlistItems.size() && playlistItems.at(audioId)->isHidden())
+            audioId++;
+
+        if (audioId < playlistItems.size()) {
+            currentAudio   = playlistItems.at(audioId);
+            currentAudioId = audioId;
+        }
+
         PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
             (ui.playerPlayListWidget->itemWidget(currentAudio));
         effects->changePlayingAudio(playlistItem->filePath());
@@ -843,6 +861,22 @@ void MainWindowUI::nextButtonClicked () {
         ui.playerPauseButton->setState(1);
         ui.playerPlayListWidget->setCurrentItem(currentAudio);
     }
+}
+
+void MainWindowUI::searchTextChanged (const QString &searchText) {
+    if (searchText == "")
+        foreach (QListWidgetItem *item, playlistItems)
+            item->setHidden(false);
+    else {
+        foreach (QListWidgetItem *item, playlistItems) {
+            auto playlistItem = qobject_cast<PlaylistWidgetItem*>(ui.playerPlayListWidget->itemWidget(item));
+            QString labelText = playlistItem->label->text();
+            if (labelText.contains(searchText, Qt::CaseInsensitive))
+                item->setHidden(false);
+            else
+                item->setHidden(true);
+        }
+  }
 }
 
 void MainWindowUI::playlistItemClicked (QListWidgetItem *item) {
@@ -889,7 +923,14 @@ void MainWindowUI::updateAudioState () {
     
     if (currentAudio != *playlistItems.end() && effects->isEOSReached() && currentAudio != stopAudio) {
         int currentAudioId = playlistItems.indexOf(currentAudio);
-        currentAudio = playlistItems.at(currentAudioId+1);
+        int audioId = currentAudioId+1;
+        while (audioId >= 0 && playlistItems.at(audioId)->isHidden())
+            audioId++;
+
+        if (audioId >= 0) {
+            currentAudio   = playlistItems.at(audioId);
+            currentAudioId = audioId;
+        }
         PlaylistWidgetItem *playlistItem = qobject_cast<PlaylistWidgetItem*>
             (ui.playerPlayListWidget->itemWidget(currentAudio));
         effects->changePlayingAudio(playlistItem->filePath());
