@@ -304,9 +304,13 @@ void Connector::connectSettingsTab(MainWindowUI* ptr) {
     connect(ptr->ui.settingsColorThemeComboBox, &QComboBox::currentTextChanged, ptr, &MainWindowUI::themeComboBoxClicked);
     connect(ptr->ui.settingsMediaFoldersButton, &QPushButton::clicked, ptr, &MainWindowUI::showSettingsTreeWidget);
     connect(ptr->ui.settingsDirectoryListView, &DirectoryListView::selectedFolderUpdated, ptr, &MainWindowUI::newFolderSelected);
+
     foreach (QAction *action, ptr->extMenu->actions())
         connect(action, &QAction::triggered, ptr, &MainWindowUI::extensionsMenuClicked);
-    connect(ptr->ui.settingsFlatButtonsCheckBox, &QCheckBox::stateChanged, ptr, &MainWindowUI::flatButtonsClicked);
+
+    connect(ptr->ui.settingsFlatButtonsCheckBox,   &QCheckBox::stateChanged, ptr, &MainWindowUI::flatButtonsClicked);
+    connect(ptr->ui.settingsAudioCoverCheckBox,    &QCheckBox::stateChanged, ptr, &MainWindowUI::showAudioCoverClicked);
+    connect(ptr->ui.settingsPlayAtStartupCheckBox, &QCheckBox::stateChanged, ptr, &MainWindowUI::playAtStartupClicked);
 }
 
 

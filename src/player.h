@@ -86,7 +86,7 @@ private:
                     *stopAudio    {nullptr};
                     
     bool flatButtons    {false},
-         showAudioCover {true},
+         showAudioCover {false},
          playAtStartup  {false},
          saveLastAudio  {false};
 
@@ -175,7 +175,10 @@ public slots:
     void extensionsMenuClicked  ();
     void newFolderSelected      (const QStringList&);
     void showSettingsTreeWidget ();
+
     void flatButtonsClicked     (int state);
+    void showAudioCoverClicked  (int state);
+    void playAtStartupClicked   (int state);
     
 protected:
     void changeEvent (QEvent       *event) override;

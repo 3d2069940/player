@@ -27,14 +27,11 @@
 #include <tag.h>
 #include <taglib.h>
 #include <fileref.h>
-#include <wavfile.h>
 #include <modfile.h>
-#include <oggfile.h>
 #include <opusfile.h>
 #include <mpegfile.h>
 #include <flacfile.h>
 #include <aifffile.h>
-#include <oggflacfile.h>
 #include <tpropertymap.h>
 #include <attachedpictureframe.h>
 //***********************************************************//
@@ -66,10 +63,11 @@ MainWindowUI::MainWindowUI () {
     parseConfigFile ();
     parsePresetFile ();
     createWidgets   ();
-    setupWidgets    ();
 
     Connector::connectWidgets(this);
-    
+
+    setupWidgets    ();
+
     audioVisualizingTimer.start();
 }
 
@@ -157,6 +155,17 @@ void MainWindowUI::setupWidgets () {
         extMenu->addAction(ext);
     }
 
+    if (showAudioCover)
+        ui.settingsAudioCoverCheckBox->click();
+
+    if (flatButtons)
+        ui.settingsFlatButtonsCheckBox->click();
+
+    if (playAtStartup) {
+        ui.settingsPlayAtStartupCheckBox->click();
+        ui.playerPauseButton->click();
+    }
+
     extMenu->setMinimumWidth(300);
     ui.settingsExtensionsButton->setMenu(extMenu.data());
 
@@ -198,6 +207,7 @@ FlatButtons: false
 PlayAtStartup: false
 SaveLastAudio: false
 MusicFolders: []
+LastAudioFilePath: ~
 ...)~";
     configYaml = YAML::Load(configData.c_str());
     
@@ -243,10 +253,8 @@ void MainWindowUI::parseConfigFile () {
     }
     extractConfigInfo<QStringList>(&extensions,     "Extensions");
     extractConfigInfo<QString>    (&presetPath,     "PresetFilePath");
-    if (presetPath == "") {
+    if (presetPath == "")
         presetPath = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).at(0) + "/player/presets.yaml";
-
-    }
     extractConfigInfo<QStringList>(&musicFolders,   "MusicFolders");
     extractConfigInfo<bool>       (&flatButtons,    "FlatButtons");
     extractConfigInfo<bool>       (&showAudioCover, "ShowAudioCover");
@@ -440,7 +448,6 @@ void MainWindowUI::updatePresetConfig (std::string presetName) {
 }
 
 void MainWindowUI::parseMusic (const QString &path, QFileInfoList& musicFiles) {
-
     QDir musicDir (path);
     musicDir.setNameFilters(extensions);
     musicFiles += musicDir.entryInfoList(QDir::Files);
@@ -586,8 +593,8 @@ void MainWindowUI::updateCurrentAudioCover (const std::string &filePath) {
     if (!showAudioCover) {
         albumCoverSet = false;
         ui.playerMusicPicture->setText("*LOGO HERE*");
+        return;
     }
-
     TagLib::FileRef file (filePath.c_str());
     QByteArray imageData;
     if (TagLib::MPEG::File *mpegFile = dynamic_cast<TagLib::MPEG::File*>(file.file())) {
@@ -614,7 +621,9 @@ void MainWindowUI::updateCurrentAudioCover (const std::string &filePath) {
     }
     if (imageData.size() > 0) {
         albumCover.loadFromData(imageData, "JPEG");
-        QImage image = albumCover.scaled(QSize(ui.playerHLine_1->width(), ui.playerHLine_1->width()), Qt::KeepAspectRatio);
+        QImage image = albumCover.scaled(QSize(ui.playerHLine_1->width(),
+                                               ui.playerHLine_1->width()),
+                                         Qt::KeepAspectRatio);
         QPixmap pixmap = QPixmap::fromImage(image);
         ui.playerMusicPicture->setPixmap(pixmap);
         ui.playerMusicPicture->setScaledContents(true);
@@ -914,9 +923,7 @@ void MainWindowUI::seekForward () {
 
     double ratio = effects->audioPosition+GST_SECOND*5 / effects->audioDuration;
 
-    if (ratio >= 1.0)
-        nextButtonClicked();
-    else {
+    if (ratio < 1.0) {
         gint64 curPosition = effects->audioDuration*curValue*ratio/maxValue;
         effects->seekPlayingPosition(curPosition);
     }
@@ -1020,7 +1027,30 @@ void MainWindowUI::flatButtonsClicked (int state) {
     QList<QPushButton*> buttons = this->findChildren<QPushButton*>();
     foreach (QPushButton *button, buttons)
         button->setFlat(state != Qt::Unchecked);
+    configYaml["FlatButtons"] = (state != Qt::Unchecked);
+}
 
+void MainWindowUI::showAudioCoverClicked (int state) {
+    showAudioCover = (state != Qt::Unchecked);
+    configYaml["ShowAudioCover"] = showAudioCover;
+
+    if (currentAudio == nullptr)
+        return;
+
+    if (!showAudioCover)
+        ui.playerMusicPicture->setText("*LOGO HERE*");
+    else {
+        int currentAudioId  = playlistItems.indexOf(currentAudio);
+        auto item           = ui.playerPlayListWidget->item(currentAudioId);
+        auto playlistWidget = qobject_cast<PlaylistWidgetItem*>
+                                          (ui.playerPlayListWidget->itemWidget(item));
+        updateCurrentAudioCover(playlistWidget->filePath());
+    }
+}
+
+void MainWindowUI::playAtStartupClicked (int state) {
+    playAtStartup = (state != Qt::Unchecked);
+    configYaml["PlayAtStartup"] = playAtStartup;
 }
 
 void MainWindowUI::changeEvent (QEvent *event) {
@@ -1050,6 +1080,22 @@ void MainWindowUI::resizeEvent (QResizeEvent *event) {
 
 void MainWindowUI::closeEvent (QCloseEvent *event) {
     presetDialogWindow->hide();
+
+    QFile configFile (configPath);
+
+    if (!configFile.open (QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning () << "[Warning]:" << "Unable to open config file. Skipping";
+        return;
+    }
+
+    YAML::Emitter emitter;
+    emitter << configYaml;
+
+    if (configFile.write (emitter.c_str()) == -1)
+        qWarning() << "[Warning]:" << "Writing config data to a file failed. Skipping";
+
+    configFile.close ();
+
     QMainWindow::closeEvent(event);
 }
 

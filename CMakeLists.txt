@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.0)
 
 include(ProcessorCount)
 
-
 project(player)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -70,7 +69,7 @@ set(HEADERS
 )
 
 add_custom_target(QCustomPlot
-    COMMAND qmake && make -j ${CPU_NUM}
+    COMMAND qmake && make -j${CPU_NUM}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/libs/qcustomplot
     COMMENT "QCustomPlot compilation"
 )
