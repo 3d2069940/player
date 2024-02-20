@@ -161,6 +161,22 @@ void MainWindowUI::setupWidgets () {
     if (flatButtons)
         ui.settingsFlatButtonsCheckBox->click();
 
+    if (saveLastAudio)
+        ui.settingsSaveLastAudioCheckBox->click();
+
+    if (saveLastAudio && configYaml["LastAudioFilePath"].IsDefined()) {
+        for (int i = 0; i < playlistItems.size(); ++i) {
+            auto itemWidget = ui.playerPlayListWidget->itemWidget(playlistItems.at(i));
+            auto playlistWidget = qobject_cast<PlaylistWidgetItem*>(itemWidget);
+            if (playlistWidget->filePath() == configYaml["LastAudioFilePath"].as<std::string>()) {
+                currentAudio = playlistItems.at(i);
+                effects->changePlayingAudio(playlistWidget->filePath());
+                effects->togglePipelineState();
+                ui.playerPlayListWidget->setCurrentRow(i);
+                break;
+            }
+        }
+    }
     if (playAtStartup) {
         ui.settingsPlayAtStartupCheckBox->click();
         ui.playerPauseButton->click();
@@ -1053,6 +1069,14 @@ void MainWindowUI::playAtStartupClicked (int state) {
     configYaml["PlayAtStartup"] = playAtStartup;
 }
 
+void MainWindowUI::saveLastAudioClicked (int state) {
+    saveLastAudio = (state != Qt::Unchecked);
+    if (!currentAudio)
+        return;
+    auto playlistWidget = qobject_cast<PlaylistWidgetItem*>(ui.playerPlayListWidget->itemWidget(currentAudio));
+    configYaml["LastAudioFilePath"] = playlistWidget->filePath().c_str();
+}
+
 void MainWindowUI::changeEvent (QEvent *event) {
     if (event->type() == QEvent::PaletteChange) {
         ui.visualizingCustomPlot->setBackground(palette().color(QPalette::Window));
@@ -1070,8 +1094,8 @@ void MainWindowUI::resizeEvent (QResizeEvent *event) {
     bars->setBrush(QBrush(gradient));
 
     if (!albumCover.isNull() && albumCoverSet) {
-        int albumCoverWidth = qMin(ui.playerHLine_1->width(), width()/2-10);
-        QImage image = albumCover.scaled(QSize(albumCoverWidth, albumCoverWidth), Qt::KeepAspectRatio);
+        int albumCoverSize = qMin(ui.playerHLine_1->width(), width()/2-10);
+        QImage image = albumCover.scaled(QSize(albumCoverSize, albumCoverSize), Qt::KeepAspectRatio);
         QPixmap pixmap = QPixmap::fromImage(image);
         ui.playerMusicPicture->setPixmap(pixmap);
     }
@@ -1087,6 +1111,15 @@ void MainWindowUI::closeEvent (QCloseEvent *event) {
         qWarning () << "[Warning]:" << "Unable to open config file. Skipping";
         return;
     }
+
+    if (saveLastAudio && currentAudio != nullptr) {
+        auto widget = ui.playerPlayListWidget->itemWidget(currentAudio);
+        auto playlistWidget = qobject_cast<PlaylistWidgetItem*>(widget);
+        configYaml["LastAudioFilePath"] = playlistWidget->filePath();
+  } else if (saveLastAudio)
+        configYaml["SaveLastAudio"] = ui.settingsSaveLastAudioCheckBox->isChecked();
+    else if (!saveLastAudio)
+        configYaml["LastAudioFilePath"] = YAML::Null;
 
     YAML::Emitter emitter;
     emitter << configYaml;

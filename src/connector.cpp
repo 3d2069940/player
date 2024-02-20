@@ -311,6 +311,7 @@ void Connector::connectSettingsTab(MainWindowUI* ptr) {
     connect(ptr->ui.settingsFlatButtonsCheckBox,   &QCheckBox::stateChanged, ptr, &MainWindowUI::flatButtonsClicked);
     connect(ptr->ui.settingsAudioCoverCheckBox,    &QCheckBox::stateChanged, ptr, &MainWindowUI::showAudioCoverClicked);
     connect(ptr->ui.settingsPlayAtStartupCheckBox, &QCheckBox::stateChanged, ptr, &MainWindowUI::playAtStartupClicked);
+    connect(ptr->ui.settingsSaveLastAudioCheckBox, &QCheckBox::stateChanged, ptr, &MainWindowUI::saveLastAudioClicked);
 }
 
 

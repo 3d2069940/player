@@ -112,6 +112,9 @@
               </item>
               <item row="0" column="4">
                <widget class="QPushButton" name="showPlaylistsButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -164,6 +167,19 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
                <widget class="QLabel" name="playerMusicPicture">
                 <property name="layoutDirection">
                  <enum>Qt::LeftToRight</enum>
@@ -175,6 +191,19 @@
                  <set>Qt::AlignCenter</set>
                 </property>
                </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </item>
@@ -3085,6 +3114,9 @@
                 </item>
                 <item>
                  <widget class="QCheckBox" name="settingsSaveLastAudioCheckBox">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
                   <property name="maximumSize">
                    <size>
                     <width>160</width>
@@ -3158,6 +3190,9 @@
                 </item>
                 <item>
                  <widget class="QLineEdit" name="settingsConfigPathEdit">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
                   <property name="maximumSize">
                    <size>
                     <width>300</width>

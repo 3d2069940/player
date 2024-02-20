@@ -176,9 +176,10 @@ public slots:
     void newFolderSelected      (const QStringList&);
     void showSettingsTreeWidget ();
 
-    void flatButtonsClicked     (int state);
-    void showAudioCoverClicked  (int state);
-    void playAtStartupClicked   (int state);
+    void flatButtonsClicked    (int state);
+    void showAudioCoverClicked (int state);
+    void playAtStartupClicked  (int state);
+    void saveLastAudioClicked  (int state);
     
 protected:
     void changeEvent (QEvent       *event) override;
