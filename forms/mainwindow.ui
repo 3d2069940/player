@@ -3177,33 +3177,6 @@
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="settingsConfigPathLayout">
-                <property name="leftMargin">
-                 <number>10</number>
-                </property>
-                <item>
-                 <widget class="QLabel" name="settingsConfigPathlabel">
-                  <property name="text">
-                   <string>Preset File Path</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="settingsConfigPathEdit">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>300</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
                <spacer name="verticalSpacer_2">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>

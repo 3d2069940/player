@@ -1116,10 +1116,10 @@ void MainWindowUI::closeEvent (QCloseEvent *event) {
         auto widget = ui.playerPlayListWidget->itemWidget(currentAudio);
         auto playlistWidget = qobject_cast<PlaylistWidgetItem*>(widget);
         configYaml["LastAudioFilePath"] = playlistWidget->filePath();
-  } else if (saveLastAudio)
-        configYaml["SaveLastAudio"] = ui.settingsSaveLastAudioCheckBox->isChecked();
-    else if (!saveLastAudio)
+  } else if (!saveLastAudio)
         configYaml["LastAudioFilePath"] = YAML::Null;
+
+    configYaml["SaveLastAudio"] = saveLastAudio;
 
     YAML::Emitter emitter;
     emitter << configYaml;

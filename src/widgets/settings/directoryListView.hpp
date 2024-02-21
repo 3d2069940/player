@@ -2,6 +2,7 @@
 #pragma once
 
 #include <QScrollBar>
+#include <qevent.h>
 
 #include "directoryListView.h"
 
@@ -36,6 +37,7 @@ void DirectoryListView::markSelectedDirs (const QStringList& paths) {
         }
         tree_ptr->isSelected = true;
     }
+    updateList();
 }
 
 void DirectoryListView::updateList () {
@@ -83,6 +85,7 @@ void DirectoryListView::keyPressEvent (QKeyEvent *event) {
     int row = currentRow();
     DirectoryListWidget *widget;
     DirectoryTree *child;
+    bool selected;
     switch (event->key()) {
         case Qt::Key_Space:
             if (row == 0 && tree->currentPath() != QDir::rootPath())
@@ -92,15 +95,17 @@ void DirectoryListView::keyPressEvent (QKeyEvent *event) {
             child = tree->children.value(widget->dirName());
             child->setChildrenState(!child->isSelected);
             tree->setParentState   ();
-            emit selectedFolderUpdated(tree->root()->listSelectedDirs());
             break;
         case Qt::Key_Return:
         case Qt::Key_Enter:
             if (row == 0 && tree->currentPath() != QDir::rootPath())
                 tree = tree->cdUp();
             else {
-                widget = qobject_cast<DirectoryListWidget*>(itemWidget(item(row)));
-                tree   = tree->cdDown(widget->dirName());
+                widget           = qobject_cast<DirectoryListWidget*>
+                                                (itemWidget(item(row)));
+                selected         = tree->isSelected;
+                tree             = tree->cdDown(widget->dirName());
+                tree->isSelected = selected;
             }
             updateList();
             setCurrentRow(0);
@@ -126,9 +131,13 @@ void DirectoryListView::mouseDoubleClickEvent (QMouseEvent *event) {
     QListWidget::mouseDoubleClickEvent(event);
 }
 
+void DirectoryListView::focusOutEvent (QFocusEvent *event) {
+    emit selectedFolderUpdated(tree->root()->listSelectedDirs());
+    QListWidget::focusOutEvent(event);
+}
+
 void DirectoryListView::onCheckBoxClicked (const QString& dirName) {
     auto child = tree->children.value(dirName);
     child->setChildrenState(!child->isSelected);
     tree->setParentState();
-    emit selectedFolderUpdated(tree->root()->listSelectedDirs());
 }

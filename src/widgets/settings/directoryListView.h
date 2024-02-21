@@ -9,6 +9,7 @@
 #include <QWheelEvent>
 #include <QMouseEvent>
 #include <QListWidget>
+#include <qevent.h>
 
 
 class DirectoryTree;
@@ -28,16 +29,17 @@ private:
     void updateList       ();
     
 protected:
-    void wheelEvent            (QWheelEvent*) override;
-    void keyPressEvent         (QKeyEvent*)   override;
-    void mouseDoubleClickEvent (QMouseEvent*) override;
-        
+    void wheelEvent            (QWheelEvent *event) override;
+    void keyPressEvent         (QKeyEvent   *event) override;
+    void mouseDoubleClickEvent (QMouseEvent *event) override;
+    void focusOutEvent         (QFocusEvent *event) override;
+
 public slots:
     void onCheckBoxClicked (const QString&);
     
 signals:
     void selectedFolderUpdated (const QStringList&);
-    
+
 };
 
 #endif // DIRECTORY_VIEW_LIST_H
