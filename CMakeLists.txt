@@ -27,7 +27,7 @@ find_package(Qt5Widgets CONFIG COMPONENTS Core Widgets Gui REQUIRED)
 pkg_check_modules(TAGLIB REQUIRED taglib)
 pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
 pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
-pkg_check_modules(SNDFILE REQUIRED sndfile)
+pkg_check_modules(SQLITE3 REQUIRED sqlite3)
 
 qt_wrap_ui(UI_FILES mainwindow.ui)
 qt_wrap_cpp(MOC_FILES src/player.h 
@@ -43,12 +43,13 @@ include_directories(src build libs/qcustomplot
                     ${GSTREAMER_INCLUDE_DIRS} 
                     ${YAML_CPP_INCLUDE_DIRS} 
                     ${TAGLIB_INCLUDE_DIRS}
-                    ${SNDFILE_INCLUDE_DIRS}
+                    ${SQLITE3_INCLUDE_DIRS}
 )
 
 link_directories(libs/qcustomplot src/widgets/settings)
 
 set(SRCS
+    src/db.hpp
     src/main.cpp
     src/player.hpp
     src/effects.hpp
@@ -60,6 +61,7 @@ set(SRCS
 )
 
 set(HEADERS
+    src/db.h
     src/player.h
     src/effects.h
     src/metaTypes.h
@@ -84,7 +86,7 @@ target_link_libraries(player qcustomplot DirectoryListView
                             ${GSTREAMER_LIBRARIES}
                             ${YAML_CPP_LIBRARIES}
                             ${TAGLIB_LIBRARIES}
-                            ${SNDFILE_LIBRARIES})
+                            ${SQLITE3_LIBRARIES})
 
 # Install the executable
 install(TARGETS player DESTINATION bin)

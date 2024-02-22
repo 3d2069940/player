@@ -32,6 +32,7 @@
 
 class QEvent;
 class Effects;
+class DataBase;
 class Connector;
 class QCloseEvent;
 class ToggleButton;
@@ -43,6 +44,7 @@ class PlaylistDialogWindow;
 
 class MainWindowUI : public QMainWindow {  
     Q_OBJECT
+    // friend DataBase;
     friend Connector;
 public:
     Ui::MainWindow ui;
@@ -51,10 +53,13 @@ public:
     virtual ~MainWindowUI ();
     
     template <class T>
-    void updatePresetConfig (std::string presetName);
+    void updatePresetConfig (const std::string &presetName);
         
 private:
-    std::unique_ptr<Effects>           effects;
+    
+    std::unique_ptr<DataBase> db;
+    std::unique_ptr<Effects>  effects;
+
     QSharedPointer<PresetDialogWindow> presetDialogWindow;
 
     QSharedPointer<QShortcut> playPauseShortcut,
@@ -90,6 +95,8 @@ private:
          playAtStartup  {false},
          saveLastAudio  {false};
 
+    std::string databasePath;
+
     std::string currentPresetType;
     
     QLinearGradient  gradient;
@@ -99,16 +106,18 @@ private:
     bool albumCoverSet;
     
 //********Init********//
-    void createWidgets       ();
-    void setupWidgets        ();
-        void setupIcons      ();
-        void setupAnimations ();
+    void createWidgets               ();
+    void setupWidgets                ();
+      void setupVisualizationWidgets ();
+      void setupSettingsWidgets      ();
+      void setupIcons                ();
+      void setupAnimations           ();
             
 //********Config********//
     void createConfigFile      ();
     void parseConfigFile       ();
-        template <class T>
-        void extractConfigInfo (T *var, std::string key);
+      template <class T>
+      void extractConfigInfo (T *var, const std::string& key);
     
 //********Parse********//
     void parsePresetFile    ();
@@ -117,7 +126,7 @@ private:
         template <class T>
         void parsePresets  (QComboBox *combobox, const std::string &key);
     void savePresets  ();
-    void removePreset (std::string, QComboBox*);
+    void removePreset (const std::string&, QComboBox*);
     
     void parseMusic (const QString &path, QFileInfoList& musicFiles);
     void updatePlaylistWidget ();

@@ -19,7 +19,6 @@
 #include <QStyleFactory>
 #include <QStandardPaths>
 #include <QLinearGradient>
-#include <QRandomGenerator>
 #include <QPropertyAnimation>
 //***********************************************************//
 // Third-party libs
@@ -42,27 +41,30 @@
 //***********************************************************//
 // Homebrew Classes
 //***********************************************************//
+#include "db.hpp"
 #include "effects.hpp"
 #include "connector.cpp"
 #include "toggleButton.hpp"
-
-
 #include "playlistWidgetItem.hpp"
 #include "widgets/effects/presetDialogWindow.hpp"
 #include "widgets/settings/directoryListView.hpp"
-
 #include "widgets/delegation/playlistDelegate.hpp"
 
 MainWindowUI::MainWindowUI () {
     ui.setupUi(this);
     
     setWindowTitle("Player");
-    
-    effects = std::make_unique<Effects>();
    
     parseConfigFile ();
     parsePresetFile ();
     createWidgets   ();
+
+    effects = std::make_unique<Effects>();
+    if (configYaml["DataBasePath"].IsDefined()) {
+        std::string path = configYaml["DataBasePath"].as<std::string>();
+        db = std::make_unique<DataBase>(path, this);
+        db->open();
+    }
 
     Connector::connectWidgets(this);
 
@@ -97,6 +99,11 @@ void MainWindowUI::createWidgets () {
     // seekForwardShortcut = QSharedPointer<QShortcut>::create(QKeySequence(Qt::Key_Right), ui.playerTab);
 //
     extMenu = QSharedPointer<QMenu>::create(ui.settingsExtensionsButton);
+
+    QStringList extActions = {"mp3", "wav", "flac", "aac", "ogg", "opus", "wma", "aiff", "ac3", "amr"};
+    foreach (const QString &ext, extActions) {
+        extMenu->addAction(ext);
+    }
 }
 
 void MainWindowUI::setupWidgets () {
@@ -120,13 +127,11 @@ void MainWindowUI::setupWidgets () {
     ui.compressorKneeToggleButton->    setLabels({"Hard-knee", "Soft-knee"});
             
     setupIcons ();
-    //  Add installed themes to settings combobox
-    QStringList styleNames = QStyleFactory::keys();
-    ui.settingsColorThemeComboBox->addItems(styleNames);
-    //  Set current theme
-    QStyle *style = QApplication::style();
-    ui.settingsColorThemeComboBox->setCurrentText(style->objectName());
-    
+    setupVisualizationWidgets();
+    setupSettingsWidgets();
+}
+
+void MainWindowUI::setupVisualizationWidgets () {
     ui.visualizingCustomPlot->xAxis->setVisible(false);
     ui.visualizingCustomPlot->yAxis->setVisible(false);
 
@@ -149,11 +154,17 @@ void MainWindowUI::setupWidgets () {
     bars->setPen(Qt::NoPen);
     bars->setWidth(1);
     bars->setBrush(QBrush(gradient));
+}
 
-    QStringList extActions = {"mp3", "wav", "flac", "aac", "ogg", "opus", "wma", "aiff", "ac3", "amr"};
-    foreach (const QString &ext, extActions) {
-        extMenu->addAction(ext);
-    }
+void MainWindowUI::setupSettingsWidgets () {
+    QString labelText = QStringLiteral("Audio Extensions to Parse: %1");
+    ui.settingsExtensionsLabel->setText(labelText.arg(extensions.join(QChar(','))));
+    //  Add installed themes to settings combobox
+    QStringList styleNames = QStyleFactory::keys();
+    ui.settingsColorThemeComboBox->addItems(styleNames);
+    //  Set current theme
+    QStyle *style = QApplication::style();
+    ui.settingsColorThemeComboBox->setCurrentText(style->objectName());
 
     if (showAudioCover)
         ui.settingsAudioCoverCheckBox->click();
@@ -272,6 +283,7 @@ void MainWindowUI::parseConfigFile () {
     if (presetPath == "")
         presetPath = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).at(0) + "/player/presets.yaml";
     extractConfigInfo<QStringList>(&musicFolders,   "MusicFolders");
+    extractConfigInfo<std::string>(&databasePath, "DataBasePath");
     extractConfigInfo<bool>       (&flatButtons,    "FlatButtons");
     extractConfigInfo<bool>       (&showAudioCover, "ShowAudioCover");
     extractConfigInfo<bool>       (&playAtStartup,  "PlayAtStartup");
@@ -279,7 +291,7 @@ void MainWindowUI::parseConfigFile () {
 }
 
 template <class T>
-void MainWindowUI::extractConfigInfo (T* var, std::string key) {
+void MainWindowUI::extractConfigInfo (T* var, const std::string &key) {
     if (!configYaml[key].IsDefined()) {
         qWarning() << "[Warning]:" << key.c_str() << "doesn't exist. Skipping";
         return;
@@ -426,7 +438,7 @@ void MainWindowUI::savePresets () {
     presetFile.close();
 }
 
-void MainWindowUI::removePreset (std::string presetType, QComboBox* combobox) {
+void MainWindowUI::removePreset (const std::string &presetType, QComboBox* combobox) {
     int         currentItemId   = combobox->currentIndex();
     std::string currentItemText = combobox->currentText().toStdString();
     combobox->removeItem(currentItemId);
@@ -437,7 +449,7 @@ void MainWindowUI::removePreset (std::string presetType, QComboBox* combobox) {
 }
 
 template <class T>
-void MainWindowUI::updatePresetConfig (std::string presetName) {
+void MainWindowUI::updatePresetConfig (const std::string &presetName) {
     YAML::Node newPresetSeq (YAML::NodeType::Sequence);
     newPresetSeq.SetStyle(YAML::EmitterStyle::Flow);
     QComboBox *combobox;
@@ -636,9 +648,9 @@ void MainWindowUI::updateCurrentAudioCover (const std::string &filePath) {
         }
     }
     if (imageData.size() > 0) {
+        int albumCoverSize = qMin(ui.playerHLine_1->width(), width()/2-10);
         albumCover.loadFromData(imageData, "JPEG");
-        QImage image = albumCover.scaled(QSize(ui.playerHLine_1->width(),
-                                               ui.playerHLine_1->width()),
+        QImage image = albumCover.scaled(QSize(albumCoverSize, albumCoverSize),
                                          Qt::KeepAspectRatio);
         QPixmap pixmap = QPixmap::fromImage(image);
         ui.playerMusicPicture->setPixmap(pixmap);
@@ -786,7 +798,6 @@ void MainWindowUI::showTagListWidget (const QString& filePath) {
     ui.playerTagListFrame->show();
     
     ui.playerSearchButton->hide();
-    ui.showPlaylistsButton->hide();
     ui.playerPlayListWidget->hide();
     ui.playerSearchLineEdit->hide();
     ui.playerPlaylistVisibilityButton->hide();
@@ -796,7 +807,6 @@ void MainWindowUI::closeTagListWidget () {
     ui.playerTagListFrame->hide();
     
     ui.playerSearchButton->show();
-    ui.showPlaylistsButton->show();
     ui.playerSearchLineEdit->show();
     ui.playerPlayListWidget->show();
     ui.playerPlaylistVisibilityButton->show();
@@ -808,6 +818,7 @@ void MainWindowUI::togglePlaylistView () {
     ui.playerSearchLineEdit->clear();
     ui.playerSearchLineEdit->setVisible(false);
 }
+
 
 void MainWindowUI::previousButtonClicked () {
     int currentAudioId = playlistItems.indexOf(currentAudio);
@@ -1019,14 +1030,17 @@ void MainWindowUI::extensionsMenuClicked () {
     QAction *action = qobject_cast<QAction*>(obj);
     QString actionText = QString("*.%1").arg(action->text());
 
-    qDebug() << extensions;
-
-    if (extensions.contains(actionText))
+    // prevent all files from being shown
+    if (extensions.contains(actionText) && extensions.size() == 1)
+        return;
+    else if (extensions.contains(actionText))
         extensions.removeOne(actionText);
     else
         extensions << actionText;
 
-    qDebug() << extensions;
+    QString labelText = QStringLiteral("Audio Extensions to Parse: %1");
+    ui.settingsExtensionsLabel->setText(labelText.arg(extensions.join(QChar(','))));
+
     updatePlaylistWidget();
 }
 

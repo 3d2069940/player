@@ -5,6 +5,7 @@
 #include "widgets/effects/presetDialogWindow.h"
 #include "widgets/settings/directoryListView.h"
 #include "effects.h"
+#include <qpushbutton.h>
 
 
 void Connector::connectWidgets(MainWindowUI* ptr) {
@@ -304,7 +305,7 @@ void Connector::connectSettingsTab(MainWindowUI* ptr) {
     connect(ptr->ui.settingsColorThemeComboBox, &QComboBox::currentTextChanged, ptr, &MainWindowUI::themeComboBoxClicked);
     connect(ptr->ui.settingsMediaFoldersButton, &QPushButton::clicked, ptr, &MainWindowUI::showSettingsTreeWidget);
     connect(ptr->ui.settingsDirectoryListView, &DirectoryListView::selectedFolderUpdated, ptr, &MainWindowUI::newFolderSelected);
-
+    
     foreach (QAction *action, ptr->extMenu->actions())
         connect(action, &QAction::triggered, ptr, &MainWindowUI::extensionsMenuClicked);
 
