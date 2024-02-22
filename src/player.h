@@ -191,6 +191,7 @@ public slots:
     void saveLastAudioClicked  (int state);
     
 protected:
+    void showEvent   (QShowEvent   *event) override;
     void changeEvent (QEvent       *event) override;
     void resizeEvent (QResizeEvent *event) override;
     void closeEvent  (QCloseEvent  *event) override;

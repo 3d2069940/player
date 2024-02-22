@@ -44,6 +44,7 @@
 #include "db.hpp"
 #include "effects.hpp"
 #include "connector.cpp"
+#include "playlistWidgetItem.h"
 #include "toggleButton.hpp"
 #include "playlistWidgetItem.hpp"
 #include "widgets/effects/presetDialogWindow.hpp"
@@ -84,7 +85,7 @@ MainWindowUI::~MainWindowUI() {
 }
 
 /**
- * @brief
+ * @brief 
  * @return Does not return any value
  */
 void MainWindowUI::createWidgets () {
@@ -1089,6 +1090,15 @@ void MainWindowUI::saveLastAudioClicked (int state) {
         return;
     auto playlistWidget = qobject_cast<PlaylistWidgetItem*>(ui.playerPlayListWidget->itemWidget(currentAudio));
     configYaml["LastAudioFilePath"] = playlistWidget->filePath().c_str();
+}
+
+void MainWindowUI::showEvent (QShowEvent *event) {
+    if (playAtStartup) {
+        auto widget = qobject_cast<PlaylistWidgetItem*>
+            (ui.playerPlayListWidget->itemWidget(ui.playerPlayListWidget->currentItem()));
+        updateCurrentAudioCover(widget->filePath());
+    }
+    QMainWindow::showEvent(event);
 }
 
 void MainWindowUI::changeEvent (QEvent *event) {

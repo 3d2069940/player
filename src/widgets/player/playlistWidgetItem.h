@@ -33,7 +33,9 @@ public:
     QMenu       *contextMenu;
     QAction     *infoAction,
                 *removeAction,
+                *addToPlaylist,
                 *stopAction;
+                
     QHBoxLayout *layout;
     QPushButton *button;
     

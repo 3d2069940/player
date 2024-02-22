@@ -20,9 +20,10 @@ PlaylistWidgetItem::PlaylistWidgetItem (const QString &labelText, const QVariant
     label       = new QLabel(labelText);
     contextMenu = new QMenu ();
     
-    infoAction   = contextMenu->addAction("Info");
-    removeAction = contextMenu->addAction("Remove");    
-    stopAction   = contextMenu->addAction("Stop After");
+    infoAction    = contextMenu->addAction("Info");
+    removeAction  = contextMenu->addAction("Remove");    
+    addToPlaylist = contextMenu->addAction("Add To Playlist");
+    stopAction    = contextMenu->addAction("Stop After");
     
     updateIcons ();
     
