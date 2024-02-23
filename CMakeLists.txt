@@ -49,11 +49,12 @@ include_directories(src build libs/qcustomplot
 link_directories(libs/qcustomplot src/widgets/settings)
 
 set(SRCS
-    src/db.hpp
     src/main.cpp
+    src/db/db.hpp
     src/player.hpp
-    src/effects.hpp
-    src/connector.cpp
+    src/parser/parser.hpp
+    src/effects/effects.hpp
+    src/connector/connector.cpp
     src/widgets/buttons/toggleButton.hpp
     src/widgets/player/playlistWidgetItem.hpp
     src/widgets/effects/presetDialogWindow.hpp
@@ -61,10 +62,11 @@ set(SRCS
 )
 
 set(HEADERS
-    src/db.h
+    src/db/db.h
     src/player.h
-    src/effects.h
     src/metaTypes.h
+    src/parser/parser.h
+    src/effects/effects.h
     src/widgets/buttons/toggleButton.h
     src/widgets/player/playlistWidgetItem.h
     src/widgets/effects/presetDialogWindow.h

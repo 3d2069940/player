@@ -2,6 +2,7 @@ build/
 player.kdev4
 .kdev4/
 .cache
+.vscode
 libs/qcustomplot/debug
 libs/qcustomplot/release
 libs/qcustomplot/libqcustomplotd.*

@@ -58,7 +58,7 @@
       </property>
       <widget class="QWidget" name="playerTab">
        <attribute name="title">
-        <string>Player</string>
+        <string>Tracks</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_8">
         <property name="leftMargin">
@@ -562,7 +562,7 @@
              <height>670</height>
             </rect>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_3">
+           <layout class="QVBoxLayout" name="verticalLayout_2">
             <property name="spacing">
              <number>0</number>
             </property>
@@ -579,22 +579,11 @@
              <number>0</number>
             </property>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_14">
-              <item>
-               <widget class="QPushButton" name="playlistsAllTracksButton">
-                <property name="text">
-                 <string>All Tracks</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="playlistsCreateNewButton">
-                <property name="text">
-                 <string>Create New Playlist</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QPushButton" name="playlistsCreateNewButton">
+              <property name="text">
+               <string>Create New Playlist</string>
+              </property>
+             </widget>
             </item>
             <item>
              <spacer name="verticalSpacer_3">
@@ -660,7 +649,7 @@
            <enum>QTabWidget::South</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <property name="elideMode">
            <enum>Qt::ElideNone</enum>

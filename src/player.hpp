@@ -6,7 +6,6 @@
 //***********************************************************//
 #include <random>
 #include <algorithm>
-#include <type_traits>
 //***********************************************************//
 // Qt5
 //***********************************************************//
@@ -37,13 +36,14 @@
 // Homebrew Headers
 //***********************************************************//
 #include "player.h"
+#include "parser/parser.hpp"
 
 //***********************************************************//
 // Homebrew Classes
 //***********************************************************//
-#include "db.hpp"
-#include "effects.hpp"
-#include "connector.cpp"
+#include "db/db.hpp"
+#include "effects/effects.hpp"
+#include "connector/connector.cpp"
 #include "playlistWidgetItem.h"
 #include "toggleButton.hpp"
 #include "playlistWidgetItem.hpp"
@@ -55,17 +55,25 @@ MainWindowUI::MainWindowUI () {
     ui.setupUi(this);
     
     setWindowTitle("Player");
-   
-    parseConfigFile ();
-    parsePresetFile ();
-    createWidgets   ();
 
     effects = std::make_unique<Effects>();
-    if (configYaml["DataBasePath"].IsDefined()) {
-        std::string path = configYaml["DataBasePath"].as<std::string>();
-        db = std::make_unique<DataBase>(path, this);
-        db->open();
-    }
+
+    parser.parseConfigFile();
+    parser.parsePresetFile();
+
+    parser.extractPresetInfo<EqualizerPreset> (ui.equalizerPresetsComboBox,"Equalizer");
+    parser.extractPresetInfo<DelayPreset>     (ui.delayPresetsComboBox,"Delay");
+    parser.extractPresetInfo<FilterPreset>    (ui.filterPresetsComboBox, "Filter");
+    parser.extractPresetInfo<PitchPreset>     (ui.pitchPresetComboBox,"Pitch");
+    parser.extractPresetInfo<CompressorPreset>(ui.compressorPresetComboBox,"Compressor");
+
+    createWidgets   ();
+
+    // if (parser.getConfigYaml()["DataBasePath"].IsDefined()) {
+    //     std::string path = parser.getConfigYaml()["DataBasePath"].as<std::string>();
+    //     db = std::make_unique<DataBase>(path, this);
+    //     db->open();
+    // }
 
     Connector::connectWidgets(this);
 
@@ -159,7 +167,7 @@ void MainWindowUI::setupVisualizationWidgets () {
 
 void MainWindowUI::setupSettingsWidgets () {
     QString labelText = QStringLiteral("Audio Extensions to Parse: %1");
-    ui.settingsExtensionsLabel->setText(labelText.arg(extensions.join(QChar(','))));
+    // ui.settingsExtensionsLabel->setText(labelText.arg(extensions.join(QChar(','))));
     //  Add installed themes to settings combobox
     QStringList styleNames = QStyleFactory::keys();
     ui.settingsColorThemeComboBox->addItems(styleNames);
@@ -167,20 +175,20 @@ void MainWindowUI::setupSettingsWidgets () {
     QStyle *style = QApplication::style();
     ui.settingsColorThemeComboBox->setCurrentText(style->objectName());
 
-    if (showAudioCover)
+    if (parser.getShowAudioCover())
         ui.settingsAudioCoverCheckBox->click();
 
-    if (flatButtons)
+    if (parser.getFlatButtons())
         ui.settingsFlatButtonsCheckBox->click();
 
-    if (saveLastAudio)
+    if (parser.getSaveLastAudio())
         ui.settingsSaveLastAudioCheckBox->click();
 
-    if (saveLastAudio && configYaml["LastAudioFilePath"].IsDefined()) {
+    if (parser.getSaveLastAudio() && parser.getConfigYaml()["LastAudioFilePath"].IsDefined()) {
         for (int i = 0; i < playlistItems.size(); ++i) {
             auto itemWidget = ui.playerPlayListWidget->itemWidget(playlistItems.at(i));
             auto playlistWidget = qobject_cast<PlaylistWidgetItem*>(itemWidget);
-            if (playlistWidget->filePath() == configYaml["LastAudioFilePath"].as<std::string>()) {
+            if (playlistWidget->filePath() == parser.getConfigYaml()["LastAudioFilePath"].as<std::string>()) {
                 currentAudio = playlistItems.at(i);
                 effects->changePlayingAudio(playlistWidget->filePath());
                 effects->togglePipelineState();
@@ -189,7 +197,7 @@ void MainWindowUI::setupSettingsWidgets () {
             }
         }
     }
-    if (playAtStartup) {
+    if (parser.getPlayAtStartup()) {
         ui.settingsPlayAtStartupCheckBox->click();
         ui.playerPauseButton->click();
     }
@@ -197,7 +205,7 @@ void MainWindowUI::setupSettingsWidgets () {
     extMenu->setMinimumWidth(300);
     ui.settingsExtensionsButton->setMenu(extMenu.data());
 
-    ui.settingsDirectoryListView->markSelectedDirs(musicFolders);
+    ui.settingsDirectoryListView->markSelectedDirs(parser.getMusicFolders());
     ui.settingsDirectoryListView->hide();
 }
 
@@ -226,278 +234,15 @@ void MainWindowUI::setupAnimations () {
 
 }
 
-void MainWindowUI::createConfigFile () {
-    std::string configData = R"~(---
-PresetFilePath: ""
-Extensions: ["*.mp3","*.flac","*.opus","*.wav"]
-ShowAudioCover: true
-FlatButtons: false
-PlayAtStartup: false
-SaveLastAudio: false
-MusicFolders: []
-LastAudioFilePath: ~
-...)~";
-    configYaml = YAML::Load(configData.c_str());
-    
-    QFile configFile (configPath);
-    if (!configFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "[Warning]:" << "Opening a file to write the configuration failed. Skipping";
-        return;
-    }
-    if (configFile.write(configData.c_str(), configData.size()) == -1)
-        qWarning() << "[Warning]:" << "Writing to the configuration file failed. Skipping";
-    configFile.close();
-}
-
-void MainWindowUI::parseConfigFile () {
-    configPath = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).at(0) + "/player/config.yaml";
-    
-    QFile configFile (configPath);
-    QFileInfo configFileInfo (configFile);
-
-    configFileInfo.absoluteDir().mkpath(".");
-    
-    if (!configFile.exists())
-        createConfigFile ();
-
-    if (!configFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "[Warning]:" << configFile.errorString();
-        createConfigFile ();
-  } else if (configFile.size() == 0) {
-        qWarning() << "[Warning]:" << "Config file is empty. Creating new one";
-        createConfigFile ();
-    }
-    QString configData = configFile.readAll();
-    configFile.close();
-    
-    try {
-        configYaml = YAML::Load(configData.toStdString());
-    } catch (YAML::ParserException &e) {
-        qWarning() << "[Warning]:" << "Bad config file data. Creating new one";
-        createConfigFile ();
-    } catch (...) {
-        qWarning() << "[Unknown Error]:" << "Creating config file";
-        createConfigFile ();
-    }
-    extractConfigInfo<QStringList>(&extensions,     "Extensions");
-    extractConfigInfo<QString>    (&presetPath,     "PresetFilePath");
-    if (presetPath == "")
-        presetPath = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).at(0) + "/player/presets.yaml";
-    extractConfigInfo<QStringList>(&musicFolders,   "MusicFolders");
-    extractConfigInfo<std::string>(&databasePath, "DataBasePath");
-    extractConfigInfo<bool>       (&flatButtons,    "FlatButtons");
-    extractConfigInfo<bool>       (&showAudioCover, "ShowAudioCover");
-    extractConfigInfo<bool>       (&playAtStartup,  "PlayAtStartup");
-    extractConfigInfo<bool>       (&saveLastAudio,  "SaveLastAudio");
-}
-
-template <class T>
-void MainWindowUI::extractConfigInfo (T* var, const std::string &key) {
-    if (!configYaml[key].IsDefined()) {
-        qWarning() << "[Warning]:" << key.c_str() << "doesn't exist. Skipping";
-        return;
-    }
-    const YAML::Node &element = configYaml[key];
-    try {
-        *var = element.as<T>();
-    } catch (YAML::BadConversion &e) {
-        qWarning() << "[Warning]:" << e.what();
-    } catch (...) {
-        qWarning() << "[Warning]:" << "Unknown error. Skipping";
-    }
-}
-
-void MainWindowUI::createPresetFile () {
-    loadDefaultPresets();
-
-    QFile presetFile (presetPath);
-
-    if (!presetFile.open (QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning () << "[Warning]:" << "Unable to open preset file. Skipping";
-        return;
-    }
-
-    YAML::Emitter emitter;
-
-    emitter << presetYaml;
-
-    if (presetFile.write (emitter.c_str()) == -1)
-        qWarning() << "[Warning]:" << "Writing presets to a file failed. Skipping";
-
-    presetFile.close ();
-}
-
-void MainWindowUI::loadDefaultPresets () {
-    std::string presetData =
-        R"~(---
-Equalizer:
-    Default: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    Bass: [30, 30, 20, 10, 0, 0, 0, 0, 0, 0]
-    Treble: [0, 0, 0, 0, 0, 10, 20, 30, 30, 30]
-    Midrange: [0, 10, 20, 30, 30, 30, 20, 10, 0, 0]
-    Soft: [-20, -10, -10, 0, 10, 10, 0, -10, -20, -20]
-    Bright: [0, 0, 10, 20, 30, 30, 20, 10, 0, 0]
-    Full Bass: [40, 30, 20, 10, 0, -10, -20, -30, -40, -40]
-    High-pitched: [0, -10, -20, -20, -10, 10, 20, 20, 10, 0]
-    Bass boost: [10, 20, 20, 10, -10, -20, -20, -10, 10, 20]
-    All boost: [20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
-Delay: ~
-Filter: ~
-Pitch: ~
-Compressor: ~
-...)~";
-    presetYaml = YAML::Load(presetData.c_str());
-}
-
-void MainWindowUI::parsePresetFile() {
-    QFile presetFile (presetPath);
-
-    if (!presetFile.exists())
-        createPresetFile ();
-
-    if (!presetFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        loadDefaultPresets();
-        qWarning() << "parsePresetFile" <<  presetFile.errorString();
-    }
-
-    if (presetFile.size() == 0) {
-        qWarning() << "[Warning]:" << "Empty config file. Creating new one";
-        createPresetFile();
-    }
-
-    QString presetData = presetFile.readAll();
-    presetFile.close();
-        
-    try {
-        presetYaml = YAML::Load(presetData.toStdString());
-    } catch (YAML::ParserException &e) {
-        qWarning() << "[Warning]:" << "Bad config file data. Creating new one";
-        createPresetFile ();
-    } catch (...) {
-        qWarning() << "[Warning]:" << "Unknown error. Creating config file";
-        createPresetFile ();
-    }
-
-    parsePresets<EqualizerPreset>  (ui.equalizerPresetsComboBox, "Equalizer");
-    parsePresets<DelayPreset>      (ui.delayPresetsComboBox,     "Delay");
-    parsePresets<FilterPreset>     (ui.filterPresetsComboBox,    "Filter");
-    parsePresets<PitchPreset>      (ui.pitchPresetComboBox,      "Pitch");
-    parsePresets<CompressorPreset> (ui.compressorPresetComboBox, "Compressor");
-}
-
-template <class T>
-void MainWindowUI::parsePresets(QComboBox *combobox, const std::string &key) {
-    QVariant data;
-    std::string presetName;
-    if (!presetYaml[key].IsDefined()) {
-        qWarning() << key.c_str() << "does not exit. Skipping";
-        return;
-    }
-    const YAML::Node &element = presetYaml[key];
-    for (YAML::const_iterator it = element.begin(); it != element.end(); ++it) {
-        presetName = it->first.as<std::string>();
-        try {
-            // Effects presets
-            if constexpr (std::is_same<T, EqualizerPreset>::value)
-                data = QVariant::fromValue(it->second.as<EqualizerPreset>());
-            // Delay presets
-            else if constexpr (std::is_same<T, DelayPreset>::value)
-                data = QVariant::fromValue(it->second.as<DelayPreset>());
-            // Filter presets
-            else if constexpr (std::is_same<T, FilterPreset>::value)
-                data = QVariant::fromValue(it->second.as<FilterPreset>());
-            // Pitch presets
-            else if constexpr (std::is_same<T, PitchPreset>::value)
-                data = QVariant::fromValue(it->second.as<PitchPreset>());
-            // Compressor presets
-            else if constexpr (std::is_same<T, CompressorPreset>::value)
-                data = QVariant::fromValue(it->second.as<CompressorPreset>());
-        } catch (YAML::BadConversion &e) {
-            qWarning() << "[Warning]:" << e.what();
-            continue;
-        } catch (...) {
-            qWarning() << "[Unknown Error with]:" << key.c_str() << presetName.c_str();
-            continue;
-        }
-        combobox->addItem(QString::fromStdString(presetName), data);
-    }
-}
-
-void MainWindowUI::savePresets () {
-    QFile presetFile (presetPath);
-
-    if (!presetFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << presetFile.errorString() << '\n';
-        return;
-    }
-
-    YAML::Emitter out;
-    out << presetYaml;
-    if (presetFile.write(out.c_str(), out.size()) == -1) {
-        qWarning() << "[Warning]:" << "Saving preset to a file failed. Skipping";
-    }
-    presetFile.close();
-}
-
-void MainWindowUI::removePreset (const std::string &presetType, QComboBox* combobox) {
-    int         currentItemId   = combobox->currentIndex();
-    std::string currentItemText = combobox->currentText().toStdString();
-    combobox->removeItem(currentItemId);
-    
-    if (presetYaml[presetType].IsDefined()) 
-        presetYaml[presetType].remove(currentItemText);
-    savePresets();
-}
-
-template <class T>
-void MainWindowUI::updatePresetConfig (const std::string &presetName) {
-    YAML::Node newPresetSeq (YAML::NodeType::Sequence);
-    newPresetSeq.SetStyle(YAML::EmitterStyle::Flow);
-    QComboBox *combobox;
-    if      constexpr (std::is_same<T, EqualizerPreset>::value) {
-        serializeEqualizerParams(&newPresetSeq);
-        combobox = ui.equalizerPresetsComboBox;
-  } else if constexpr (std::is_same<T, DelayPreset>::value) {
-        serializeDelayParams(&newPresetSeq);
-        combobox = ui.delayPresetsComboBox;
-  } else if constexpr (std::is_same<T, FilterPreset>::value) {
-        serializeFilterParams(&newPresetSeq);
-        combobox = ui.filterPresetsComboBox;
-  } else if constexpr (std::is_same<T, PitchPreset>::value) {
-        serializePitchParams(&newPresetSeq);
-        combobox = ui.pitchPresetComboBox;
-  } else if constexpr (std::is_same<T, CompressorPreset>::value) {
-        serializeCompressorParams(&newPresetSeq);
-        combobox = ui.compressorPresetComboBox;
-  }
-
-    presetYaml[currentPresetType][presetName] = std::move(newPresetSeq);
-    parsePresets<T>(combobox, currentPresetType);
-    savePresets();
-}
-
-void MainWindowUI::parseMusic (const QString &path, QFileInfoList& musicFiles) {
-    QDir musicDir (path);
-    musicDir.setNameFilters(extensions);
-    musicFiles += musicDir.entryInfoList(QDir::Files);
-
-    QDir folderDir (path);
-    QFileInfoList folderList;
-    folderDir.setFilter(QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot);
-    folderList = folderDir.entryInfoList();
-    foreach (const QFileInfo &folder, folderList)
-        parseMusic (folder.absoluteFilePath(), musicFiles);
-}
-
 void MainWindowUI::updatePlaylistWidget () {
     //  Add playlist items
     ui.playerPlayListWidget->clear();
     QFileInfoList musicFiles;
-    if (musicFolders.size() == 0)
-        musicFolders << QStandardPaths::standardLocations(QStandardPaths::MusicLocation).at(0);
+    if (parser.getMusicFolders().size() == 0)
+        parser.setMusicFolders(QStandardPaths::standardLocations(QStandardPaths::MusicLocation));
 
-    foreach (const QString &folder, musicFolders)
-        parseMusic(folder, musicFiles);
+    foreach (const QString &folder, parser.getMusicFolders())
+        parser.parseMusic(folder, musicFiles);
     
     QSize               size (ui.playerPlayListWidget->width(), 40);
     PlaylistButtonValue playlistValue;
@@ -619,7 +364,7 @@ void MainWindowUI::changeCompressorParams (const QVariant &data) {
 
 //********Others********//
 void MainWindowUI::updateCurrentAudioCover (const std::string &filePath) {
-    if (!showAudioCover) {
+    if (!parser.getShowAudioCover()) {
         albumCoverSet = false;
         ui.playerMusicPicture->setText("*LOGO HERE*");
         return;
@@ -734,16 +479,16 @@ void MainWindowUI::updateVisualizingWidget () {
 void MainWindowUI::addNewPreset () {
     std::string presetName = presetDialogWindow->getLineInput();
 
-    if      (currentPresetType == "Equalizer")
-        updatePresetConfig<EqualizerPreset> (presetName);
-    else if (currentPresetType == "Delay")
-        updatePresetConfig<DelayPreset>     (presetName);
-    else if (currentPresetType == "Filter")
-        updatePresetConfig<FilterPreset>    (presetName);
-    else if (currentPresetType == "Pitch")
-        updatePresetConfig<PitchPreset>     (presetName);
-    else if (currentPresetType == "Compressor")
-        updatePresetConfig<CompressorPreset>(presetName);
+    // if      (currentPresetType == "Equalizer")
+    //     updatePresetConfig<EqualizerPreset> (presetName);
+    // else if (currentPresetType == "Delay")
+    //     updatePresetConfig<DelayPreset>     (presetName);
+    // else if (currentPresetType == "Filter")
+    //     updatePresetConfig<FilterPreset>    (presetName);
+    // else if (currentPresetType == "Pitch")
+    //     updatePresetConfig<PitchPreset>     (presetName);
+    // else if (currentPresetType == "Compressor")
+    //     updatePresetConfig<CompressorPreset>(presetName);
 
     presetDialogWindow->dialogLineEdit->clear();
     presetDialogWindow->hide();
@@ -808,7 +553,6 @@ void MainWindowUI::closeTagListWidget () {
     ui.playerTagListFrame->hide();
     
     ui.playerSearchButton->show();
-    ui.playerSearchLineEdit->show();
     ui.playerPlayListWidget->show();
     ui.playerPlaylistVisibilityButton->show();
 }
@@ -1024,29 +768,29 @@ void MainWindowUI::themeComboBoxClicked (const QString &theme) {
 }
 
 void MainWindowUI::extensionsMenuClicked () {
-    QObject *obj = sender();
-    if (!obj)
-        return;
+    // QObject *obj = sender();
+    // if (!obj)
+    //     return;
 
-    QAction *action = qobject_cast<QAction*>(obj);
-    QString actionText = QString("*.%1").arg(action->text());
+    // QAction *action = qobject_cast<QAction*>(obj);
+    // QString actionText = QString("*.%1").arg(action->text());
 
-    // prevent all files from being shown
-    if (extensions.contains(actionText) && extensions.size() == 1)
-        return;
-    else if (extensions.contains(actionText))
-        extensions.removeOne(actionText);
-    else
-        extensions << actionText;
+    // // prevent all files from being shown
+    // if (extensions.contains(actionText) && extensions.size() == 1)
+    //     return;
+    // else if (extensions.contains(actionText))
+    //     extensions.removeOne(actionText);
+    // else
+    //     extensions << actionText;
 
-    QString labelText = QStringLiteral("Audio Extensions to Parse: %1");
-    ui.settingsExtensionsLabel->setText(labelText.arg(extensions.join(QChar(','))));
+    // QString labelText = QStringLiteral("Audio Extensions to Parse: %1");
+    // ui.settingsExtensionsLabel->setText(labelText.arg(extensions.join(QChar(','))));
 
-    updatePlaylistWidget();
+    // updatePlaylistWidget();
 }
 
 void MainWindowUI::newFolderSelected (const QStringList& folders) {
-    musicFolders = folders;
+    parser.setMusicFolders(folders);
     updatePlaylistWidget();
 }
 
@@ -1058,17 +802,17 @@ void MainWindowUI::flatButtonsClicked (int state) {
     QList<QPushButton*> buttons = this->findChildren<QPushButton*>();
     foreach (QPushButton *button, buttons)
         button->setFlat(state != Qt::Unchecked);
-    configYaml["FlatButtons"] = (state != Qt::Unchecked);
+    parser.setConfigYaml<bool>("FlatButtons",state != Qt::Unchecked);
 }
 
 void MainWindowUI::showAudioCoverClicked (int state) {
-    showAudioCover = (state != Qt::Unchecked);
-    configYaml["ShowAudioCover"] = showAudioCover;
+    parser.setShowAudioCover(state != Qt::Unchecked);
+    parser.setConfigYaml<bool>("ShowAudioCover",parser.getShowAudioCover());
 
     if (currentAudio == nullptr)
         return;
 
-    if (!showAudioCover)
+    if (!parser.getShowAudioCover())
         ui.playerMusicPicture->setText("*LOGO HERE*");
     else {
         int currentAudioId  = playlistItems.indexOf(currentAudio);
@@ -1080,20 +824,20 @@ void MainWindowUI::showAudioCoverClicked (int state) {
 }
 
 void MainWindowUI::playAtStartupClicked (int state) {
-    playAtStartup = (state != Qt::Unchecked);
-    configYaml["PlayAtStartup"] = playAtStartup;
+    parser.setPlayAtStartup(state != Qt::Unchecked);
+    parser.setConfigYaml("PlayAtStartup",parser.getPlayAtStartup());
 }
 
 void MainWindowUI::saveLastAudioClicked (int state) {
-    saveLastAudio = (state != Qt::Unchecked);
+    parser.setSaveLastAudio(state != Qt::Unchecked);
     if (!currentAudio)
         return;
     auto playlistWidget = qobject_cast<PlaylistWidgetItem*>(ui.playerPlayListWidget->itemWidget(currentAudio));
-    configYaml["LastAudioFilePath"] = playlistWidget->filePath().c_str();
+    parser.setConfigYaml("LastAudioFilePath", playlistWidget->filePath().c_str());
 }
 
 void MainWindowUI::showEvent (QShowEvent *event) {
-    if (playAtStartup) {
+    if (parser.getPlayAtStartup()) {
         auto widget = qobject_cast<PlaylistWidgetItem*>
             (ui.playerPlayListWidget->itemWidget(ui.playerPlayListWidget->currentItem()));
         updateCurrentAudioCover(widget->filePath());
@@ -1129,30 +873,11 @@ void MainWindowUI::resizeEvent (QResizeEvent *event) {
 void MainWindowUI::closeEvent (QCloseEvent *event) {
     presetDialogWindow->hide();
 
-    QFile configFile (configPath);
-
-    if (!configFile.open (QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning () << "[Warning]:" << "Unable to open config file. Skipping";
-        return;
-    }
-
-    if (saveLastAudio && currentAudio != nullptr) {
+    if (currentAudio != nullptr) {
         auto widget = ui.playerPlayListWidget->itemWidget(currentAudio);
         auto playlistWidget = qobject_cast<PlaylistWidgetItem*>(widget);
-        configYaml["LastAudioFilePath"] = playlistWidget->filePath();
-  } else if (!saveLastAudio)
-        configYaml["LastAudioFilePath"] = YAML::Null;
-
-    configYaml["SaveLastAudio"] = saveLastAudio;
-
-    YAML::Emitter emitter;
-    emitter << configYaml;
-
-    if (configFile.write (emitter.c_str()) == -1)
-        qWarning() << "[Warning]:" << "Writing config data to a file failed. Skipping";
-
-    configFile.close ();
-
+        parser.saveConfigFile(playlistWidget->filePath());
+    }
     QMainWindow::closeEvent(event);
 }
 

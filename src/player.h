@@ -3,11 +3,6 @@
 #define PLAYER_H
 
 //***********************************************************//
-// STL
-//***********************************************************//
-#include <limits>
-
-//***********************************************************//
 // Qt5
 //***********************************************************//
 #include <QList>
@@ -25,10 +20,12 @@
 #include <gst/gst.h>
 #include <yaml-cpp/yaml.h>
 
+#include "parser/parser.h"
 //***********************************************************//
 // Autogen
 //***********************************************************//
 #include "ui_mainwindow.h"
+
 
 class QEvent;
 class Effects;
@@ -51,12 +48,9 @@ public:
     
     MainWindowUI ();
     virtual ~MainWindowUI ();
-    
-    template <class T>
-    void updatePresetConfig (const std::string &presetName);
         
 private:
-    
+    Parser  parser;
     std::unique_ptr<DataBase> db;
     std::unique_ptr<Effects>  effects;
 
@@ -78,24 +72,8 @@ private:
            audioPanningTimer,
            audioVisualizingTimer;
     
-    YAML::Node configYaml,
-               presetYaml;
-               
-    QString     configPath,
-                presetPath;
-
-    QStringList extensions,
-                musicFolders;
-    
     QListWidgetItem *currentAudio {nullptr},
                     *stopAudio    {nullptr};
-                    
-    bool flatButtons    {false},
-         showAudioCover {false},
-         playAtStartup  {false},
-         saveLastAudio  {false};
-
-    std::string databasePath;
 
     std::string currentPresetType;
     
