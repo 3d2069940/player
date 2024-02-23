@@ -2,7 +2,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-
 #include <qcombobox.h>
 #include <string>
 
@@ -29,9 +28,14 @@ public:
     void saveConfigFile (const std::string &filePath);
 
     void parsePresetFile ();
-      template<class T>
+      template <class T>
       void extractPresetInfo (QComboBox *combobox, const std::string &key);
       void loadDefaultPreset ();
+
+    template <class T>
+    void addToPreset (QComboBox *combobox, YAML::Node *node, 
+                      const std::string &value, const std::string &presetName);
+    void removeFromPreset (QComboBox *combobox, const std::string &key);
 
     void savePresetFile ();
 

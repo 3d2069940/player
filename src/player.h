@@ -104,7 +104,6 @@ private:
         template <class T>
         void parsePresets  (QComboBox *combobox, const std::string &key);
     void savePresets  ();
-    void removePreset (const std::string&, QComboBox*);
     
     void parseMusic (const QString &path, QFileInfoList& musicFiles);
     void updatePlaylistWidget ();

@@ -65,9 +65,9 @@ void Connector::connectEqualizer(MainWindowUI* ptr) {
         QVariant defaultData = QVariant::fromValue(defaultPreset);
         ptr->changeEqualizerParams(defaultData);
     });
-    // connect(ptr->ui.equalizerDeletePresetButton, &QPushButton::clicked, [ptr] () {
-    //     ptr->removePreset("Equalizer", ptr->ui.equalizerPresetsComboBox);
-    // });
+    connect(ptr->ui.equalizerDeletePresetButton, &QPushButton::clicked, [ptr] () {
+        ptr->parser.removeFromPreset(ptr->ui.equalizerPresetsComboBox, "Equalizer");
+    });
     connect(ptr->ui.equalizerSavePresetButton, &QPushButton::clicked, [ptr]() {
         ptr->currentPresetType = "Equalizer";
         ptr->presetDialogWindow->show();
@@ -132,9 +132,9 @@ void Connector::connectDelay(MainWindowUI* ptr) {
         ptr->currentPresetType = "Delay";
         ptr->presetDialogWindow->show();
     });
-    // connect(ptr->ui.delayDeletePresetButton, &QPushButton::clicked, [ptr]() {
-    //     ptr->removePreset("Delay", ptr->ui.delayPresetsComboBox);
-    // });
+    connect(ptr->ui.delayDeletePresetButton, &QPushButton::clicked, [ptr]() {
+        ptr->parser.removeFromPreset(ptr->ui.delayPresetsComboBox, "Delay");
+    });
 
     using namespace CODES;
     connect(ptr->ui.delayDelaySpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [ptr](int value) {
@@ -159,9 +159,9 @@ void Connector::connectFilter(MainWindowUI* ptr) {
         ptr->currentPresetType = "Filter";
         ptr->presetDialogWindow->show();
     });
-    // connect(ptr->ui.filterDeletePresetButton, &QPushButton::clicked, [ptr]() {
-    //     ptr->removePreset("Filter", ptr->ui.filterPresetsComboBox);
-    // });
+    connect(ptr->ui.filterDeletePresetButton, &QPushButton::clicked, [ptr]() {
+        ptr->parser.removeFromPreset(ptr->ui.filterPresetsComboBox, "Filter");
+    });
     connect(ptr->ui.filterDefaultPresetButton, &QPushButton::clicked, [ptr]() {
         FilterPreset defaultPreset;
         QVariant defaultData = QVariant::fromValue(defaultPreset);
@@ -202,9 +202,9 @@ void Connector::connectPitch(MainWindowUI* ptr) {
         ptr->currentPresetType = "Pitch";
         ptr->presetDialogWindow->show();
     });
-    // connect(ptr->ui.pitchDeletePresetButton, &QPushButton::clicked, [ptr]() {
-    //     ptr->removePreset("Pitch", ptr->ui.pitchPresetComboBox);
-    // });
+    connect(ptr->ui.pitchDeletePresetButton, &QPushButton::clicked, [ptr]() {
+        ptr->parser.removeFromPreset(ptr->ui.pitchPresetComboBox, "Pitch");
+    });
     connect(ptr->ui.pitchDefaultPresetButton, &QPushButton::clicked, [ptr]() {
         PitchPreset defaultPreset;
         QVariant data = QVariant::fromValue(defaultPreset);
@@ -234,9 +234,9 @@ void Connector::connectCompressor(MainWindowUI* ptr) {
         ptr->currentPresetType = "Compressor";
         ptr->presetDialogWindow->show();
     });
-    // connect(ptr->ui.compressorDeletePresetButton, &QPushButton::clicked, [ptr]() {
-    //     ptr->removePreset("Compressor", ptr->ui.compressorPresetComboBox);
-    // });
+    connect(ptr->ui.compressorDeletePresetButton, &QPushButton::clicked, [ptr]() {
+        ptr->parser.removeFromPreset(ptr->ui.compressorPresetComboBox, "Compressor");
+    });
     connect(ptr->ui.compressorDefaultPresetButton, &QPushButton::clicked, [ptr]() {
         CompressorPreset defaultPreset;
         QVariant data = QVariant::fromValue(defaultPreset);

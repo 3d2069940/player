@@ -2,6 +2,9 @@
 #ifndef PARSER_CPP
 #define PARSER_CPP
 
+#include <algorithm>
+#include <type_traits>
+
 #include "parser.h"
 #include "metaTypes.h"
 
@@ -175,6 +178,8 @@ void Parser::extractPresetInfo (QComboBox *combobox, const std::string &key) {
     QVariant data;
     std::string presetName;
 
+    combobox->clear();
+
     if (!presetYaml[key].IsDefined()) {
         qWarning() << key.c_str() << "doesn't exists. Skipped";
         presetYaml[key] = YAML::Null;
@@ -216,6 +221,34 @@ Pitch: ~
 Compressor: ~
 ---)~";
     presetYaml = YAML::Load(presetData);
+}
+
+template <class T>
+void Parser::addToPreset (QComboBox *combobox, YAML::Node *node, 
+                          const std::string &key, const std::string &presetName) {
+    if constexpr (std::is_same_v<T, EqualizerPreset>) {
+        presetYaml["Equalizer"][presetName]  = *node;
+    } else if constexpr (std::is_same_v<T, DelayPreset>) {
+        presetYaml["Delay"][presetName]      = *node;
+    } else if constexpr (std::is_same_v<T, FilterPreset>) {
+        presetYaml["Filter"][presetName]     = *node;
+    } else if constexpr (std::is_same_v<T, PitchPreset>) {
+        presetYaml["Pitch"][presetName]      = *node;
+    } else if constexpr (std::is_same_v<T, CompressorPreset>) {
+        presetYaml["Compressor"][presetName] = *node;
+    }
+    if (int id = combobox->findText(QString::fromStdString(presetName)); id != -1)
+        combobox->removeItem(id);
+
+    extractPresetInfo<T>(combobox, key);
+}
+
+void Parser::removeFromPreset (QComboBox *combobox, const std::string &key) {
+    std::string itemText = combobox->currentText().toStdString();
+    int itemId = combobox->currentIndex();
+    combobox->removeItem(itemId);
+    if (presetYaml[key][itemText].IsDefined())
+        presetYaml[key].remove(itemText);
 }
 
 void Parser::savePresetFile () {

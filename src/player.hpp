@@ -35,6 +35,7 @@
 //***********************************************************//
 // Homebrew Headers
 //***********************************************************//
+#include "metaTypes.h"
 #include "player.h"
 #include "parser/parser.hpp"
 
@@ -479,16 +480,29 @@ void MainWindowUI::updateVisualizingWidget () {
 void MainWindowUI::addNewPreset () {
     std::string presetName = presetDialogWindow->getLineInput();
 
-    // if      (currentPresetType == "Equalizer")
-    //     updatePresetConfig<EqualizerPreset> (presetName);
-    // else if (currentPresetType == "Delay")
-    //     updatePresetConfig<DelayPreset>     (presetName);
-    // else if (currentPresetType == "Filter")
-    //     updatePresetConfig<FilterPreset>    (presetName);
-    // else if (currentPresetType == "Pitch")
-    //     updatePresetConfig<PitchPreset>     (presetName);
-    // else if (currentPresetType == "Compressor")
-    //     updatePresetConfig<CompressorPreset>(presetName);
+    YAML::Node node;
+
+    if (currentPresetType == "Equalizer") {
+        serializeEqualizerParams(&node);
+        parser.addToPreset<EqualizerPreset>(ui.equalizerPresetsComboBox, &node, 
+                                                currentPresetType, presetName);
+  } else if (currentPresetType == "Delay") {
+        serializeDelayParams(&node);
+        parser.addToPreset<DelayPreset>(ui.delayPresetsComboBox, &node, 
+                                        currentPresetType, presetName);
+  } else if (currentPresetType == "Filter") {
+        serializeFilterParams(&node);
+        parser.addToPreset<FilterPreset>(ui.filterPresetsComboBox, &node, 
+                                        currentPresetType, presetName);
+  } else if (currentPresetType == "Pitch") {
+        serializeFilterParams(&node);
+        parser.addToPreset<PitchPreset>(ui.pitchPresetComboBox, &node,
+                                        currentPresetType, presetName);
+  } else if (currentPresetType == "Compressor") {
+        serializeCompressorParams(&node);
+        parser.addToPreset<CompressorPreset>(ui.compressorPresetComboBox, &node, 
+                                            currentPresetType, presetName);
+    }
 
     presetDialogWindow->dialogLineEdit->clear();
     presetDialogWindow->hide();
