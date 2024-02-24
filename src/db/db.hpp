@@ -2,8 +2,6 @@
 #ifndef DB_HPP
 #define DB_HPP
 
-#include <iostream>
-
 #include "db.h"
 #include "player.h"
 #include "playlistWidgetItem.h"
@@ -12,8 +10,6 @@
 
 #include <QList>
 #include <QListWidgetItem>
-#include <cstddef>
-#include <qlistwidget.h>
 #include <sqlite3.h>
 
 
@@ -28,15 +24,14 @@ DataBase::~DataBase () {
 
 void DataBase::open () {
     int returnCode = sqlite3_open(dbPath.c_str(),&db);
-    if (returnCode) {
+    if (returnCode)
         qWarning() << "[Warning]: failed to open database " << dbPath.c_str();
-  } else {
+    else
         qDebug() << "Database opened successfully";
-  }
 }
 
 void DataBase::write (const std::string &tableName, const QList<QListWidgetItem*> &values) {
-    std::string commandCreate = "; CREATE TABLE IF NOT EXISTS " + tableName +
+    std::string commandCreate = "CREATE TABLE IF NOT EXISTS " + tableName +
                                 " (NAME TEXT);";
  
     sqlite3_exec(db, commandCreate.c_str(), nullptr,nullptr,nullptr);
@@ -49,7 +44,33 @@ void DataBase::write (const std::string &tableName, const QList<QListWidgetItem*
     }
 }
 
-QStringList DataBase::read (const std::string &tableName) {
+void DataBase::remove (const std::string &tableName, const std::string &key) {
+    std::string commandRemove = "DELETE FROM " + tableName + 
+                                " WHERE column_name = " + key;
+    sqlite3_exec(db,commandRemove.c_str(),nullptr,nullptr,nullptr);
+}
+
+QStringList DataBase::tables () {
+    QStringList result;
+    sqlite3_stmt *stmt;
+    std::string commandRead = "SELECT name FROM sqlite_master WHERE type='table';";
+    int returnCode = sqlite3_prepare_v2(db, commandRead.c_str(), -1, &stmt, nullptr);
+    
+    if (returnCode != SQLITE_OK) {
+        sqlite3_finalize(stmt);
+        return result;
+    }
+
+    while ((returnCode = sqlite3_step(stmt)) == SQLITE_ROW) {
+        const char *tableName = reinterpret_cast<const char*>(sqlite3_column_text(stmt,0));
+        result << tableName;
+    }
+
+    sqlite3_finalize(stmt);
+    return result;
+}
+
+QStringList DataBase::readTable (const std::string &tableName) {
     QStringList result;
     sqlite3_stmt *stmt;
     std::string commandRead = "SELECT NAME FROM " + tableName + " ;";
@@ -64,10 +85,23 @@ QStringList DataBase::read (const std::string &tableName) {
 }
 
 void DataBase::createNewPlaylist (const std::string &playlistName) {
-    std::string commandCreate = "; CREATE TABLE IF NOT EXISTS " + playlistName +
+    std::string commandCreate = "CREATE TABLE IF NOT EXISTS " + playlistName +
                                 " (NAME TEXT);";
     sqlite3_exec(db, commandCreate.c_str(), nullptr, nullptr, nullptr);
 
+}
+
+bool DataBase::tableExists (const std::string &tableName) {
+    std::string commandSearch = "SELECT name FROM sqlite_master WHERE type='table' AND name='" + 
+                                tableName + "'";
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db,commandSearch.c_str(),-1,&stmt,nullptr) == SQLITE_OK)
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            sqlite3_finalize(stmt);
+            return true;
+        }
+    sqlite3_finalize(stmt);
+    return false;
 }
 
 bool DataBase::exists (const std::string &value, const std::string &tableName) {

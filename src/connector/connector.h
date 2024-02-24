@@ -3,8 +3,10 @@
 #define CONNECTOR_H
 
 
-class MainWindowUI;
+#include <QObject>
 
+
+class MainWindowUI;
 class Connector : public QObject {
 public:
     static inline void connectWidgets          (MainWindowUI* ptr);
@@ -15,6 +17,7 @@ public:
       static inline void connectPitch          (MainWindowUI* ptr);
       static inline void connectCompressor     (MainWindowUI* ptr);
       static inline void connectPanorama       (MainWindowUI* ptr);
+    static inline void connectPlaylistTab      (MainWindowUI* ptr);
     static inline void connectVisualizationTab (MainWindowUI* ptr);
     static inline void connectSettingsTab      (MainWindowUI* ptr);
 };

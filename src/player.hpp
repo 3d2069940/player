@@ -4,6 +4,11 @@
 //***********************************************************//
 // STL
 //***********************************************************//
+#include <cstddef>
+#include <memory>
+#include <qpushbutton.h>
+#include <qstandardpaths.h>
+#include <qvariant.h>
 #include <random>
 #include <algorithm>
 //***********************************************************//
@@ -44,6 +49,7 @@
 //***********************************************************//
 #include "db/db.hpp"
 #include "effects/effects.hpp"
+#include "playlist/playlist.hpp"
 #include "connector/connector.cpp"
 #include "playlistWidgetItem.h"
 #include "toggleButton.hpp"
@@ -68,16 +74,18 @@ MainWindowUI::MainWindowUI () {
     parser.extractPresetInfo<PitchPreset>     (ui.pitchPresetComboBox,"Pitch");
     parser.extractPresetInfo<CompressorPreset>(ui.compressorPresetComboBox,"Compressor");
 
+    std::string path;
+    if (parser.getConfigYaml()["DataBasePath"].IsDefined())
+        path = parser.getConfigYaml()["DataBasePath"].as<std::string>();
+    else
+        path = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).at(0).toStdString() + 
+                "/player/database.db";
+
+    db = std::make_unique<DataBase>(path, this);
+    db->open();
+
     createWidgets   ();
-
-    // if (parser.getConfigYaml()["DataBasePath"].IsDefined()) {
-    //     std::string path = parser.getConfigYaml()["DataBasePath"].as<std::string>();
-    //     db = std::make_unique<DataBase>(path, this);
-    //     db->open();
-    // }
-
     Connector::connectWidgets(this);
-
     setupWidgets    ();
 
     audioVisualizingTimer.start();
@@ -114,6 +122,20 @@ void MainWindowUI::createWidgets () {
     foreach (const QString &ext, extActions) {
         extMenu->addAction(ext);
     }
+    
+    if (!db.get())
+        return;
+
+    foreach (const QString &table, db->tables()) {
+        QPushButton *button = new QPushButton();
+        Playlist playlist;
+        playlist.setPlaylistFiles(db->readTable(table.toStdString()));
+        QVariant variant = QVariant::fromValue(playlist);
+        button->setText(table);
+        button->setProperty("playlist",variant);
+        ui.verticalLayout_3->addWidget(button);
+        connect(button,&QPushButton::clicked,this, &MainWindowUI::onPlaylistButtonClicked);
+    }
 }
 
 void MainWindowUI::setupWidgets () {
@@ -126,6 +148,7 @@ void MainWindowUI::setupWidgets () {
     ui.playerTagListFrame->hide();
     ui.playerPlayListWidget->hide();
     ui.playerSearchLineEdit->hide();
+    ui.playlistCreateNewDialogFrame->hide();
 
     playlistDelegate = QSharedPointer<PlaylistDelegate>::create();
     ui.playerPlayListWidget->setItemDelegate(playlistDelegate.data());
@@ -152,7 +175,7 @@ void MainWindowUI::setupVisualizationWidgets () {
     ui.visualizingCustomPlot->xAxis->setRange(0, 10);
     
     ui.visualizingCustomPlot->setBackground(palette().color(QPalette::Window));
-    
+
     gradient.setStart (width()/2, height()/2);
     gradient.setFinalStop(width()/2, height()-ui.visualizingCustomPlot->height());
       
@@ -744,6 +767,50 @@ void MainWindowUI::updateAudioState () {
         effects->changePlayingAudio(playlistItem->filePath());
         ui.playerPlayListWidget->setCurrentItem(currentAudio);
     }
+}
+
+void MainWindowUI::onPlaylistButtonClicked () {
+    QObject *object = sender();
+    if (object == nullptr)
+        return;
+
+    ui.playlistPlaylistWidget->show();
+    ui.playlistCreateNewDialogFrame->hide();
+
+    QPushButton *button = qobject_cast<QPushButton*>(object);
+    QVariant buttonData = button->property("playlist");
+    Playlist playlist = buttonData.value<Playlist>();
+    playlist.show(ui.playlistPlaylistWidget);
+}
+
+void MainWindowUI::newPlaylistButtonClicked () {
+    ui.playlistCreateNewDialogFrame->show();
+    ui.playlistPlaylistWidget->hide();
+}
+
+void MainWindowUI::newPlaylistButtonAccepted () {
+    std::string playlistName = ui.playlistNewPlaylistLineEdit->text().toStdString();
+    ui.playlistNewPlaylistLineEdit->clear();
+
+    ui.playlistCreateNewDialogFrame->hide();
+    ui.playlistPlaylistWidget->show();
+    
+    if (db->tableExists(playlistName))
+        return;
+    
+    db->createNewPlaylist(playlistName);
+    QPushButton *button = new QPushButton();
+    Playlist playlist;
+    playlist.setPlaylistFiles(db->readTable(playlistName));
+    QVariant variant = QVariant::fromValue(playlist);
+    button->setText(QString::fromStdString(playlistName));
+    button->setProperty("playlist",variant);
+    ui.verticalLayout_3->addWidget(button);
+    connect(button,&QPushButton::clicked,this, &MainWindowUI::onPlaylistButtonClicked);
+}
+
+void MainWindowUI::newPlaylistButtonRejected () {
+    ui.playlistNewPlaylistLineEdit->clear();
 }
 
 void MainWindowUI::updatePanPosition () {

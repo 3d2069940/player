@@ -54,6 +54,7 @@ set(SRCS
     src/player.hpp
     src/parser/parser.hpp
     src/effects/effects.hpp
+    src/playlist/playlist.hpp
     src/connector/connector.cpp
     src/widgets/buttons/toggleButton.hpp
     src/widgets/player/playlistWidgetItem.hpp
@@ -66,6 +67,7 @@ set(HEADERS
     src/player.h
     src/metaTypes.h
     src/parser/parser.h
+    src/playlist/playlist.h
     src/effects/effects.h
     src/widgets/buttons/toggleButton.h
     src/widgets/player/playlistWidgetItem.h

@@ -21,6 +21,7 @@ void Connector::connectWidgets(MainWindowUI* ptr) {
     Connector::connectPitch           (ptr);
     Connector::connectCompressor      (ptr);
     Connector::connectPanorama        (ptr);
+    Connector::connectPlaylistTab     (ptr);
     Connector::connectVisualizationTab(ptr);
     Connector::connectSettingsTab     (ptr);
 }
@@ -290,6 +291,13 @@ void Connector::connectPanorama(MainWindowUI* ptr) {
         ptr->audioPanningTimer.setInterval(ptr->ui.panoramaSpeedDial->maximum()+10-value);
         ptr->audioPanningTimer.start();
     });
+}
+
+void Connector::connectPlaylistTab (MainWindowUI* ptr) {
+    connect(ptr->ui.playlistsCreateNewButton, &QPushButton::clicked, ptr, &MainWindowUI::newPlaylistButtonClicked);
+    connect(ptr->ui.playlistDialogButtonBox,&QDialogButtonBox::accepted, ptr, &MainWindowUI::newPlaylistButtonAccepted);
+    connect(ptr->ui.playlistDialogButtonBox,&QDialogButtonBox::rejected, ptr, &MainWindowUI::newPlaylistButtonRejected);
+    
 }
 
 void Connector::connectVisualizationTab(MainWindowUI* ptr) {

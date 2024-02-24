@@ -145,6 +145,11 @@ public slots:
     void seekForward           ();
     void seekBackward          ();
     void updateAudioState      ();
+//  PlaylistTab
+    void onPlaylistButtonClicked  ();
+    void newPlaylistButtonClicked ();
+    void newPlaylistButtonAccepted ();
+    void newPlaylistButtonRejected ();
 //  Effects
     void updatePanPosition     ();    
 //  Playlist
