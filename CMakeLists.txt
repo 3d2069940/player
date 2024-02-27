@@ -22,57 +22,34 @@ find_program(QMAKE qmake)
 find_program(MAKE make)
 
 find_package(PkgConfig REQUIRED)    
-find_package(Qt5Widgets CONFIG COMPONENTS Core Widgets Gui REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 
 pkg_check_modules(TAGLIB REQUIRED taglib)
 pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
 pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
 pkg_check_modules(SQLITE3 REQUIRED sqlite3)
 
-qt_wrap_ui(UI_FILES mainwindow.ui)
-qt_wrap_cpp(MOC_FILES src/player.h 
-                      src/widgets/player/playlistWidgetItem.h
-                      src/widgets/effects/presetDialogWindow.h
-)
+qt_wrap_ui(UI_FILES mainwindow.ui       playertab.ui 
+                    playlisttab.ui      effectstab.ui 
+                    visualizationtab.ui settingstab.ui)
+# qt_wrap_cpp(MOC_FILES )
 qt_add_resources(RESOURCES icons.qrc)
 
-include_directories(src build libs/qcustomplot
-                    src/widgets/settings
-                    src/widgets/player
-                    src/widgets/buttons
+include_directories(build
+                    libs/qcustomplot
+                    src/widgets/toggleButton
+                    src/widgets/directoryListView
+                    ${Qt5Widgets_INCLUDE_DIRS}
                     ${GSTREAMER_INCLUDE_DIRS} 
                     ${YAML_CPP_INCLUDE_DIRS} 
                     ${TAGLIB_INCLUDE_DIRS}
                     ${SQLITE3_INCLUDE_DIRS}
 )
 
-link_directories(libs/qcustomplot src/widgets/settings)
+link_directories(libs/qcustomplot)
 
-set(SRCS
-    src/main.cpp
-    src/db/db.hpp
-    src/player.hpp
-    src/parser/parser.hpp
-    src/effects/effects.hpp
-    src/playlist/playlist.hpp
-    src/connector/connector.cpp
-    src/widgets/buttons/toggleButton.hpp
-    src/widgets/player/playlistWidgetItem.hpp
-    src/widgets/effects/presetDialogWindow.hpp
-    src/widgets/delegation/playlistDelegate.hpp
-)
-
-set(HEADERS
-    src/db/db.h
-    src/player.h
-    src/metaTypes.h
-    src/parser/parser.h
-    src/playlist/playlist.h
-    src/effects/effects.h
-    src/widgets/buttons/toggleButton.h
-    src/widgets/player/playlistWidgetItem.h
-    src/widgets/effects/presetDialogWindow.h
-)
+file(GLOB_RECURSE HEADERS "src/*.h")
+file(GLOB_RECURSE SRCS "src/*.hpp")
 
 add_custom_target(QCustomPlot
     COMMAND qmake && make -j${CPU_NUM}
@@ -80,17 +57,19 @@ add_custom_target(QCustomPlot
     COMMENT "QCustomPlot compilation"
 )
 
-add_subdirectory(src/widgets/settings)
-add_executable(player ${SRCS} ${HEADERS} ${UI_FILES} ${MOC_FILES} ${RESOURCES})
-add_dependencies(player QCustomPlot DirectoryListView)
+# add_subdirectory(src/widgets/settings)
+add_executable(player src/main.cpp ${SRCS} ${HEADERS} ${UI_FILES} ${MOC_FILES} ${RESOURCES})
+add_dependencies(player QCustomPlot)
 
 
 # Use the Widgets module from Qt 5.
-target_link_libraries(player qcustomplot DirectoryListView
-                            ${GSTREAMER_LIBRARIES}
-                            ${YAML_CPP_LIBRARIES}
-                            ${TAGLIB_LIBRARIES}
-                            ${SQLITE3_LIBRARIES})
+target_link_libraries(player 
+                      qcustomplot
+                      Qt5::Widgets
+                      ${GSTREAMER_LIBRARIES}
+                      ${YAML_CPP_LIBRARIES}
+                      ${TAGLIB_LIBRARIES}
+                      ${SQLITE3_LIBRARIES})
 
 # Install the executable
 install(TARGETS player DESTINATION bin)

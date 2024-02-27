@@ -7,7 +7,7 @@
 //***********************************************************//
 #include <atomic>
 #include <vector>
-
+#include <string>
 //***********************************************************//
 // GStreamer
 //***********************************************************//
@@ -101,8 +101,8 @@ public:
     std::atomic<bool> magnitudesChanged {false}; 
     guint spectrumBands = 10;
     
-    std::vector <double> previousMagnitudes,
-                         currentMagnitudes;
+    std::vector<double> previousMagnitudes,
+                        currentMagnitudes;
 
     Effects ();
     ~Effects ();

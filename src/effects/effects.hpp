@@ -168,12 +168,6 @@ gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
         default:
             break;
     }
-
-    if (GST_MINI_OBJECT_REFCOUNT_VALUE(msg) > 1) {
-        g_printerr("Msg cleared\n");
-        gst_message_unref(msg);
-        msg = nullptr;
-    }
     return TRUE;
 }
 
