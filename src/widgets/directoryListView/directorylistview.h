@@ -14,12 +14,11 @@ public:
     explicit DirectoryListView (QWidget *parent = nullptr);
     virtual ~DirectoryListView ();
 
-    void markSelectedDirectories (const QStringList &directories);
-
 private:
     DirectoryTree *tree;
-
     void update ();
+
+    void onCheckBoxClicked (int state);
 
 protected:
     void wheelEvent            (QWheelEvent *event) override;

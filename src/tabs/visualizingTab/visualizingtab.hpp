@@ -7,9 +7,9 @@
 VisualizingTab::VisualizingTab (QWidget *parent) 
     : QWidget (parent) {
     ui.setupUi(this);
-    createWidgets();
-    setupTab     ();
-    connectTab   ();
+    createWidgets  ();
+    setupWidgets   ();
+    connectWidgets ();
 }
 
 VisualizingTab::~VisualizingTab () {
@@ -21,7 +21,7 @@ void VisualizingTab::createWidgets () {
     bars  = new QCPBars(ui.visualizingCustomPlot->xAxis, ui.visualizingCustomPlot->yAxis);
 }
 
-void VisualizingTab::setupTab () {
+void VisualizingTab::setupWidgets () {
     ui.visualizingCustomPlot->xAxis->setVisible(false);
     ui.visualizingCustomPlot->yAxis->setVisible(false);
 
@@ -44,7 +44,7 @@ void VisualizingTab::setupTab () {
     bars->setBrush(QBrush(gradient));
 }
 
-void VisualizingTab::connectTab () {
+void VisualizingTab::connectWidgets () {
 
 }
 

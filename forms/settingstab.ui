@@ -348,11 +348,7 @@
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="settingsMediaFoldersHLayout">
-       <item>
-        <widget class="DirectoryListView" name="settingsDirectoryListView" native="true"/>
-       </item>
-      </layout>
+      <widget class="DirectoryListView" name="settingsDirectoryListView" native="true"/>
      </item>
      <item>
       <spacer name="verticalSpacer_2">

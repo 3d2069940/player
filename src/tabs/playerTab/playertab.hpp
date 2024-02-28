@@ -21,11 +21,7 @@
 #include "src/widgets/playerTabPlaylist/playertabplaylistitem.h"
 #include "togglebutton.hpp"
 #include "src/effects/effects.h"
-#include <qfileinfo.h>
-#include <qlistwidget.h>
-#include <qpushbutton.h>
-#include <qstandardpaths.h>
-#include <qvariant.h>
+#include "src/parser/parser.h"
 #include "../../widgets/playerTabPlaylist/playertabplaylistitem.hpp"
 
 
@@ -33,10 +29,10 @@ PlayerTab::PlayerTab (QWidget *parent)
     : QWidget (parent) {
     ui.setupUi(this);
 
-    createWidgets ();
-    setupTab      ();
-    connectTab    ();
-    updateIcons   ();
+    createWidgets  ();
+    setupWidgets   ();
+    connectWidgets ();
+    updateIcons    ();
 }
 
 PlayerTab::~PlayerTab () {
@@ -45,10 +41,9 @@ PlayerTab::~PlayerTab () {
 
 void PlayerTab::createWidgets () {
     delegate = QSharedPointer<PlayerTabItemDelegate>::create();
-    updatePlayList();
 }
 
-void PlayerTab::setupTab () {
+void PlayerTab::setupWidgets () {
     ui.playerTagFrame->hide();
     ui.playerAllTracksListWidget->hide();
     ui.playerSearchLineEdit->hide();
@@ -59,12 +54,17 @@ void PlayerTab::setupTab () {
     audioTimer.setInterval(50);
 }
 
-void PlayerTab::connectTab () {
+void PlayerTab::connectWidgets () {
     connect(ui.playerTogglePlaylistButton, &QPushButton::clicked, this, &PlayerTab::togglePlaylistView);
+//  search
     connect(ui.playerSearchButton, &QPushButton::clicked, this, &PlayerTab::toggleSearchLineView);
+    connect(ui.playerSearchLineEdit, &QLineEdit::textChanged, this, &PlayerTab::onLineEditTextChanged);
+
     connect(ui.playerAllTracksListWidget, &QListWidget::itemClicked, this, &PlayerTab::onPlayerPlaylistItemClicked);
 //  control buttons
+    connect(ui.playerPrevButton, &QPushButton::clicked, this, &PlayerTab::onPrevButtonClicked);
     connect(ui.playerPauseButton, &QPushButton::clicked, this, &PlayerTab::onPauseButtonClicked);
+    connect(ui.playerNextButton, &QPushButton::clicked, this, &PlayerTab::onNextButtonClicked);
 //  timer
     connect(&audioTimer, &QTimer::timeout, this, &PlayerTab::updateAudioInfo);
 }
@@ -73,14 +73,13 @@ void PlayerTab::updatePlayList () {
     if (musicFolders.isEmpty())
         musicFolders.append(QStandardPaths::standardLocations(QStandardPaths::MusicLocation));
     QFileInfoList musicFiles;
-
-    foreach (const QString &folder, musicFolders)
-        parseMusic(folder, musicFiles);
+    parser->getMusicFiles(musicFiles);
 
     QSize size (ui.playerAllTracksListWidget->width(), 40);
     PlayerPlaylistButtonValue buttonValue;
     foreach (const QFileInfo &musicFile, musicFiles) {
         QListWidgetItem *item = new QListWidgetItem (ui.playerAllTracksListWidget);
+        playlistItems.append(item);
         item->setSizeHint(size);
 
         buttonValue.listWidget = ui.playerAllTracksListWidget;
@@ -93,22 +92,15 @@ void PlayerTab::updatePlayList () {
     }
 }
 
-void PlayerTab::parseMusic (const QString &path, QFileInfoList &musicFiles) {
-    if (extensions.isEmpty())
-        return;
-    QDir musicDir (path);
-    musicDir.setNameFilters(extensions);
-    musicFiles += musicDir.entryInfoList(QDir::Files);
-
-    QDir folderDir (path);
-    folderDir.setFilter(QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot);
-    QFileInfoList folderList = folderDir.entryInfoList();
-    foreach (const QFileInfo &folder, folderList)
-        parseMusic(folder.absoluteFilePath(), musicFiles);
-}
-
 void PlayerTab::setEffects (Effects *_effects) {
     effects = _effects;
+}
+
+void PlayerTab::setParser (Parser *_parser) {
+    parser = _parser;
+    musicFolders = parser->getMusicFolders();
+    extensions   = parser->getExtensions();
+    updatePlayList();
 }
 
 void PlayerTab::updateIcons () {
@@ -132,12 +124,10 @@ void PlayerTab::updateIcons () {
 
 void PlayerTab::setMusicFolders (const QStringList &_musicFolders) {
     musicFolders = _musicFolders;
-    updatePlayList();
 }
 
 void PlayerTab::setExtensions (const QStringList &_extensions) {
     extensions = _extensions;
-    updatePlayList();
 }
 
 void PlayerTab::changeEvent (QEvent *event) {
@@ -156,16 +146,51 @@ void PlayerTab::togglePlaylistView () {
     ui.playerSearchLineEdit->setVisible(false);
 }
 
-void PlayerTab::onPauseButtonClicked () {
-    effects->togglePipelineState();
+void PlayerTab::onLineEditTextChanged (const QString &newText) {
+    foreach (QListWidgetItem* item, playlistItems) {
+        auto widget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(item));
+        if (QString::fromStdString(widget->filePath()).contains(newText))
+            item->setHidden(false);
+        else
+            item->setHidden(true);
+    }
+}
 
-    if (ui.playerPauseButton->getState() == 0)
-        audioTimer.stop();
-    else
-        audioTimer.start();
+void PlayerTab::onPrevButtonClicked () {
+    int id = playlistItems.indexOf(currentAudio);
+    if (id != -1 && id > 0) {
+        currentAudio = playlistItems.at(id-1);
+        auto widget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(currentAudio));
+        effects->changePlayingAudio(widget->filePath());
+        ui.playerAllTracksListWidget->setCurrentItem(currentAudio);
+    }
+}
+
+void PlayerTab::onPauseButtonClicked () {
+    if (currentAudio != nullptr) {
+        effects->togglePipelineState();
+
+        if (ui.playerPauseButton->getState() == 0)
+            audioTimer.stop();
+        else    
+            audioTimer.start();
+    } else
+        ui.playerPauseButton->setState(0);
+}
+
+void PlayerTab::onNextButtonClicked () {
+    int id = playlistItems.indexOf(currentAudio);
+    if (id != -1 && id < playlistItems.size()-1) {
+        currentAudio = playlistItems.at(id+1);
+        auto widget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(currentAudio));
+        effects->changePlayingAudio(widget->filePath());
+        ui.playerAllTracksListWidget->setCurrentItem(currentAudio);
+    }
+
 }
 
 void PlayerTab::onPlayerPlaylistItemClicked (QListWidgetItem *item) {
+    currentAudio = item;
     auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(item));
     effects->changePlayingAudio(itemWidget->filePath());
     ui.playerPauseButton->setState(1);

@@ -44,7 +44,7 @@
       <enum>QTabWidget::South</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -81,428 +81,8 @@
        <property name="verticalSpacing">
         <number>6</number>
        </property>
-       <item row="3" column="0">
-        <layout class="QHBoxLayout" name="equalizerSlidersLayout_2">
-         <property name="topMargin">
-          <number>6</number>
-         </property>
-         <property name="bottomMargin">
-          <number>15</number>
-         </property>
-         <item>
-          <layout class="QVBoxLayout" name="equalizer29HzLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="equalizer29HzSliderLayout_2">
-             <item>
-              <widget class="QSlider" name="equalizer29HzSlider_2">
-               <property name="focusPolicy">
-                <enum>Qt::TabFocus</enum>
-               </property>
-               <property name="minimum">
-                <number>-240</number>
-               </property>
-               <property name="maximum">
-                <number>120</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="equalizer29HzLabel_2">
-             <property name="text">
-              <string>29 Hz</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="equalizer29HzGainLabel_2">
-             <property name="text">
-              <string>0 dB</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="equalizer59HzLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="equalizer59HzSliderLayout_2">
-             <item>
-              <widget class="QSlider" name="equalizer59HzSlider_2">
-               <property name="focusPolicy">
-                <enum>Qt::TabFocus</enum>
-               </property>
-               <property name="minimum">
-                <number>-240</number>
-               </property>
-               <property name="maximum">
-                <number>120</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="equalizer59HzLabel_2">
-             <property name="text">
-              <string>59 Hz</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="equalizer59HzGainLabel_2">
-             <property name="text">
-              <string>0 dB</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="equalizer119HzLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="equalizer119HzSliderLayout_2">
-             <item>
-              <widget class="QSlider" name="equalizer119HzSlider_2">
-               <property name="focusPolicy">
-                <enum>Qt::TabFocus</enum>
-               </property>
-               <property name="minimum">
-                <number>-240</number>
-               </property>
-               <property name="maximum">
-                <number>120</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="equalizer119HzLabel_2">
-             <property name="text">
-              <string>119 Hz</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="equalizer119HzGainLabel_2">
-             <property name="text">
-              <string>0 dB</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="equalizer237HzLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="equalizer237HzSliderLayout_2">
-             <item>
-              <widget class="QSlider" name="equalizer237HzSlider_2">
-               <property name="focusPolicy">
-                <enum>Qt::TabFocus</enum>
-               </property>
-               <property name="minimum">
-                <number>-240</number>
-               </property>
-               <property name="maximum">
-                <number>120</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="equalizer237HzLabel_2">
-             <property name="text">
-              <string>237 Hz</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="equalizer237HzGainLabel_2">
-             <property name="text">
-              <string>0 dB</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="equalizer474HzLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="equalizer474HzSliderLayout_2">
-             <item>
-              <widget class="QSlider" name="equalizer474HzSlider_2">
-               <property name="focusPolicy">
-                <enum>Qt::TabFocus</enum>
-               </property>
-               <property name="minimum">
-                <number>-240</number>
-               </property>
-               <property name="maximum">
-                <number>120</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="equalizer474HzLabel_2">
-             <property name="text">
-              <string>474 Hz</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="equalizer474HzGainLabel_2">
-             <property name="text">
-              <string>0 dB</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="equalizer1000HzLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="equalizer1000HzSliderLayout_2">
-             <item>
-              <widget class="QSlider" name="equalizer1000HzSlider_2">
-               <property name="focusPolicy">
-                <enum>Qt::TabFocus</enum>
-               </property>
-               <property name="minimum">
-                <number>-240</number>
-               </property>
-               <property name="maximum">
-                <number>120</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="equalizer1000HzLabel_2">
-             <property name="text">
-              <string>1 kHz</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="equalizer1000HzGainLabel_2">
-             <property name="text">
-              <string>0 dB</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="equalizer2000HzLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="equalizer2000HzSliderLayout_2">
-             <item>
-              <widget class="QSlider" name="equalizer2000HzSlider_2">
-               <property name="focusPolicy">
-                <enum>Qt::TabFocus</enum>
-               </property>
-               <property name="minimum">
-                <number>-240</number>
-               </property>
-               <property name="maximum">
-                <number>120</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="equalizer2000HzLabel_2">
-             <property name="text">
-              <string>2 kHz</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="equalizer2000HzGainLabel_2">
-             <property name="text">
-              <string>0 dB</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="equalizer4000HzLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="equalizer4000HzSliderLayout_2">
-             <item>
-              <widget class="QSlider" name="equalizer4000HzSlider_2">
-               <property name="focusPolicy">
-                <enum>Qt::TabFocus</enum>
-               </property>
-               <property name="minimum">
-                <number>-240</number>
-               </property>
-               <property name="maximum">
-                <number>120</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="equalizer4000HzLabel_2">
-             <property name="text">
-              <string>4 kHz</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="equalizer4000HzGainLabel_2">
-             <property name="text">
-              <string>0 dB</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="equalizer8000HzLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="equalizer8000HzSliderLayout_2">
-             <item>
-              <widget class="QSlider" name="equalizer8000HzSlider_2">
-               <property name="focusPolicy">
-                <enum>Qt::TabFocus</enum>
-               </property>
-               <property name="minimum">
-                <number>-240</number>
-               </property>
-               <property name="maximum">
-                <number>120</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="equalizer8000HzLabel_2">
-             <property name="text">
-              <string>8 kHz</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="equalizer8000HzGainLabel_2">
-             <property name="text">
-              <string>0 dB</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="equalizer16000HzLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="equalizer16000HzSliderLayout_2">
-             <item>
-              <widget class="QSlider" name="equalizer16000HzSlider_2">
-               <property name="focusPolicy">
-                <enum>Qt::TabFocus</enum>
-               </property>
-               <property name="minimum">
-                <number>-240</number>
-               </property>
-               <property name="maximum">
-                <number>120</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="equalizer16000HzLabel_2">
-             <property name="text">
-              <string>16 kHz</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignHCenter">
-            <widget class="QLabel" name="equalizer16000HzGainLabel_2">
-             <property name="text">
-              <string>0 dB</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
        <item row="0" column="0">
-        <widget class="QLabel" name="equalizerEqualizerLabel_2">
+        <widget class="QLabel" name="equalizerEqualizerLabel">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -515,90 +95,6 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-       </item>
-       <item row="2" column="0">
-        <layout class="QGridLayout" name="equalizerVolumeLayout_2">
-         <property name="topMargin">
-          <number>6</number>
-         </property>
-         <property name="bottomMargin">
-          <number>6</number>
-         </property>
-         <item row="0" column="4">
-          <spacer name="equalizerHSpacer_7">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="equalizerGlobalVolumeLabel_2">
-           <property name="text">
-            <string>Volume:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="3">
-          <widget class="QSlider" name="equalizerVolumeSlider_2">
-           <property name="focusPolicy">
-            <enum>Qt::TabFocus</enum>
-           </property>
-           <property name="maximum">
-            <number>50</number>
-           </property>
-           <property name="pageStep">
-            <number>1</number>
-           </property>
-           <property name="value">
-            <number>10</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <spacer name="equalizerHSpacer_8">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>10</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="0" column="0">
-          <spacer name="equalizerHSpacer_9">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
        </item>
        <item row="1" column="0">
         <layout class="QHBoxLayout" name="equalizerSettingsLayout_2">
@@ -627,6 +123,22 @@
             <string>Preset:</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
          <item>
           <widget class="QComboBox" name="equalizerPresetsComboBox_2">
@@ -666,6 +178,510 @@
          </item>
         </layout>
        </item>
+       <item row="2" column="0">
+        <layout class="QGridLayout" name="equalizerVolumeLayout_2">
+         <property name="topMargin">
+          <number>6</number>
+         </property>
+         <property name="bottomMargin">
+          <number>6</number>
+         </property>
+         <item row="0" column="4">
+          <spacer name="equalizerHSpacer_7">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLabel" name="equalizerGlobalVolumeLabel_2">
+           <property name="text">
+            <string>Volume:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QSlider" name="equalizerVolumeSlider">
+           <property name="focusPolicy">
+            <enum>Qt::TabFocus</enum>
+           </property>
+           <property name="maximum">
+            <number>50</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>10</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <spacer name="equalizerHSpacer_8">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Minimum</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>10</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="0">
+          <spacer name="equalizerHSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Minimum</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="3" column="0">
+        <layout class="QHBoxLayout" name="equalizerSlidersLayout">
+         <property name="topMargin">
+          <number>6</number>
+         </property>
+         <property name="bottomMargin">
+          <number>15</number>
+         </property>
+         <item>
+          <layout class="QVBoxLayout" name="equalizer29HzLayout">
+           <item>
+            <layout class="QHBoxLayout" name="equalizer29HzSliderLayout">
+             <item>
+              <widget class="QSlider" name="equalizer29HzSlider">
+               <property name="focusPolicy">
+                <enum>Qt::TabFocus</enum>
+               </property>
+               <property name="minimum">
+                <number>-240</number>
+               </property>
+               <property name="maximum">
+                <number>120</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="equalizer29HzLabel">
+             <property name="text">
+              <string>29 Hz</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="equalizer29HzGainLabel">
+             <property name="text">
+              <string>0 dB</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="equalizer59HzLayout">
+           <item>
+            <layout class="QHBoxLayout" name="equalizer59HzSliderLayout">
+             <item>
+              <widget class="QSlider" name="equalizer59HzSlider">
+               <property name="focusPolicy">
+                <enum>Qt::TabFocus</enum>
+               </property>
+               <property name="minimum">
+                <number>-240</number>
+               </property>
+               <property name="maximum">
+                <number>120</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="equalizer59HzLabel">
+             <property name="text">
+              <string>59 Hz</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="equalizer59HzGainLabel">
+             <property name="text">
+              <string>0 dB</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="equalizer119HzLayout">
+           <item>
+            <layout class="QHBoxLayout" name="equalizer119HzSliderLayout">
+             <item>
+              <widget class="QSlider" name="equalizer119HzSlider">
+               <property name="focusPolicy">
+                <enum>Qt::TabFocus</enum>
+               </property>
+               <property name="minimum">
+                <number>-240</number>
+               </property>
+               <property name="maximum">
+                <number>120</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="equalizer119HzLabel">
+             <property name="text">
+              <string>119 Hz</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="equalizer119HzGainLabel">
+             <property name="text">
+              <string>0 dB</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="equalizer237HzLayout">
+           <item>
+            <layout class="QHBoxLayout" name="equalizer237HzSliderLayout">
+             <item>
+              <widget class="QSlider" name="equalizer237HzSlider">
+               <property name="focusPolicy">
+                <enum>Qt::TabFocus</enum>
+               </property>
+               <property name="minimum">
+                <number>-240</number>
+               </property>
+               <property name="maximum">
+                <number>120</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="equalizer237HzLabel">
+             <property name="text">
+              <string>237 Hz</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="equalizer237HzGainLabel">
+             <property name="text">
+              <string>0 dB</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="equalizer474HzLayout">
+           <item>
+            <layout class="QHBoxLayout" name="equalizer474HzSliderLayout">
+             <item>
+              <widget class="QSlider" name="equalizer474HzSlider">
+               <property name="focusPolicy">
+                <enum>Qt::TabFocus</enum>
+               </property>
+               <property name="minimum">
+                <number>-240</number>
+               </property>
+               <property name="maximum">
+                <number>120</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="equalizer474HzLabel">
+             <property name="text">
+              <string>474 Hz</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="equalizer474HzGainLabel">
+             <property name="text">
+              <string>0 dB</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="equalizer1000HzLayout">
+           <item>
+            <layout class="QHBoxLayout" name="equalizer1000HzSliderLayout">
+             <item>
+              <widget class="QSlider" name="equalizer1000HzSlider">
+               <property name="focusPolicy">
+                <enum>Qt::TabFocus</enum>
+               </property>
+               <property name="minimum">
+                <number>-240</number>
+               </property>
+               <property name="maximum">
+                <number>120</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="equalizer1000HzLabel">
+             <property name="text">
+              <string>1 kHz</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="equalizer1000HzGainLabel">
+             <property name="text">
+              <string>0 dB</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="equalizer2000HzLayout">
+           <item>
+            <layout class="QHBoxLayout" name="equalizer2000HzSliderLayout">
+             <item>
+              <widget class="QSlider" name="equalizer2000HzSlider">
+               <property name="focusPolicy">
+                <enum>Qt::TabFocus</enum>
+               </property>
+               <property name="minimum">
+                <number>-240</number>
+               </property>
+               <property name="maximum">
+                <number>120</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="equalizer2000HzLabel">
+             <property name="text">
+              <string>2 kHz</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="equalizer2000HzGainLabel">
+             <property name="text">
+              <string>0 dB</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="equalizer4000HzLayout">
+           <item>
+            <layout class="QHBoxLayout" name="equalizer4000HzSliderLayout">
+             <item>
+              <widget class="QSlider" name="equalizer4000HzSlider">
+               <property name="focusPolicy">
+                <enum>Qt::TabFocus</enum>
+               </property>
+               <property name="minimum">
+                <number>-240</number>
+               </property>
+               <property name="maximum">
+                <number>120</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="equalizer4000HzLabel">
+             <property name="text">
+              <string>4 kHz</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="equalizer4000HzGainLabel">
+             <property name="text">
+              <string>0 dB</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="equalizer8000HzLayout">
+           <item>
+            <layout class="QHBoxLayout" name="equalizer8000HzSliderLayout">
+             <item>
+              <widget class="QSlider" name="equalizer8000HzSlider">
+               <property name="focusPolicy">
+                <enum>Qt::TabFocus</enum>
+               </property>
+               <property name="minimum">
+                <number>-240</number>
+               </property>
+               <property name="maximum">
+                <number>120</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="equalizer8000HzLabel">
+             <property name="text">
+              <string>8 kHz</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="equalizer8000HzGainLabel">
+             <property name="text">
+              <string>0 dB</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="equalizer16000HzLayout">
+           <item>
+            <layout class="QHBoxLayout" name="equalizer16000HzSliderLayout">
+             <item>
+              <widget class="QSlider" name="equalizer16000HzSlider">
+               <property name="focusPolicy">
+                <enum>Qt::TabFocus</enum>
+               </property>
+               <property name="minimum">
+                <number>-240</number>
+               </property>
+               <property name="maximum">
+                <number>120</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="equalizer16000HzLabel">
+             <property name="text">
+              <string>16 kHz</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignHCenter">
+            <widget class="QLabel" name="equalizer16000HzGainLabel">
+             <property name="text">
+              <string>0 dB</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="delayTab_2">
@@ -690,17 +706,7 @@
          <item>
           <layout class="QHBoxLayout" name="filterPreferenciesHLayout">
            <item>
-            <widget class="QPushButton" name="filterModeToggleButton">
-             <property name="focusPolicy">
-              <enum>Qt::TabFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Low Pass/High Pass</string>
-             </property>
-             <property name="text">
-              <string>Low Pass</string>
-             </property>
-            </widget>
+            <widget class="ToggleButton" name="filterModeToggleButton" native="true"/>
            </item>
            <item>
             <widget class="QSpinBox" name="filterCutoffSpinBox">
@@ -778,17 +784,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="filterFilterTypeButton">
-             <property name="focusPolicy">
-              <enum>Qt::TabFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Chebyshev filter type (I or II)</string>
-             </property>
-             <property name="text">
-              <string>I</string>
-             </property>
-            </widget>
+            <widget class="ToggleButton" name="filterFilterTypeButton" native="true"/>
            </item>
           </layout>
          </item>
@@ -1125,11 +1121,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
-             <property name="text">
-              <string>PushButton</string>
-             </property>
-            </widget>
+            <widget class="ToggleButton" name="delaySurroundDelayButton" native="true"/>
            </item>
            <item>
             <spacer name="delayVSpacer_4">
@@ -2023,6 +2015,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ToggleButton</class>
+   <extends>QWidget</extends>
+   <header location="global">togglebutton.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

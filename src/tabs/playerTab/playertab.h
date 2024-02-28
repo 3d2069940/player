@@ -6,6 +6,7 @@
 // Qt5
 //*******************************************************//
 #include <QTimer>
+#include <QVector>
 #include <QWidget>
 #include <QFileInfo>
 #include <QListWidget>
@@ -22,9 +23,9 @@
 // Forward Declaration
 //*******************************************************//
 class Effects;
+class Parser;
 
-
-class PlayerTab : public QWidget, public Tab {
+class PlayerTab : public QWidget, public ITab {
     Q_OBJECT
 public:
     explicit PlayerTab (QWidget *parent=nullptr);
@@ -32,13 +33,16 @@ public:
 
 //  setters
     void setEffects      (Effects *_effects);
+    void setParser       (Parser  *_parser);
+
     void setMusicFolders (const QStringList &_musicFolders);
     void setExtensions   (const QStringList &_extensions);
 
 private:
     Ui::PlayerTabWidget ui;
 
-    Effects *effects;
+    Effects *effects = nullptr;
+    Parser  *parser  = nullptr;
 
     QSharedPointer<PlayerTabItemDelegate> delegate;
 
@@ -47,12 +51,14 @@ private:
     QStringList musicFolders,
                 extensions;
 
-    void createWidgets () override;
-    void setupTab      () override;
-    void connectTab    () override;
+    QVector<QListWidgetItem*> playlistItems;
+    QListWidgetItem *currentAudio = nullptr;
+
+    void createWidgets  () override;
+    void setupWidgets   () override;
+    void connectWidgets () override;
 
     void updatePlayList ();
-    void parseMusic     (const QString &path, QFileInfoList &musicFiles);
 
     void updateIcons ();
 
@@ -61,9 +67,14 @@ protected:
 
 private slots:
     void togglePlaylistView   ();
-    void toggleSearchLineView ();
-
+//  search
+    void onLineEditTextChanged (const QString &newText);
+    void toggleSearchLineView  ();
+//  control buttons
+    void onPrevButtonClicked  ();
     void onPauseButtonClicked ();
+    void onNextButtonClicked  ();
+
     void onPlayerPlaylistItemClicked (QListWidgetItem *item);
 
     void updateAudioInfo ();

@@ -13,6 +13,7 @@
 #include "tabs/settingsTab/settingstab.hpp" 
 
 #include "effects/effects.hpp"
+#include "parser/parser.hpp"
 
 
 #include "widgets/directoryListView/directorylistview.hpp"
@@ -24,6 +25,7 @@ MainWindowUI::MainWindowUI (QWidget *parent)
 
     playerTab = QSharedPointer<PlayerTab>::create();
     playerTab->setEffects(&effects);
+    playerTab->setParser(&parser);
     ui.playerGridLayout->addWidget(playerTab.data());
 
 
@@ -31,6 +33,7 @@ MainWindowUI::MainWindowUI (QWidget *parent)
     ui.playlistGridLayout->addWidget(playlistTab.data());
 
     effectsTab = QSharedPointer<EffectsTab>::create();
+    effectsTab->setEffects(&effects);
     ui.effectsGridLayout->addWidget(effectsTab.data());
 
     visualizingTab = QSharedPointer<VisualizingTab>::create();

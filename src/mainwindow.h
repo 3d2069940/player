@@ -4,10 +4,10 @@
 
 
 #include <QMainWindow>
-#include <qlistwidget.h>
 
 
 #include "effects/effects.h"
+#include "parser/parser.h"
 
 
 #include "ui_mainwindow.h"
@@ -35,6 +35,7 @@ private:
     QSharedPointer<SettingsTab>    settingsTab;
 
     Effects effects;
+    Parser  parser;
 
     void connectWidgets ();
 };

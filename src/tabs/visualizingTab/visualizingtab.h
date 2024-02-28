@@ -11,7 +11,7 @@
 #include "ui_visualizingtab.h"
 
 
-class VisualizingTab : public QWidget, public Tab {
+class VisualizingTab : public QWidget, public ITab {
 
 public:
     explicit VisualizingTab (QWidget *parent=nullptr);
@@ -23,9 +23,9 @@ private:
     QCPBars *bars;
     QLinearGradient gradient;
 
-    void inline createWidgets () override;
-    void inline setupTab      () override;
-    void inline connectTab    () override;
+    void inline createWidgets  () override;
+    void inline setupWidgets   () override;
+    void inline connectWidgets () override;
 };
 
 #endif // _VISUALIZINGTAB_H_
