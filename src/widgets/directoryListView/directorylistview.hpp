@@ -67,7 +67,7 @@ void DirectoryListView::update () {
 }
 
 void DirectoryListView::onCheckBoxClicked (int state) {
-
+    Q_UNUSED(state);
 }
 
 void DirectoryListView::wheelEvent (QWheelEvent *event) {

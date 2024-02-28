@@ -44,7 +44,7 @@
       <enum>QTabWidget::South</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -148,7 +148,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QDialogButtonBox" name="buttonBox_5">
+          <widget class="QDialogButtonBox" name="equalizerButtonBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -1395,7 +1395,7 @@
         </layout>
        </item>
        <item row="0" column="0">
-        <widget class="QLabel" name="compressorPitchPitchSpeedLabel_2">
+        <widget class="QLabel" name="compressorPitchPitchSpeedLabel">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -1429,7 +1429,7 @@
          <item>
           <layout class="QVBoxLayout" name="pitchTempoLayout_2">
            <item>
-            <widget class="QDial" name="pitchTempoDial_2">
+            <widget class="QDial" name="pitchTempoDial">
              <property name="focusPolicy">
               <enum>Qt::TabFocus</enum>
              </property>
@@ -1457,7 +1457,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="pitchTempoLabel_2">
+            <widget class="QLabel" name="pitchTempoLabel">
              <property name="text">
               <string>Tempo</string>
              </property>
@@ -1469,9 +1469,9 @@
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="pitchPitchLayout_2">
+          <layout class="QVBoxLayout" name="pitchPitchLayout">
            <item>
-            <widget class="QDial" name="pitchPitchDial_2">
+            <widget class="QDial" name="pitchPitchDial">
              <property name="focusPolicy">
               <enum>Qt::TabFocus</enum>
              </property>
@@ -1493,7 +1493,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="pitchPitchLabel_2">
+            <widget class="QLabel" name="pitchPitchLabel">
              <property name="text">
               <string>Pitch</string>
              </property>
@@ -1505,9 +1505,9 @@
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="pitchRateLayout_2">
+          <layout class="QVBoxLayout" name="pitchRateLayout">
            <item>
-            <widget class="QDial" name="pitchRateDial_2">
+            <widget class="QDial" name="pitchRateDial">
              <property name="focusPolicy">
               <enum>Qt::TabFocus</enum>
              </property>
@@ -1529,7 +1529,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="pitchRateLabel_2">
+            <widget class="QLabel" name="pitchRateLabel">
              <property name="text">
               <string>Rate</string>
              </property>
@@ -1541,9 +1541,9 @@
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="pitchOutputRateLayout_2">
+          <layout class="QVBoxLayout" name="pitchOutputRateLayout">
            <item>
-            <widget class="QDial" name="pitchOutputRateDial_2">
+            <widget class="QDial" name="pitchOutputRateDial">
              <property name="focusPolicy">
               <enum>Qt::TabFocus</enum>
              </property>
@@ -1565,7 +1565,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="pitchOutputRateLabel_2">
+            <widget class="QLabel" name="pitchOutputRateLabel">
              <property name="text">
               <string>Output-rate</string>
              </property>
@@ -1579,28 +1579,20 @@
         </layout>
        </item>
        <item row="5" column="0">
-        <layout class="QHBoxLayout" name="compressorLayout_2">
+        <layout class="QHBoxLayout" name="compressorLayout">
          <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
-          <widget class="QPushButton" name="pushButton_2">
-           <property name="text">
-            <string>Compressor</string>
-           </property>
-          </widget>
+          <widget class="ToggleButton" name="compressorCompressorButton" native="true"/>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_3">
-           <property name="text">
-            <string>Hard-knee</string>
-           </property>
-          </widget>
+          <widget class="ToggleButton" name="compressorKneeTypeButton" native="true"/>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="compressorRatioLayout_2">
+          <layout class="QVBoxLayout" name="compressorRatioLayout">
            <item>
-            <widget class="QDial" name="compressorRatioDial_2">
+            <widget class="QDial" name="compressorRatioDial">
              <property name="focusPolicy">
               <enum>Qt::TabFocus</enum>
              </property>
@@ -1619,7 +1611,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="compressorRatioLabel_2">
+            <widget class="QLabel" name="compressorRatioLabel">
              <property name="text">
               <string>Ratio</string>
              </property>
@@ -1631,9 +1623,9 @@
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="compressorThresholdLayout_2">
+          <layout class="QVBoxLayout" name="compressorThresholdLayout">
            <item>
-            <widget class="QDial" name="compressorThresholdDial_2">
+            <widget class="QDial" name="compressorThresholdDial">
              <property name="focusPolicy">
               <enum>Qt::TabFocus</enum>
              </property>
@@ -1649,7 +1641,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="compressorThresholdLabel_2">
+            <widget class="QLabel" name="compressorThresholdLabel">
              <property name="text">
               <string>Threshold</string>
              </property>
@@ -1663,7 +1655,7 @@
         </layout>
        </item>
        <item row="1" column="0">
-        <layout class="QHBoxLayout" name="pitchSettingsLayout_2">
+        <layout class="QHBoxLayout" name="pitchSettingsLayout">
          <item>
           <spacer name="compressorPitchHSpacer_10">
            <property name="orientation">
@@ -1681,7 +1673,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="pitchPresetLabel_2">
+          <widget class="QLabel" name="pitchPresetLabel">
            <property name="text">
             <string>Preset:</string>
            </property>
@@ -1704,7 +1696,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QComboBox" name="pitchPresetComboBox_2">
+          <widget class="QComboBox" name="pitchPresetComboBox">
            <property name="focusPolicy">
             <enum>Qt::TabFocus</enum>
            </property>
@@ -1746,7 +1738,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="panoramaTab_2">
+     <widget class="QWidget" name="panoramaTab">
       <attribute name="title">
        <string>Panorama</string>
       </attribute>
@@ -1763,23 +1755,8 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item row="0" column="0">
-        <widget class="QLabel" name="panoramaAudioPanoramaLabel_2">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Audio Panorama</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <spacer name="panoramaVSpacer_2">
+       <item row="3" column="0">
+        <spacer name="panoramaVSpacer_1">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -1791,10 +1768,10 @@
          </property>
         </spacer>
        </item>
-       <item row="1" column="0">
-        <layout class="QHBoxLayout" name="panoramaLayout_2">
+       <item row="2" column="0">
+        <layout class="QHBoxLayout" name="panoramaLayout">
          <item>
-          <layout class="QVBoxLayout" name="panoramaPanMethodLayout_2">
+          <layout class="QVBoxLayout" name="panoramaPanMethodLayout">
            <item>
             <spacer name="panoramaPanVSpacer_5">
              <property name="orientation">
@@ -1812,14 +1789,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="panoramaPanningMethodButton_2">
-             <property name="focusPolicy">
-              <enum>Qt::TabFocus</enum>
-             </property>
-             <property name="text">
-              <string>Psychoacoustic</string>
-             </property>
-            </widget>
+            <widget class="ToggleButton" name="panoramaPanningMethodButton" native="true"/>
            </item>
            <item>
             <spacer name="panoramaPanVSpacer_6">
@@ -1838,7 +1808,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="panoramaPanMethodLabel_2">
+            <widget class="QLabel" name="panoramaPanMethodLabel">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -1856,9 +1826,9 @@
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="panoramaPositionLayout_2">
+          <layout class="QVBoxLayout" name="panoramaPositionLayout">
            <item>
-            <widget class="QDial" name="panoramaPositionDial_2">
+            <widget class="QDial" name="panoramaPositionDial">
              <property name="focusPolicy">
               <enum>Qt::TabFocus</enum>
              </property>
@@ -1883,7 +1853,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="panoramaPositionLabel_2">
+            <widget class="QLabel" name="panoramaPositionLabel">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -1901,7 +1871,7 @@
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="panoramaAutoPanVLayout_2">
+          <layout class="QVBoxLayout" name="panoramaAutoPanVLayout">
            <item>
             <spacer name="panoramaPanVSpacer_7">
              <property name="orientation">
@@ -1919,14 +1889,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="panoramaAutoPanoramaButton_2">
-             <property name="focusPolicy">
-              <enum>Qt::TabFocus</enum>
-             </property>
-             <property name="text">
-              <string>On</string>
-             </property>
-            </widget>
+            <widget class="ToggleButton" name="panoramaAutoPanoramaButton" native="true"/>
            </item>
            <item>
             <spacer name="panoramaPanVSpacer_8">
@@ -1945,7 +1908,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="panoramaAutoPanLabel_2">
+            <widget class="QLabel" name="panoramaAutoPanLabel">
              <property name="text">
               <string>Auto Panorama</string>
              </property>
@@ -1957,9 +1920,9 @@
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="panoramaSpeedLayout_2">
+          <layout class="QVBoxLayout" name="panoramaSpeedLayout">
            <item>
-            <widget class="QDial" name="panoramaSpeedDial_2">
+            <widget class="QDial" name="panoramaSpeedDial">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -1990,7 +1953,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="panoramaSpeedLabel_2">
+            <widget class="QLabel" name="panoramaSpeedLabel">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -2008,6 +1971,34 @@
           </layout>
          </item>
         </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="panoramaAudioPanoramaLabel">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Audio Panorama</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <spacer name="panoramaVSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

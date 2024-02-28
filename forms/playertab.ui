@@ -88,14 +88,14 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>40</width>
+             <width>0</width>
              <height>20</height>
             </size>
            </property>
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="playerAudioCoverLabel">
            <property name="text">
             <string>*LOGO HERE*</string>
            </property>
@@ -108,7 +108,7 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>40</width>
+             <width>0</width>
              <height>20</height>
             </size>
            </property>
@@ -165,7 +165,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QFrame" name="frame">
+        <widget class="QFrame" name="playerHLine_1">
          <property name="frameShape">
           <enum>QFrame::HLine</enum>
          </property>

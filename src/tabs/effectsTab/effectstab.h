@@ -6,6 +6,7 @@
 
 #include "src/effects/effects.h"
 #include "ui_effectstab.h"
+#include "metatypes.h"
 
 
 class Effects;
@@ -33,9 +34,14 @@ private:
       void connectPanorama   ();
 
 private slots:
-    void onEqualizerValueChanged(CODES::EQUALIZER code, int    value);
-    void onDelayValueChanged    (CODES::DELAY     code, int    value=0);
-    void onFilterValueChanged   (CODES::FILTER    code, gfloat value=0);
+    void equalizerResetButtonClicked (const EqualizerPreset &preset);
+
+    void onEqualizerValueChanged  (CODES::EQUALIZER  code, int    value);
+    void onDelayValueChanged      (CODES::DELAY      code, int    value=0);
+    void onFilterValueChanged     (CODES::FILTER     code, gfloat value=0);
+    void onPitchValueChanged      (CODES::PITCH      code, int    value);
+    void onCompressorValueChanged (CODES::COMPRESSOR code, int    value=0);
+    void onPanoramaValueChanged   (CODES::PANORAMA   code, int    value=0);
 };
 
 #endif // _EFFECTSTAB_H_

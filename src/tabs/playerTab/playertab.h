@@ -51,6 +51,8 @@ private:
     QStringList musicFolders,
                 extensions;
 
+    QImage albumCover;
+
     QVector<QListWidgetItem*> playlistItems;
     QListWidgetItem *currentAudio = nullptr;
 
@@ -61,6 +63,8 @@ private:
     void updatePlayList ();
 
     void updateIcons ();
+
+    void updateAlbumCover ();
 
 protected:
     void changeEvent (QEvent *event) override;

@@ -10,7 +10,20 @@
 #include <QStandardPaths>
 #include <qcombobox.h>
 #include <qfileinfo.h>
+#include <qimage.h>
 #include <qstandardpaths.h>
+//*******************************************************//
+// TagLib
+//*******************************************************//
+#include <tag.h>
+#include <taglib.h>
+#include <fileref.h>
+#include <opusfile.h>
+#include <mpegfile.h>
+#include <flacfile.h>
+#include <aifffile.h>
+#include <tpropertymap.h>
+#include <attachedpictureframe.h>
 //*******************************************************//
 // Homebrew classes
 //*******************************************************//
@@ -42,6 +55,41 @@ QStringList Parser::getExtensions () {
 
 QStringList Parser::getMusicFolders () {
     return musicFolders;
+}
+
+QImage Parser::getAudioCover (const std::string &filePath) {
+    QImage albumCover;
+    if (!showAudioCover)
+        return albumCover;
+
+       TagLib::FileRef file (filePath.c_str());
+    QByteArray imageData;
+    if (TagLib::MPEG::File *mpegFile = dynamic_cast<TagLib::MPEG::File*>(file.file())) {
+        if (auto mpegTag   = mpegFile->ID3v2Tag()) {
+            if (auto mpegFrame = mpegTag->frameList("APIC"); mpegFrame.size() > 0) {
+                auto mpegImage = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(mpegFrame.front());
+                if (mpegImage)
+                    imageData = QByteArray (mpegImage->picture().data(), mpegImage->picture().size());
+            }
+        }
+  } else if (TagLib::FLAC::File *flacFile = dynamic_cast<TagLib::FLAC::File*>(file.file())) {
+        if (auto flacTag = flacFile->pictureList(); flacTag.size() > 0) {
+            auto flacImage = flacTag.front();
+            if (flacImage)
+                imageData = QByteArray (flacImage->data().data(), flacImage->data().size());
+        }
+  } else if (TagLib::Ogg::Opus::File *opusFile = dynamic_cast<TagLib::Ogg::Opus::File*>(file.file())) {
+        auto opusTag = opusFile->tag();
+        if (auto opusFrame = opusTag->pictureList(); opusFrame.size() > 0) {
+            auto opusImage = opusFrame.front();
+            if (opusImage)
+                imageData = QByteArray (opusImage->data().data(), opusImage->data().size());
+        }
+    }
+    if (imageData.size() > 0)
+        albumCover.loadFromData(imageData, "JPEG");
+
+    return albumCover;
 }
 
 void Parser::parseConfigFile () {

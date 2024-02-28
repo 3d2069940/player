@@ -20,8 +20,11 @@ public:
 
 //  getters
     void getMusicFiles   (QFileInfoList &musicFiles);
+    
     QStringList getExtensions   ();
     QStringList getMusicFolders ();
+
+    QImage getAudioCover (const std::string &filePath);
 
 private:
     QString configFilePath,
@@ -51,6 +54,8 @@ private:
       void extractPresetInfo(QComboBox *combobox, const std::string &key);
 
     void parseMusic (const QString &path, QFileInfoList &musicFiles);
+
+    void parseAudioCover (const std::string &filePath);
 };
 
 #endif // _PARSER_H_

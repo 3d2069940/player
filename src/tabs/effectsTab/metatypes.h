@@ -20,18 +20,18 @@ struct EqualizerPreset {
 
 struct DelayPreset {
     int  delay         {1};
-    bool surroundDelay {false};
+    bool surroundDelay {0};
     int  intensity     {0};
     int  maxDelay      {5000};
     int  feedback      {0};
 };
 
 struct FilterPreset {
-    bool   mode       {false};
+    bool   mode       {0};
     int    cutoff     {48000};
     double ripple     {0.25};
     int    poles      {4};
-    bool   filterType {false};
+    bool   filterType {0};
 };
 
 struct PitchPreset {

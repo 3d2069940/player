@@ -10,6 +10,7 @@
 #include <QStandardPaths>
 
 #include <QDebug>
+#include <qpixmap.h>
 //*******************************************************//
 // Homebrew classes
 //*******************************************************//
@@ -122,6 +123,18 @@ void PlayerTab::updateIcons () {
     ui.playerNextButton->setIcon(QIcon(iconPath+"next_track.svg"));
 }
 
+void PlayerTab::updateAlbumCover () {
+    if (albumCover.isNull())
+        ui.playerAudioCoverLabel->setText("*LOGO HERE*");
+    else {
+        int albumCoverSize = qMin(ui.playerHLine_1->width(), width()/2-10);
+        QImage image = albumCover.scaled(QSize(albumCoverSize, albumCoverSize),
+                                     Qt::KeepAspectRatio);
+        QPixmap pixmap    = QPixmap::fromImage(image);
+        ui.playerAudioCoverLabel->setPixmap(pixmap);
+    }
+}
+
 void PlayerTab::setMusicFolders (const QStringList &_musicFolders) {
     musicFolders = _musicFolders;
 }
@@ -160,8 +173,10 @@ void PlayerTab::onPrevButtonClicked () {
     int id = playlistItems.indexOf(currentAudio);
     if (id != -1 && id > 0) {
         currentAudio = playlistItems.at(id-1);
-        auto widget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(currentAudio));
-        effects->changePlayingAudio(widget->filePath());
+        auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(currentAudio));
+        effects->changePlayingAudio(itemWidget->filePath());
+        albumCover = parser->getAudioCover(itemWidget->filePath());
+        updateAlbumCover();
         ui.playerAllTracksListWidget->setCurrentItem(currentAudio);
     }
 }
@@ -182,8 +197,10 @@ void PlayerTab::onNextButtonClicked () {
     int id = playlistItems.indexOf(currentAudio);
     if (id != -1 && id < playlistItems.size()-1) {
         currentAudio = playlistItems.at(id+1);
-        auto widget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(currentAudio));
-        effects->changePlayingAudio(widget->filePath());
+        auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(currentAudio));
+        effects->changePlayingAudio(itemWidget->filePath());
+        albumCover = parser->getAudioCover(itemWidget->filePath());
+        updateAlbumCover();
         ui.playerAllTracksListWidget->setCurrentItem(currentAudio);
     }
 
@@ -193,6 +210,8 @@ void PlayerTab::onPlayerPlaylistItemClicked (QListWidgetItem *item) {
     currentAudio = item;
     auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(item));
     effects->changePlayingAudio(itemWidget->filePath());
+    albumCover = parser->getAudioCover(itemWidget->filePath());
+    updateAlbumCover();
     ui.playerPauseButton->setState(1);
     audioTimer.start();
 }
