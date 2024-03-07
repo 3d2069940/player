@@ -13,7 +13,7 @@
 class PlayerTabPlaylistItem : public QWidget {
     Q_OBJECT
 public:
-    explicit PlayerTabPlaylistItem (const QString&, const QVariant &data);
+    PlayerTabPlaylistItem (const QString&, const QVariant &data);
     virtual ~PlayerTabPlaylistItem ();
     
     std::string filePath () const;
@@ -24,7 +24,6 @@ public:
     
     QMenu       *contextMenu;
     QAction     *infoAction,
-                *removeAction,
                 *addToPlaylist,
                 *stopAction;
                 
@@ -38,12 +37,12 @@ protected:
     void changeEvent (QEvent *event) override;
     
 public slots:
-    void contextMenuShow       ();
-    void infoActionClicked ();
-    
+    void contextMenuShow ();
+
+    void addToPlaylistClicked ();
+
 signals:
-    void infoActionShow (const QString&);
-    
+    void onAddToPlaylistClicked (const QString &musicFiles);
 };
 
 

@@ -14,22 +14,28 @@
 
 #include "effects/effects.hpp"
 #include "parser/parser.hpp"
+#include "db/db.hpp"
 
 
 #include "widgets/directoryListView/directorylistview.hpp"
+#include <qscopedpointer.h>
+#include <qstandardpaths.h>
 
 
 MainWindowUI::MainWindowUI (QWidget *parent) 
     : QMainWindow(parent) {
     ui.setupUi(this);
 
-    playerTab = QSharedPointer<PlayerTab>::create();
+    QString path = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).at(0); 
+    db.setPath(path.toStdString() + "/player/database.db");
+    db.open();
+
+    playerTab = QSharedPointer<PlayerTab>::create(&db);
     playerTab->setEffects(&effects);
     playerTab->setParser(&parser);
     ui.playerGridLayout->addWidget(playerTab.data());
 
-
-    playlistTab = QSharedPointer<PlaylistTab>::create();
+    playlistTab = QSharedPointer<PlaylistTab>::create(&db);
     ui.playlistGridLayout->addWidget(playlistTab.data());
 
     effectsTab = QSharedPointer<EffectsTab>::create();
@@ -37,6 +43,7 @@ MainWindowUI::MainWindowUI (QWidget *parent)
     ui.effectsGridLayout->addWidget(effectsTab.data());
 
     visualizingTab = QSharedPointer<VisualizingTab>::create();
+    visualizingTab->setEffects(&effects);
     ui.visualizingGridLayout->addWidget(visualizingTab.data());
 
     settingsTab = QSharedPointer<SettingsTab>::create();

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>887</width>
+    <width>797</width>
     <height>617</height>
    </rect>
   </property>
@@ -50,7 +50,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QScrollArea" name="scrollArea">
+        <widget class="QScrollArea" name="playlistsScrollArea">
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -59,10 +59,32 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>435</width>
+            <width>390</width>
             <height>567</height>
            </rect>
           </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="0" column="0">
+            <layout class="QVBoxLayout" name="playlistScrollAreaLayout">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+            </layout>
+           </item>
+           <item row="1" column="0">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </widget>
         </widget>
        </item>
@@ -101,27 +123,77 @@
             <enum>QFrame::Panel</enum>
            </property>
            <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
+            <enum>QFrame::Sunken</enum>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
-             <spacer name="verticalSpacer">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
+             <widget class="QLabel" name="playlistNameLabel">
+              <property name="text">
+               <string>TextLabel</string>
               </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="playlistCreationTimeLabel">
+              <property name="text">
+               <string>TextLabel</string>
               </property>
-             </spacer>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="playlistUpdateTimeLabel">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="playlistControlsLayout">
+              <item>
+               <widget class="QPushButton" name="playlistRenameButton">
+                <property name="text">
+                 <string>Rename</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="playlistDeleteButton">
+                <property name="text">
+                 <string>Delete</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
          </item>
          <item>
-          <widget class="QListWidget" name="listWidget_2"/>
+          <widget class="QFrame" name="playlistConfirmRemovingFrame">
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="playlistConfirmRemovingLabel">
+              <property name="text">
+               <string>Delete Playlist?</string>
+              </property>
+             </widget>
+            </item>
+            <item alignment="Qt::AlignHCenter">
+             <widget class="QDialogButtonBox" name="playlistConfirmRemovingButtonBox">
+              <property name="standardButtons">
+               <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QListWidget" name="playlistValuesListWidget">
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

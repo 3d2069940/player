@@ -49,6 +49,10 @@ void Effects::waitForPipelineState () {
     gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
 }
 
+void Effects::setEOSReached (bool value) {
+    reachedEOS = value;
+}
+
 void Effects::initEffects () {
     pipeline  = gst_pipeline_new         ("audio-player");
     
@@ -78,7 +82,7 @@ void Effects::initEffects () {
     
     g_object_set (G_OBJECT(limiter),  "mode", 0, "cutoff", 48000.0, NULL);
     g_object_set (G_OBJECT(delay),    "max-delay", 5000000000, NULL);
-    g_object_set (G_OBJECT(spectrum), "bands", 10, "interval", 25000000, NULL);
+    g_object_set (G_OBJECT(spectrum), "bands", 25, "interval", 75000000, NULL);
     
     gboolean binAdded = TRUE;
 

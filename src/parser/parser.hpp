@@ -59,7 +59,7 @@ QStringList Parser::getMusicFolders () {
 
 QImage Parser::getAudioCover (const std::string &filePath) {
     QImage albumCover;
-    if (!showAudioCover)
+    if (!_showAudioCover)
         return albumCover;
 
        TagLib::FileRef file (filePath.c_str());
@@ -90,6 +90,22 @@ QImage Parser::getAudioCover (const std::string &filePath) {
         albumCover.loadFromData(imageData, "JPEG");
 
     return albumCover;
+}
+
+bool Parser::flatButtons () const {
+    return _flatButtons;
+}
+
+bool Parser::showAudioCover () const {
+    return _showAudioCover;
+}
+
+bool Parser::playAtStartup () const {
+    return _playAtStartup;
+}
+
+bool Parser::saveLastAudio () const {
+    return _saveLastAudio;
 }
 
 void Parser::parseConfigFile () {
@@ -135,10 +151,10 @@ void Parser::parseConfigFile () {
                             "/player/presets.yaml";
     extractConfigInfo<QStringList>(&musicFolders,"MusicFolders");
     extractConfigInfo<std::string>(&databasePath, "DataBasePath");
-    extractConfigInfo<bool>       (&flatButtons,    "FlatButtons");
-    extractConfigInfo<bool>       (&showAudioCover, "ShowAudioCover");
-    extractConfigInfo<bool>       (&playAtStartup,  "PlayAtStartup");
-    extractConfigInfo<bool>       (&saveLastAudio,  "SaveLastAudio");
+    extractConfigInfo<bool>       (&_flatButtons,    "FlatButtons");
+    extractConfigInfo<bool>       (&_showAudioCover, "ShowAudioCover");
+    extractConfigInfo<bool>       (&_playAtStartup,  "PlayAtStartup");
+    extractConfigInfo<bool>       (&_saveLastAudio,  "SaveLastAudio");
 }
 
 template <class T>

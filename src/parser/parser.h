@@ -26,6 +26,12 @@ public:
 
     QImage getAudioCover (const std::string &filePath);
 
+    bool flatButtons    () const,
+         showAudioCover () const,
+         playAtStartup  () const,
+         saveLastAudio  () const;
+
+
 private:
     QString configFilePath,
             presetFilePath;
@@ -35,10 +41,10 @@ private:
 
     std::string databasePath;
 
-    bool flatButtons,
-         showAudioCover,
-         playAtStartup,
-         saveLastAudio;
+    bool _flatButtons,
+         _showAudioCover,
+         _playAtStartup,
+         _saveLastAudio;
 
     QStringList extensions;
     QStringList musicFolders;

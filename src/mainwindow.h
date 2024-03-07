@@ -8,6 +8,7 @@
 
 #include "effects/effects.h"
 #include "parser/parser.h"
+#include "db/db.h"
 
 
 #include "ui_mainwindow.h"
@@ -36,6 +37,7 @@ private:
 
     Effects effects;
     Parser  parser;
+    DataBase db;
 
     void connectWidgets ();
 };

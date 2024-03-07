@@ -45,8 +45,11 @@
          <property name="minimum">
           <number>2</number>
          </property>
+         <property name="maximum">
+          <number>129</number>
+         </property>
          <property name="value">
-          <number>10</number>
+          <number>25</number>
          </property>
         </widget>
        </item>
@@ -68,7 +71,7 @@
           <number>2000</number>
          </property>
          <property name="value">
-          <number>100</number>
+          <number>75</number>
          </property>
         </widget>
        </item>

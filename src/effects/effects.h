@@ -112,6 +112,8 @@ public:
     void togglePipelineState  ();
     void waitForPipelineState ();
     
+    void setEOSReached (bool value);
+
     bool updateAudioInfo ();
     
     void updateAudioSpectrum (const GstStructure*);

@@ -10,6 +10,11 @@
 #include <QStandardPaths>
 
 #include <QDebug>
+#include <qdialogbuttonbox.h>
+#include <qevent.h>
+#include <qglobal.h>
+#include <qnamespace.h>
+#include <qobject.h>
 #include <qpixmap.h>
 //*******************************************************//
 // Homebrew classes
@@ -18,6 +23,7 @@
 //*******************************************************//
 // Classes definition
 //*******************************************************//
+#include "src/db/db.h"
 #include "src/tabs/playerTab/playertabitemdelegation.h"
 #include "src/widgets/playerTabPlaylist/playertabplaylistitem.h"
 #include "togglebutton.hpp"
@@ -26,8 +32,8 @@
 #include "../../widgets/playerTabPlaylist/playertabplaylistitem.hpp"
 
 
-PlayerTab::PlayerTab (QWidget *parent) 
-    : QWidget (parent) {
+PlayerTab::PlayerTab (DataBase *_db, QWidget *parent) 
+    : QWidget (parent), db(_db) {
     ui.setupUi(this);
 
     createWidgets  ();
@@ -41,7 +47,7 @@ PlayerTab::~PlayerTab () {
 }
 
 void PlayerTab::createWidgets () {
-    delegate = QSharedPointer<PlayerTabItemDelegate>::create();
+    dialog   = QSharedPointer<QDialog>::create();
 }
 
 void PlayerTab::setupWidgets () {
@@ -50,7 +56,10 @@ void PlayerTab::setupWidgets () {
     ui.playerSearchLineEdit->hide();
     ui.playerSearchButton->hide();
 
-    ui.playerAllTracksListWidget->setItemDelegate(delegate.data());
+    dialogUi.setupUi(dialog.data());
+
+    ui.playerAllTracksListWidget->setItemDelegate(&delegate);
+    dialogUi.listWidget->setItemDelegate(&delegate);
 
     audioTimer.setInterval(50);
 }
@@ -66,8 +75,14 @@ void PlayerTab::connectWidgets () {
     connect(ui.playerPrevButton, &QPushButton::clicked, this, &PlayerTab::onPrevButtonClicked);
     connect(ui.playerPauseButton, &QPushButton::clicked, this, &PlayerTab::onPauseButtonClicked);
     connect(ui.playerNextButton, &QPushButton::clicked, this, &PlayerTab::onNextButtonClicked);
+//  slider
+    connect(ui.playerAudioSlider, &QSlider::valueChanged, this, &PlayerTab::onSliderValueChanged);
+    connect(ui.playerAudioSlider, &QSlider::sliderReleased, this, &PlayerTab::onSliderReleased);
+    connect(ui.playerAudioSlider, &QSlider::sliderPressed, this, &PlayerTab::onSliderPressed);
 //  timer
     connect(&audioTimer, &QTimer::timeout, this, &PlayerTab::updateAudioInfo);
+//  dialog window
+    connect(dialogUi.buttonBox, &QDialogButtonBox::accepted, this, &PlayerTab::addToPlaylist);
 }
 
 void PlayerTab::updatePlayList () {
@@ -89,6 +104,7 @@ void PlayerTab::updatePlayList () {
 
         QVariant value = QVariant::fromValue(buttonValue);
         auto *playlistItem = new PlayerTabPlaylistItem (musicFile.fileName(), value);
+        connect(playlistItem, &PlayerTabPlaylistItem::onAddToPlaylistClicked, this, &PlayerTab::addToPlaylistClicked);
         ui.playerAllTracksListWidget->setItemWidget(item, playlistItem);
     }
 }
@@ -102,6 +118,10 @@ void PlayerTab::setParser (Parser *_parser) {
     musicFolders = parser->getMusicFolders();
     extensions   = parser->getExtensions();
     updatePlayList();
+}
+
+void PlayerTab::setDataBase (DataBase *_db) {
+    db = _db;
 }
 
 void PlayerTab::updateIcons () {
@@ -127,7 +147,7 @@ void PlayerTab::updateAlbumCover () {
     if (albumCover.isNull())
         ui.playerAudioCoverLabel->setText("*LOGO HERE*");
     else {
-        int albumCoverSize = qMin(ui.playerHLine_1->width(), width()/2-10);
+        int albumCoverSize = qMin(ui.playerHLine_1->width(), height()-150);
         QImage image = albumCover.scaled(QSize(albumCoverSize, albumCoverSize),
                                      Qt::KeepAspectRatio);
         QPixmap pixmap    = QPixmap::fromImage(image);
@@ -149,6 +169,21 @@ void PlayerTab::changeEvent (QEvent *event) {
     QWidget::changeEvent(event);
 }
 
+void PlayerTab::resizeEvent (QResizeEvent *event) {
+    if (!albumCover.isNull())
+        updateAlbumCover();
+    QWidget::resizeEvent(event);
+}
+
+void PlayerTab::showEvent (QShowEvent *event) {
+    // if (parser->showAudioCover()) {
+    //     auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(currentAudio));
+    //     albumCover = parser->getAudioCover(itemWidget->filePath());
+    //     updateAlbumCover();
+    // }
+    QWidget::showEvent(event);
+}
+
 void PlayerTab::toggleSearchLineView () {
     ui.playerSearchLineEdit->setVisible(!ui.playerSearchLineEdit->isVisible());
 }
@@ -157,12 +192,18 @@ void PlayerTab::togglePlaylistView () {
     ui.playerAllTracksListWidget->setVisible(!ui.playerAllTracksListWidget->isVisible());
     ui.playerSearchButton->setVisible(!ui.playerSearchButton->isVisible());
     ui.playerSearchLineEdit->setVisible(false);
+    updateAlbumCover();
 }
 
+/**
+* This function is called when typing in QLineEdit
+* hides elements that do not contain string occurrences
+*/
 void PlayerTab::onLineEditTextChanged (const QString &newText) {
     foreach (QListWidgetItem* item, playlistItems) {
         auto widget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(item));
-        if (QString::fromStdString(widget->filePath()).contains(newText))
+        QString fileName = QString::fromStdString(widget->filePath());
+        if (fileName.contains(newText, Qt::CaseInsensitive))
             item->setHidden(false);
         else
             item->setHidden(true);
@@ -203,7 +244,22 @@ void PlayerTab::onNextButtonClicked () {
         updateAlbumCover();
         ui.playerAllTracksListWidget->setCurrentItem(currentAudio);
     }
+}
 
+void PlayerTab::onSliderValueChanged (int value) {
+    Q_UNUSED(value);
+}
+
+void PlayerTab::onSliderReleased () {
+    effects->updateAudioDuration();
+    int max   = ui.playerAudioSlider->maximum(),
+        value = ui.playerAudioSlider->value();
+    effects->seekPlayingPosition(effects->audioDuration*value/max);
+    audioTimer.start();
+}
+
+void PlayerTab::onSliderPressed () {
+    audioTimer.stop();
 }
 
 void PlayerTab::onPlayerPlaylistItemClicked (QListWidgetItem *item) {
@@ -216,7 +272,25 @@ void PlayerTab::onPlayerPlaylistItemClicked (QListWidgetItem *item) {
     audioTimer.start();
 }
 
+void PlayerTab::addToPlaylistClicked (const QString &_musicFile) {
+    dialogUi.listWidget->clear();
+    dialogUi.listWidget->addItems(db->getTableNames());
+
+    musicFile = _musicFile;
+
+    dialog->show();
+}
+
+void PlayerTab::addToPlaylist () {
+    auto item = dialogUi.listWidget->currentItem();
+    if (item == nullptr)
+        return;
+    QString tableName = item->text();
+    db->writeValue(tableName.toStdString(), musicFile.toStdString());
+}
+
 void PlayerTab::updateAudioInfo () {
+    QSignalBlocker blocker (ui.playerAudioSlider);
     effects->updateAudioDuration();
     effects->updateAudioPosition();
 
@@ -243,6 +317,10 @@ void PlayerTab::updateAudioInfo () {
 
     ui.playerAudioLabel->setText(labelText);
 
+    if (effects->isEOSReached()) {
+        ui.playerNextButton->click();
+        effects->setEOSReached(false);
+    }
 }
 
 #endif // _PLAYERTAB_HPP
