@@ -7,6 +7,7 @@
 #include "playlisttab.h"
 
 // #include "src/widgets/playlistTabPlaylist/playlisttabplaylistitem.h"
+#include "src/effects/effects.h"
 #include "src/widgets/playlistTabPlaylist/playlistplaylistbuttonvalue.h"
 #include "src/widgets/playlistTabPlaylist/playlisttabplaylistitem.h"
 #include "src/widgets/playlistTabPlaylist/playlisttabplaylistitem.hpp"
@@ -34,6 +35,10 @@ PlaylistTab::~PlaylistTab () {
 
 }
 
+void PlaylistTab::setEffects (Effects *_effects) {
+    effects = _effects;
+}
+
 void PlaylistTab::createWidgets () {
     foreach (const QString &playlistName, db->getTableNames()) {
         auto button = new QPushButton ();
@@ -48,6 +53,8 @@ void PlaylistTab::setupWidgets () {
     ui.playlistCreationMenuFrame->hide();
     ui.playlistInfoFrame->hide();
     ui.playlistConfirmRemovingFrame->hide();
+
+    ui.playlistValuesListWidget->setItemDelegate(&delegate);
 }
 
 void PlaylistTab::connectWidgets () {
@@ -59,6 +66,8 @@ void PlaylistTab::connectWidgets () {
     connect(ui.playlistDeleteButton, &QPushButton::clicked, ui.playlistConfirmRemovingFrame, &QFrame::show);
     connect(ui.playlistConfirmRemovingButtonBox, &QDialogButtonBox::accepted, this, &PlaylistTab::onAcceptDeleteButtonBoxClicked);
     connect(ui.playlistConfirmRemovingButtonBox, &QDialogButtonBox::rejected, this, &PlaylistTab::onRejectDeleteButtonBoxClicked);
+
+    connect(ui.playlistValuesListWidget, &QListWidget::itemClicked, this, &PlaylistTab::onPlaylistItemClicked);
 }
 
 void PlaylistTab::showEvent (QShowEvent *event) {
@@ -141,6 +150,16 @@ void PlaylistTab::onPlaylistButtonClicked () {
 
         connect(widget, &PlaylistTabPlaylistItem::removeClicked, this, &PlaylistTab::onRemoveItemClicked);
     }
+}
+
+void PlaylistTab::onPlaylistItemClicked (QListWidgetItem *item) {
+    effects->setAudioList(ui.playlistValuesListWidget);
+    effects->setCurrentAudio<PlaylistTabPlaylistItem>(item);
+    std::string filePath = effects->getAudioFilePath<PlaylistTabPlaylistItem>();
+    // albumCover = parser->getAudioCover(filePath);
+    // updateAlbumCover();
+    // ui.playerPauseButton->setState(1);
+    // audioTimer.start();
 }
 
 void PlaylistTab::onAcceptDeleteButtonBoxClicked () {

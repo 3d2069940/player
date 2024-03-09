@@ -17,7 +17,7 @@
 //*******************************************************//
 #include "../tab.h"
 #include "src/db/db.h"
-#include "playertabitemdelegation.h"
+#include "src/tabs/playlistitemdelegate.h"
 //*******************************************************//
 // Autogen
 //*******************************************************//
@@ -39,7 +39,6 @@ public:
 //  setters
     void setEffects  (Effects  *_effects);
     void setParser   (Parser   *_parser);
-    void setDataBase (DataBase *_db);
 
     void setMusicFolders (const QStringList &_musicFolders);
     void setExtensions   (const QStringList &_extensions);
@@ -52,7 +51,7 @@ private:
     Parser   *parser  = nullptr;
     DataBase *db      = nullptr;
 
-    PlayerTabItemDelegate delegate;
+    PlaylistItemDelegate delegate;
     QSharedPointer<QDialog> dialog;
 
     QTimer audioTimer;

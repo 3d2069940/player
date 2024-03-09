@@ -9,7 +9,6 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
-
 class PlayerTabPlaylistItem : public QWidget {
     Q_OBJECT
 public:
@@ -44,6 +43,5 @@ public slots:
 signals:
     void onAddToPlaylistClicked (const QString &musicFiles);
 };
-
 
 #endif // _PLAYERTABPLAYLISTTAB_H_

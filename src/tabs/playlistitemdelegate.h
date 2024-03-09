@@ -5,7 +5,7 @@
 #include <QPainter>
 #include <QStyledItemDelegate>
 
-class PlayerTabItemDelegate : public QStyledItemDelegate {
+class PlaylistItemDelegate : public QStyledItemDelegate {
 
 public:
     void paint (QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {

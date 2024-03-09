@@ -5,6 +5,7 @@
 // Homebrew Headers
 //***********************************************************//
 #include "effects.h"
+#include "src/widgets/playerTabPlaylist/playertabplaylistitem.h"
 
 
 Effects::Effects () {
@@ -15,10 +16,6 @@ Effects::~Effects () {
     gst_element_set_state(pipeline, GST_STATE_NULL);
     gst_object_unref(pipeline);
     gst_deinit();
-}
-
-bool Effects::isEOSReached() {
-    return reachedEOS;
 }
 
 bool Effects::isPipelineRunning () {
@@ -34,6 +31,8 @@ bool Effects::isPipelineRunning () {
 }
 
 void Effects::togglePipelineState () {
+    if (currentAudio == nullptr)
+        return;
     GstState state;
     gboolean result;
     
@@ -47,10 +46,6 @@ void Effects::togglePipelineState () {
 
 void Effects::waitForPipelineState () {
     gst_element_get_state(pipeline, NULL, NULL, GST_CLOCK_TIME_NONE);
-}
-
-void Effects::setEOSReached (bool value) {
-    reachedEOS = value;
 }
 
 void Effects::initEffects () {
@@ -145,7 +140,7 @@ gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
         case GST_MESSAGE_EOS:
             gst_element_set_state(effects->pipeline, GST_STATE_PAUSED);
             effects->waitForPipelineState();
-            effects->reachedEOS = true;
+            effects->playNextAudio();
             break;
         case GST_MESSAGE_ERROR:
             gst_message_parse_error(msg, &err, &debug_info);
@@ -155,11 +150,10 @@ gboolean Effects::busCallback (GstBus *, GstMessage *msg, gpointer userdata) {
             g_free(debug_info);
             gst_element_set_state(effects->pipeline, GST_STATE_NULL);
             effects->waitForPipelineState();
-            effects->reachedEOS = true;
             break;
-        case GST_MESSAGE_STREAM_START:
-            effects->reachedEOS = false;
-            break;
+        // case GST_MESSAGE_STREAM_START:
+        //     effects->reachedEOS = false;
+        //     break;
         case GST_MESSAGE_ELEMENT:
             structure = gst_message_get_structure(msg);
             name = gst_structure_get_name(structure);
@@ -182,37 +176,9 @@ void Effects::padAddedCallback (GstElement *, GstPad *pad, gpointer userdata) {
     gst_object_unref(sinkpad);
 }
 
-bool Effects::updateAudioInfo () {
-    GstPad  *pad  = gst_element_get_static_pad(GST_ELEMENT(convert1), "sink");
-    gboolean result;
-    
-    if (pad == nullptr)
-        return false;
-        
-    GstCaps *caps = gst_pad_get_current_caps(pad);
-    if (caps == nullptr) {
-        gst_object_unref(pad);
-        return false;
-    }
-        
-    GstStructure *structure = gst_caps_get_structure(caps, 0);
-    if (structure == nullptr) {
-        gst_caps_unref(caps);
-        gst_object_unref(pad);
-        return false;
-    }
-        
-    result  = gst_structure_get_int(structure, "rate", &sampleRate);
-    result |= gst_structure_get_int(structure, "channels", &channels);
-    
-    gst_caps_unref(caps);
-    gst_object_unref(pad);
-    
-    return result != 0;
-}
 
 void Effects::updateAudioSpectrum (const GstStructure *structure) {
-    if (!updateAudioInfo() || magnitudesChanged.load())
+    if (magnitudesChanged.load())
         return;
 
     previousMagnitudes = currentMagnitudes;
@@ -436,3 +402,48 @@ void Effects::changeSpectrumProps (CODES::SPECTRUM code, int64_t newValue) {
     }
 }
 
+void Effects::playNextAudio () {
+    if (audioList == nullptr) 
+        return;
+    int id = audioList->currentRow();
+    if (id != -1 && id < audioList->count()-1) {
+        currentAudio = audioList->item(id+1);
+        auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(audioList->itemWidget(currentAudio));
+        changePlayingAudio(itemWidget->filePath());
+        audioList->setCurrentItem(currentAudio);
+    }
+}
+
+void Effects::playPreviousAudio () {
+    if (audioList == nullptr)
+        return;
+    int id = audioList->currentRow();
+    if (id != -1 && id > 0) {
+        currentAudio = audioList->item(id-1);
+        auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(audioList->itemWidget(currentAudio));
+        changePlayingAudio(itemWidget->filePath());
+        audioList->setCurrentItem(currentAudio);
+    }
+}
+
+void Effects::setAudioList (QListWidget *_audioList) {
+    if (audioList != nullptr)
+        audioList->clearFocus();
+    audioList = _audioList;
+}
+
+template <class T>
+void Effects::setCurrentAudio (QListWidgetItem *_currentAudio) {
+    currentAudio = _currentAudio;
+    auto itemWidget = qobject_cast<T*>(audioList->itemWidget(currentAudio));
+    changePlayingAudio(itemWidget->filePath());
+    audioList->setCurrentItem(currentAudio);
+}
+
+template <class T>
+std::string Effects::getAudioFilePath () {
+    if (audioList == nullptr)
+        return "";
+    auto itemWidget = qobject_cast<T*>(audioList->itemWidget(currentAudio));
+    return itemWidget->filePath();
+}

@@ -13,6 +13,8 @@
 //***********************************************************//
 #include <gst/gst.h>
 
+#include <QList>
+#include <QListWidgetItem>
 
 namespace CODES {
     enum EQUALIZER {
@@ -70,7 +72,9 @@ class Effects {
 private:
 //  VARIABLES
     GstBus *bus;
-    bool   reachedEOS;
+
+    QListWidget     *audioList    = nullptr;
+    QListWidgetItem *currentAudio = nullptr;
 //  FUNCTIONS 
     void initEffects ();
 //  CALLBACKS
@@ -96,7 +100,6 @@ public:
                *audiosink;
                
     gint64 audioDuration, audioPosition;
-    gint channels, sampleRate;
     
     std::atomic<bool> magnitudesChanged {false}; 
     guint spectrumBands = 10;
@@ -106,15 +109,10 @@ public:
 
     Effects ();
     ~Effects ();
-    
-    bool isEOSReached         (); 
+     
     bool isPipelineRunning    ();
     void togglePipelineState  ();
     void waitForPipelineState ();
-    
-    void setEOSReached (bool value);
-
-    bool updateAudioInfo ();
     
     void updateAudioSpectrum (const GstStructure*);
     void updateAudioDuration ();
@@ -132,6 +130,17 @@ public:
     void changePanoramaProps   (CODES::PANORAMA,   int newValue = 0);
 
     void changeSpectrumProps   (CODES::SPECTRUM, int64_t);
+
+    void playNextAudio     ();
+    void playPreviousAudio ();
+
+//  setters
+    void setAudioList    (QListWidget     *_audioList);
+    template <class T>
+    void setCurrentAudio (QListWidgetItem *_currentAudio);
+//  getters
+    template <class T>
+    std::string getAudioFilePath ();
 };
 
 #endif // EFFECTS_H

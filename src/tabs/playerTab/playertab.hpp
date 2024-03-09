@@ -24,12 +24,12 @@
 // Classes definition
 //*******************************************************//
 #include "src/db/db.h"
-#include "src/tabs/playerTab/playertabitemdelegation.h"
+#include "src/tabs/playlistitemdelegate.h"
 #include "src/widgets/playerTabPlaylist/playertabplaylistitem.h"
 #include "togglebutton.hpp"
 #include "src/effects/effects.h"
 #include "src/parser/parser.h"
-#include "../../widgets/playerTabPlaylist/playertabplaylistitem.hpp"
+#include "src/widgets/playerTabPlaylist/playertabplaylistitem.hpp"
 
 
 PlayerTab::PlayerTab (DataBase *_db, QWidget *parent) 
@@ -120,13 +120,8 @@ void PlayerTab::setParser (Parser *_parser) {
     updatePlayList();
 }
 
-void PlayerTab::setDataBase (DataBase *_db) {
-    db = _db;
-}
-
 void PlayerTab::updateIcons () {
-    QPalette palette = qApp->palette();
-    QColor   backgroundColor = palette.color(QPalette::Window);
+    QColor   backgroundColor = palette().color(QPalette::Window);
     
     QString iconPath = backgroundColor.value() < 128 ? QStringLiteral(":icons/white/") :
                                                        QStringLiteral(":icons/black/");
@@ -211,39 +206,23 @@ void PlayerTab::onLineEditTextChanged (const QString &newText) {
 }
 
 void PlayerTab::onPrevButtonClicked () {
-    int id = playlistItems.indexOf(currentAudio);
-    if (id != -1 && id > 0) {
-        currentAudio = playlistItems.at(id-1);
-        auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(currentAudio));
-        effects->changePlayingAudio(itemWidget->filePath());
-        albumCover = parser->getAudioCover(itemWidget->filePath());
-        updateAlbumCover();
-        ui.playerAllTracksListWidget->setCurrentItem(currentAudio);
-    }
+    effects->playPreviousAudio();
+    std::string filePath = effects->getAudioFilePath<PlayerTabPlaylistItem>();
+    albumCover = parser->getAudioCover(filePath);
+    ui.playerPauseButton->setState(1);
+    updateAlbumCover();
 }
 
 void PlayerTab::onPauseButtonClicked () {
-    if (currentAudio != nullptr) {
-        effects->togglePipelineState();
-
-        if (ui.playerPauseButton->getState() == 0)
-            audioTimer.stop();
-        else    
-            audioTimer.start();
-    } else
-        ui.playerPauseButton->setState(0);
+    effects->togglePipelineState();
 }
 
 void PlayerTab::onNextButtonClicked () {
-    int id = playlistItems.indexOf(currentAudio);
-    if (id != -1 && id < playlistItems.size()-1) {
-        currentAudio = playlistItems.at(id+1);
-        auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(currentAudio));
-        effects->changePlayingAudio(itemWidget->filePath());
-        albumCover = parser->getAudioCover(itemWidget->filePath());
-        updateAlbumCover();
-        ui.playerAllTracksListWidget->setCurrentItem(currentAudio);
-    }
+    effects->playNextAudio();
+    std::string filePath = effects->getAudioFilePath<PlayerTabPlaylistItem>();
+    albumCover = parser->getAudioCover(filePath);
+    ui.playerPauseButton->setState(1);
+    updateAlbumCover();
 }
 
 void PlayerTab::onSliderValueChanged (int value) {
@@ -263,10 +242,10 @@ void PlayerTab::onSliderPressed () {
 }
 
 void PlayerTab::onPlayerPlaylistItemClicked (QListWidgetItem *item) {
-    currentAudio = item;
-    auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(item));
-    effects->changePlayingAudio(itemWidget->filePath());
-    albumCover = parser->getAudioCover(itemWidget->filePath());
+    effects->setAudioList(ui.playerAllTracksListWidget);
+    effects->setCurrentAudio<PlayerTabPlaylistItem>(item);
+    std::string filePath = effects->getAudioFilePath<PlayerTabPlaylistItem>();
+    albumCover = parser->getAudioCover(filePath);
     updateAlbumCover();
     ui.playerPauseButton->setState(1);
     audioTimer.start();
@@ -316,11 +295,6 @@ void PlayerTab::updateAudioInfo () {
     labelText = labelText.arg(QString::number(durationSeconds),2,QChar('0'));
 
     ui.playerAudioLabel->setText(labelText);
-
-    if (effects->isEOSReached()) {
-        ui.playerNextButton->click();
-        effects->setEOSReached(false);
-    }
 }
 
 #endif // _PLAYERTAB_HPP

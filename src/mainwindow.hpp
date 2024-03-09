@@ -36,6 +36,7 @@ MainWindowUI::MainWindowUI (QWidget *parent)
     ui.playerGridLayout->addWidget(playerTab.data());
 
     playlistTab = QSharedPointer<PlaylistTab>::create(&db);
+    playlistTab->setEffects(&effects);
     ui.playlistGridLayout->addWidget(playlistTab.data());
 
     effectsTab = QSharedPointer<EffectsTab>::create();
