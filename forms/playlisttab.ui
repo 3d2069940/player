@@ -51,6 +51,12 @@
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QScrollArea" name="playlistsScrollArea">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -59,11 +65,26 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>390</width>
-            <height>567</height>
+            <width>394</width>
+            <height>571</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <property name="spacing">
+            <number>0</number>
+           </property>
            <item row="0" column="0">
             <layout class="QVBoxLayout" name="playlistScrollAreaLayout">
              <property name="spacing">
@@ -84,6 +105,91 @@
              </property>
             </spacer>
            </item>
+           <item row="2" column="0">
+            <widget class="QFrame" name="playlistAudioControlFrame">
+             <layout class="QVBoxLayout" name="playlistControlFrame">
+              <item>
+               <widget class="QFrame" name="playlistControlButtonFrame">
+                <layout class="QHBoxLayout" name="horizontalLayout_3">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QPushButton" name="playlistPreviousButton">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="playlistRepeatButton">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="ToggleButton" name="playlistPauseButton" native="true"/>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="playlistShuffleButton">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="playlistNextButton">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="playlistAudioInfoFrame">
+                <item>
+                 <widget class="QLabel" name="playlistAudioPositionLabel">
+                  <property name="text">
+                   <string>0:00:00/0:00:00</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSlider" name="playlistAudioPositionSlider">
+                  <property name="maximum">
+                   <number>100</number>
+                  </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
           </layout>
          </widget>
         </widget>
@@ -92,6 +198,9 @@
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QFrame" name="playlistCreationMenuFrame">
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -120,7 +229,7 @@
          <item>
           <widget class="QFrame" name="playlistInfoFrame">
            <property name="frameShape">
-            <enum>QFrame::Panel</enum>
+            <enum>QFrame::NoFrame</enum>
            </property>
            <property name="frameShadow">
             <enum>QFrame::Sunken</enum>
@@ -151,6 +260,9 @@
              <layout class="QHBoxLayout" name="playlistControlsLayout">
               <item>
                <widget class="QPushButton" name="playlistRenameButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Rename</string>
                 </property>
@@ -189,7 +301,26 @@
           </widget>
          </item>
          <item>
+          <widget class="QFrame" name="playlistRenameLayout">
+           <layout class="QHBoxLayout" name="playlistRenameFrame">
+            <item>
+             <widget class="QLabel" name="playlistRenameLabel">
+              <property name="text">
+               <string>New Playlist Name:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="playlistRenameLineEdit"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <widget class="QListWidget" name="playlistValuesListWidget">
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
            <property name="horizontalScrollBarPolicy">
             <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
@@ -203,6 +334,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ToggleButton</class>
+   <extends>QWidget</extends>
+   <header location="global">togglebutton.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

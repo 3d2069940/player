@@ -34,7 +34,11 @@ private:
       void connectPanorama   ();
 
 private slots:
-    void equalizerResetButtonClicked (const EqualizerPreset &preset);
+    void equalizerResetButtonClicked  (const EqualizerPreset  &preset);
+    void delayResetButtonClicked      (const DelayPreset      &preset);
+    void filterResetButtonClicked     (const FilterPreset     &preset);
+    void pitchResetButtonClicked      (const PitchPreset      &preset);
+    void compressorResetButtonClicked (const CompressorPreset &preset);
 
     void onEqualizerValueChanged  (CODES::EQUALIZER  code, int    value);
     void onDelayValueChanged      (CODES::DELAY      code, int    value=0);

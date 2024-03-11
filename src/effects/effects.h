@@ -120,7 +120,7 @@ public:
     
     void seekPlayingPosition (gint64);
     
-    void changePlayingAudio  (std::string);
+    void changePlayingAudio  (const std::string &filePath);
     
     void changeEqualizerProps  (CODES::EQUALIZER,  int);
     void changeDelayProps      (CODES::DELAY,      int newValue = 0);

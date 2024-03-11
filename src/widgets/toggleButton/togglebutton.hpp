@@ -4,13 +4,15 @@
 
 
 #include "togglebutton.h"
+
+#include <QDebug>
 #include <qevent.h>
 #include <qnamespace.h>
-#include <qpushbutton.h>
+#include <QPushButton>
 
 
 ToggleButton::ToggleButton (QWidget *parent) : QPushButton(parent) {
-
+    connect(this, &QPushButton::clicked, this, &ToggleButton::onButtonClicked);
 }
 
 ToggleButton::~ToggleButton () {
@@ -41,16 +43,14 @@ int ToggleButton::getState () const {
     return stateId;
 }
 
-void ToggleButton::mousePressEvent (QMouseEvent *event) {
-    if (event->button() == Qt::LeftButton) {
-        if (iconsSet) {
-            ++stateId %= icons.size();
-            setIcon(icons.at(stateId));
-        } else {
-            ++stateId %= labels.size();
-            setText(labels.at(stateId));
-        }
-  } QPushButton::mousePressEvent(event);
+void ToggleButton::onButtonClicked () {
+    if (iconsSet) {
+        ++stateId %= icons.size();
+        setIcon(icons.at(stateId));
+    } else {
+        ++stateId %= labels.size();
+        setText(labels.at(stateId));
+    }
 }
 
 

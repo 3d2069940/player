@@ -140,6 +140,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="playerRepeatButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -150,6 +153,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="playerShuffleButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string/>
            </property>

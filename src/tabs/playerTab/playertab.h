@@ -63,6 +63,8 @@ private:
 
     QString musicFile;
 
+    bool playlistAudioActive = false;
+
     QVector<QListWidgetItem*> playlistItems;
     QListWidgetItem *currentAudio = nullptr;
 
@@ -87,20 +89,27 @@ private slots:
     void onLineEditTextChanged (const QString &newText);
     void toggleSearchLineView  ();
 //  control buttons
-    void onPrevButtonClicked  ();
-    void onPauseButtonClicked ();
-    void onNextButtonClicked  ();
+    void onPreviousButtonClicked ();
+    void onPauseButtonClicked    ();
+    void onNextButtonClicked     ();
 //  slider
     void onSliderValueChanged (int value);
     void onSliderReleased     ();
     void onSliderPressed      ();
 //  playlist
-    void onPlayerPlaylistItemClicked (QListWidgetItem *item);
+    void onPlaylistItemClicked (QListWidgetItem *item);
 
     void addToPlaylistClicked (const QString &_musicFile);
     void addToPlaylist ();
 //  timer
     void updateAudioInfo ();
+
+signals:
+    void audioStateChanged ();
+
+public slots:
+    void onAudioStateChanged ();
+
 };
 
 #endif // PLAYERTAB_H_

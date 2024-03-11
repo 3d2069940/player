@@ -6,7 +6,9 @@
 //***********************************************************//
 #include "effects.h"
 #include "src/widgets/playerTabPlaylist/playertabplaylistitem.h"
+#include "src/widgets/playlistTabPlaylist/playlisttabplaylistitem.h"
 
+#include <QDebug>
 
 Effects::Effects () {
     initEffects ();
@@ -219,9 +221,10 @@ void Effects::seekPlayingPosition (gint64 position) {
     waitForPipelineState    ();
 }
 
-void Effects::changePlayingAudio (std::string filePath) {
+void Effects::changePlayingAudio (const std::string& filePath) {
     // gst_element_set_state (pipeline, GST_STATE_READY);
-    gst_element_set_state (pipeline, GST_STATE_NULL);
+    gst_element_set_state (pipeline, GST_STATE_READY);
+    waitForPipelineState();
     
     g_object_set (filesrc, "location", filePath.c_str(), NULL);
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
@@ -403,25 +406,35 @@ void Effects::changeSpectrumProps (CODES::SPECTRUM code, int64_t newValue) {
 }
 
 void Effects::playNextAudio () {
-    if (audioList == nullptr) 
-        return;
     int id = audioList->currentRow();
-    if (id != -1 && id < audioList->count()-1) {
+    if (id < audioList->count()-1) {
         currentAudio = audioList->item(id+1);
-        auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(audioList->itemWidget(currentAudio));
-        changePlayingAudio(itemWidget->filePath());
+        std::string filePath;
+        if (qobject_cast<PlayerTabPlaylistItem *>(audioList->itemWidget(currentAudio))) {
+            auto itemWidget = qobject_cast<PlayerTabPlaylistItem *>(audioList->itemWidget(currentAudio));
+            filePath = itemWidget->filePath();
+        } else {
+            auto itemWidget = qobject_cast<PlaylistTabPlaylistItem*> (audioList->itemWidget(currentAudio));
+            filePath = itemWidget->filePath();
+        } 
+        changePlayingAudio(filePath);
         audioList->setCurrentItem(currentAudio);
     }
 }
 
 void Effects::playPreviousAudio () {
-    if (audioList == nullptr)
-        return;
     int id = audioList->currentRow();
-    if (id != -1 && id > 0) {
+    if (id > 0) {
         currentAudio = audioList->item(id-1);
-        auto itemWidget = qobject_cast<PlayerTabPlaylistItem*>(audioList->itemWidget(currentAudio));
-        changePlayingAudio(itemWidget->filePath());
+        std::string filePath;
+        if (qobject_cast<PlayerTabPlaylistItem *>(audioList->itemWidget(currentAudio))) {
+            auto itemWidget = qobject_cast<PlayerTabPlaylistItem *>(audioList->itemWidget(currentAudio));
+            filePath = itemWidget->filePath();
+        } else {
+            auto itemWidget = qobject_cast<PlaylistTabPlaylistItem*> (audioList->itemWidget(currentAudio));
+            filePath = itemWidget->filePath();
+        } 
+        changePlayingAudio(filePath);
         audioList->setCurrentItem(currentAudio);
     }
 }

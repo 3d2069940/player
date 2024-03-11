@@ -70,9 +70,9 @@ void PlayerTab::connectWidgets () {
     connect(ui.playerSearchButton, &QPushButton::clicked, this, &PlayerTab::toggleSearchLineView);
     connect(ui.playerSearchLineEdit, &QLineEdit::textChanged, this, &PlayerTab::onLineEditTextChanged);
 
-    connect(ui.playerAllTracksListWidget, &QListWidget::itemClicked, this, &PlayerTab::onPlayerPlaylistItemClicked);
+    connect(ui.playerAllTracksListWidget, &QListWidget::itemClicked, this, &PlayerTab::onPlaylistItemClicked);
 //  control buttons
-    connect(ui.playerPrevButton, &QPushButton::clicked, this, &PlayerTab::onPrevButtonClicked);
+    connect(ui.playerPrevButton, &QPushButton::clicked, this, &PlayerTab::onPreviousButtonClicked);
     connect(ui.playerPauseButton, &QPushButton::clicked, this, &PlayerTab::onPauseButtonClicked);
     connect(ui.playerNextButton, &QPushButton::clicked, this, &PlayerTab::onNextButtonClicked);
 //  slider
@@ -122,7 +122,6 @@ void PlayerTab::setParser (Parser *_parser) {
 
 void PlayerTab::updateIcons () {
     QColor   backgroundColor = palette().color(QPalette::Window);
-    
     QString iconPath = backgroundColor.value() < 128 ? QStringLiteral(":icons/white/") :
                                                        QStringLiteral(":icons/black/");
 
@@ -205,7 +204,12 @@ void PlayerTab::onLineEditTextChanged (const QString &newText) {
     }
 }
 
-void PlayerTab::onPrevButtonClicked () {
+void PlayerTab::onPreviousButtonClicked () {
+    if (ui.playerAllTracksListWidget->currentItem() == nullptr)
+        return;
+    playlistAudioActive = false;
+    effects->setAudioList(ui.playerAllTracksListWidget);
+    effects->setCurrentAudio<PlayerTabPlaylistItem>(ui.playerAllTracksListWidget->currentItem());
     effects->playPreviousAudio();
     std::string filePath = effects->getAudioFilePath<PlayerTabPlaylistItem>();
     albumCover = parser->getAudioCover(filePath);
@@ -214,10 +218,25 @@ void PlayerTab::onPrevButtonClicked () {
 }
 
 void PlayerTab::onPauseButtonClicked () {
+    auto item = ui.playerAllTracksListWidget->currentItem();
+    if (item == nullptr)
+        return;
+    effects->setAudioList(ui.playerAllTracksListWidget);
     effects->togglePipelineState();
+    if (playlistAudioActive) {
+        effects->setCurrentAudio<PlayerTabPlaylistItem>(item);
+        audioTimer.start();
+        playlistAudioActive = false;
+    }
 }
 
 void PlayerTab::onNextButtonClicked () {
+    auto item = ui.playerAllTracksListWidget->currentItem();
+    if (item == nullptr)
+        return;
+    playlistAudioActive = false;
+    effects->setAudioList(ui.playerAllTracksListWidget);
+    effects->setCurrentAudio<PlayerTabPlaylistItem>(item);
     effects->playNextAudio();
     std::string filePath = effects->getAudioFilePath<PlayerTabPlaylistItem>();
     albumCover = parser->getAudioCover(filePath);
@@ -241,7 +260,7 @@ void PlayerTab::onSliderPressed () {
     audioTimer.stop();
 }
 
-void PlayerTab::onPlayerPlaylistItemClicked (QListWidgetItem *item) {
+void PlayerTab::onPlaylistItemClicked (QListWidgetItem *item) {
     effects->setAudioList(ui.playerAllTracksListWidget);
     effects->setCurrentAudio<PlayerTabPlaylistItem>(item);
     std::string filePath = effects->getAudioFilePath<PlayerTabPlaylistItem>();
@@ -295,6 +314,12 @@ void PlayerTab::updateAudioInfo () {
     labelText = labelText.arg(QString::number(durationSeconds),2,QChar('0'));
 
     ui.playerAudioLabel->setText(labelText);
+}
+
+void PlayerTab::onAudioStateChanged () {
+    audioTimer.stop();
+    playlistAudioActive = true;
+    ui.playerPauseButton->setState(0);
 }
 
 #endif // _PLAYERTAB_HPP

@@ -16,9 +16,7 @@
 #include "parser/parser.hpp"
 #include "db/db.hpp"
 
-
 #include "widgets/directoryListView/directorylistview.hpp"
-#include <qscopedpointer.h>
 #include <qstandardpaths.h>
 
 
@@ -49,10 +47,15 @@ MainWindowUI::MainWindowUI (QWidget *parent)
 
     settingsTab = QSharedPointer<SettingsTab>::create();
     ui.settingsGridLayout->addWidget(settingsTab.data());
+
+    connectWidgets();
 }
 
 MainWindowUI::~MainWindowUI () {
 
 }
 
+void MainWindowUI::connectWidgets () {
+    connect(playlistTab.data(), &PlaylistTab::audioStateChanged, playerTab.data(), &PlayerTab::onAudioStateChanged);
+}
 #endif // _MAINWINDOW_HPP_

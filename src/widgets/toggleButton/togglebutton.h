@@ -11,13 +11,12 @@ public:
     explicit ToggleButton (QWidget *parent = nullptr);
     virtual ~ToggleButton ();
 
-    void inline setLabels (const QStringList&  _labels);
-    void inline setIcons  (const QList<QIcon>& _icons);
-
-
-    void inline setState  (int);
-
-    int  inline getState () const;
+//  setters
+    void setLabels (const QStringList&  _labels);
+    void setIcons  (const QList<QIcon>& _icons);
+    void setState  (int);
+//  getters
+    int getState () const;
 
 private:
     QList<QIcon> icons;
@@ -26,8 +25,7 @@ private:
     int stateId {0};
     bool iconsSet;
 
-protected:
-    void mousePressEvent (QMouseEvent *event) override;
+    void onButtonClicked ();
 };
 
 #endif // _TOGGLEBUTTON_H_

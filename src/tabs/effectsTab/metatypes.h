@@ -19,19 +19,19 @@ struct EqualizerPreset {
 };
 
 struct DelayPreset {
-    int  delay         {1};
-    bool surroundDelay {0};
-    int  intensity     {0};
-    int  maxDelay      {5000};
-    int  feedback      {0};
+    int delay         {1};
+    int surroundDelay {0};
+    int intensity     {0};
+    int maxDelay      {5000};
+    int feedback      {0};
 };
 
 struct FilterPreset {
-    bool   mode       {0};
+    int    mode       {0};
     int    cutoff     {48000};
     double ripple     {0.25};
     int    poles      {4};
-    bool   filterType {0};
+    int    filterType {0};
 };
 
 struct PitchPreset {
@@ -44,8 +44,8 @@ struct PitchPreset {
 struct CompressorPreset {
     int compressor {0};
     int kneeType   {0};
-    int  ratio     {10};
-    int  threshold {0};
+    int ratio      {10};
+    int threshold  {0};
 };
 
 // Registers a custom data type for QVariant

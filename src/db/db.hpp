@@ -124,6 +124,7 @@ void DataBase::updateTime (const std::string &tableName) {
     if (rc != SQLITE_DONE)
         qDebug() << "Can't update time" << rc;
 
+    sqlite3_finalize(stmt);
 }
 
 void DataBase::setPath (const std::string &_filePath) {

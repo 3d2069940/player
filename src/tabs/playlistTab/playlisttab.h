@@ -9,7 +9,7 @@
 
 
 #include <QEvent>
-
+#include <QTimer>
 
 
 class Effects;
@@ -23,6 +23,7 @@ public:
 
 //  setters
     void setEffects (Effects *_effects);
+
 private:
     Ui::PlaylistTabWidget ui;
 
@@ -33,9 +34,13 @@ private:
 
     PlaylistItemDelegate delegate;
 
+    QTimer audioTimer;
+
     void createWidgets  () override;
     void setupWidgets   () override;
     void connectWidgets () override;
+
+    void updateIcons ();
 
 protected:
     void showEvent (QShowEvent *event) override;
@@ -49,11 +54,26 @@ private slots:
     void onPlaylistButtonClicked ();
     void onPlaylistItemClicked   (QListWidgetItem *item);
 
+    void onRenameButtonClicked ();
+    void onDeleteButtonClicked ();
     void onAcceptDeleteButtonBoxClicked ();
     void onRejectDeleteButtonBoxClicked ();
-    void onPlaylistRenameClicked ();
 
     void onRemoveItemClicked (const QVariant &data);
+
+//  slider
+    void onSliderValueChanged (int value);
+    void onSliderReleased     ();
+    void onSliderPressed      ();
+//  control buttons
+    void onPreviousButtonClicked ();
+    void onPauseButtonClicked    ();
+    void onNextButtonClicked     ();
+//  timer
+    void updateAudioInfo ();
+
+signals:
+    void audioStateChanged ();
 };
 
 #endif // _PLAYLISTTAB_H_

@@ -6,13 +6,14 @@
 #include <QSlider>
 #include <QSpinBox>
 #include <QDialogButtonBox>
-#include <qimageiohandler.h>
+#include <QPushButton>
+#include <qdialogbuttonbox.h>
 #include <qpushbutton.h>
 
 #include "effectstab.h"
 
 #include "src/effects/effects.h"
-#include "src/effects/effects.hpp"
+#include "src/tabs/effectsTab/metatypes.h"
 
 
 EffectsTab::EffectsTab (QWidget *parent)
@@ -88,6 +89,10 @@ void EffectsTab::connectEqualizer () {
 }
 
 void EffectsTab::connectDelay () {
+//  control buttons
+    connect(ui.delayButtonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, [&]() {
+        delayResetButtonClicked(DelayPreset());});
+//  effect
     using namespace CODES;
     connect(ui.delayDelaySpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [&](int value) {
         onDelayValueChanged(DELAY::Delay, value);});
@@ -102,6 +107,10 @@ void EffectsTab::connectDelay () {
 }
 
 void EffectsTab::connectFilter () {
+//  control buttons
+    connect(ui.filterButtonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, [&]() {
+        filterResetButtonClicked(FilterPreset());});
+//  effect
     using namespace CODES;
     connect(ui.filterModeToggleButton, &QPushButton::clicked, [&]() {
         onFilterValueChanged(FILTER::Mode);});
@@ -116,6 +125,10 @@ void EffectsTab::connectFilter () {
 }
 
 void EffectsTab::connectPitch () {
+//  control buttons
+    connect(ui.pitchButtonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, [&]() {
+        pitchResetButtonClicked(PitchPreset());});
+//  effect
     using namespace CODES;
     connect(ui.pitchTempoDial, &QDial::valueChanged, [&](int value) {
         onPitchValueChanged(PITCH::Tempo, value);});
@@ -128,6 +141,10 @@ void EffectsTab::connectPitch () {
 }
 
 void EffectsTab::connectCompressor () {
+//  control buttons
+    connect(ui.compressorButtonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, [&]() {
+        compressorResetButtonClicked(CompressorPreset());});
+//  effects
     using namespace CODES;
     connect(ui.compressorCompressorButton, &QPushButton::clicked, [&]() {
         onCompressorValueChanged(COMPRESSOR::Compressor);});
@@ -158,6 +175,41 @@ void EffectsTab::equalizerResetButtonClicked (const EqualizerPreset &preset) {
     ui.equalizer4000HzSlider->setValue (preset.slider4kHz);
     ui.equalizer8000HzSlider->setValue (preset.slider8kHz);
     ui.equalizer16000HzSlider->setValue(preset.slider16kHz);
+}
+
+void EffectsTab::delayResetButtonClicked (const DelayPreset &preset) {
+    ui.delayDelaySpinBox->setValue(preset.delay);
+    if (ui.delaySurroundDelayButton->getState() != preset.surroundDelay)
+        ui.delaySurroundDelayButton->click();
+    ui.delayIntensityDial->setValue(preset.intensity);
+    ui.delayMaxDelaySpinBox->setValue(preset.maxDelay);
+    ui.delayFeedbackDial->setValue(preset.feedback);
+}
+
+void EffectsTab::filterResetButtonClicked (const FilterPreset &preset) {
+    if (ui.filterModeToggleButton->getState() != preset.mode)
+        ui.filterModeToggleButton->click();
+    ui.filterCutoffSpinBox->setValue(preset.cutoff);
+    ui.filterRippleSpinBox->setValue(preset.ripple);
+    ui.filterPolesSpinBox->setValue(preset.poles);
+    if (ui.filterFilterTypeButton->getState() != preset.filterType)
+        ui.filterFilterTypeButton->click();
+}
+
+void EffectsTab::pitchResetButtonClicked (const PitchPreset &preset) {
+    ui.pitchTempoDial->setValue(preset.tempo);
+    ui.pitchPitchDial->setValue(preset.pitch);
+    ui.pitchRateDial->setValue(preset.rate);
+    ui.pitchOutputRateDial->setValue(preset.outputRate);
+}  
+
+void EffectsTab::compressorResetButtonClicked (const CompressorPreset &preset) {
+    if (ui.compressorCompressorButton->getState() != preset.compressor)
+        ui.compressorCompressorButton->click();
+    if (ui.compressorKneeTypeButton->getState() != preset.kneeType)
+        ui.compressorKneeTypeButton->click();
+    ui.compressorRatioDial->setValue(preset.ratio);
+    ui.compressorThresholdDial->setValue(preset.threshold);
 }
 
 void EffectsTab::onEqualizerValueChanged (CODES::EQUALIZER code, int value) {
