@@ -3,28 +3,21 @@
 #define _DIRECTORYLISTVIEWITEM_HPP_
 
 
-#include "directorylistviewitem.h"
+#include <QEvent>
 #include <QDebug>
-#include <qcheckbox.h>
-#include <qnamespace.h>
+#include <QCheckBox>
+#include <qsize.h>
+#include <qsizepolicy.h>
+
+#include "directorylistviewitem.h"
 
 
 class DirectoryListView;
 
 DirectoryListViewItem::DirectoryListViewItem (const QString &folderName, Qt::CheckState state) 
     : label(folderName) {
-    checkbox.setTristate(true);
-    checkbox.setCheckState(state);
-    checkbox.setFocusPolicy(Qt::NoFocus);
-
-    layout.addWidget(&checkbox);
-    layout.addWidget(&label);
-
-    setLayout(&layout);
-
-    if (parent() != nullptr) {
-        qDebug() << "bruh";
-    }
+    setupWidgets(state);
+    updateIcons();
 }
 
 DirectoryListViewItem::~DirectoryListViewItem () {
@@ -46,6 +39,33 @@ QString DirectoryListViewItem::getFolderName () const {
 
 QCheckBox *DirectoryListViewItem::getCheckBox () {
     return &checkbox;
+}
+
+void DirectoryListViewItem::setupWidgets (Qt::CheckState state) {
+    checkbox.setTristate(true);
+    checkbox.setCheckState(state);
+    checkbox.setFocusPolicy(Qt::NoFocus);
+    QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    checkbox.setSizePolicy(policy);
+    
+    layout.addWidget(&checkbox);
+    layout.addWidget(&label);
+
+    setLayout(&layout);
+}
+
+void DirectoryListViewItem::updateIcons () {
+    QColor   backgroundColor = palette().color(QPalette::Window);
+    QString iconPath = backgroundColor.value() < 128 ? QStringLiteral(":icons/white/") :
+                                                       QStringLiteral(":icons/black/");
+
+    checkbox.setIcon(QIcon(iconPath+"folder.svg"));
+}
+
+void DirectoryListViewItem::changeEvent (QEvent *event) {
+    if (event->type() == QEvent::PaletteChange)
+        updateIcons();
+    QWidget::changeEvent(event);
 }
 
 #endif // _DIRECTORYLISTVIEWITEM_HPP_

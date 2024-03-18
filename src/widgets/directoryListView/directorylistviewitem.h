@@ -9,6 +9,7 @@
 #include <QHBoxLayout>
 #include <qcheckbox.h>
 
+
 class DirectoryTree;
 
 class DirectoryListViewItem : public QWidget {
@@ -26,6 +27,13 @@ private:
     QLabel label;
     QCheckBox checkbox;
     QHBoxLayout layout;
+
+    void setupWidgets (Qt::CheckState state);
+
+    void updateIcons ();
+
+protected:
+    void changeEvent (QEvent *event) override;
 
 };
 

@@ -197,10 +197,8 @@ void PlayerTab::onLineEditTextChanged (const QString &newText) {
     foreach (QListWidgetItem* item, playlistItems) {
         auto widget = qobject_cast<PlayerTabPlaylistItem*>(ui.playerAllTracksListWidget->itemWidget(item));
         QString fileName = QString::fromStdString(widget->filePath());
-        if (fileName.contains(newText, Qt::CaseInsensitive))
-            item->setHidden(false);
-        else
-            item->setHidden(true);
+        bool contains = fileName.contains(newText, Qt::CaseInsensitive);
+        item->setHidden(!contains);
     }
 }
 
@@ -215,6 +213,7 @@ void PlayerTab::onPreviousButtonClicked () {
     albumCover = parser->getAudioCover(filePath);
     ui.playerPauseButton->setState(1);
     updateAlbumCover();
+    emit audioStateChanged();
 }
 
 void PlayerTab::onPauseButtonClicked () {
@@ -228,6 +227,7 @@ void PlayerTab::onPauseButtonClicked () {
         audioTimer.start();
         playlistAudioActive = false;
     }
+    emit audioStateChanged();
 }
 
 void PlayerTab::onNextButtonClicked () {
@@ -242,6 +242,7 @@ void PlayerTab::onNextButtonClicked () {
     albumCover = parser->getAudioCover(filePath);
     ui.playerPauseButton->setState(1);
     updateAlbumCover();
+    emit audioStateChanged();
 }
 
 void PlayerTab::onSliderValueChanged (int value) {
@@ -268,6 +269,7 @@ void PlayerTab::onPlaylistItemClicked (QListWidgetItem *item) {
     updateAlbumCover();
     ui.playerPauseButton->setState(1);
     audioTimer.start();
+    emit audioStateChanged();
 }
 
 void PlayerTab::addToPlaylistClicked (const QString &_musicFile) {

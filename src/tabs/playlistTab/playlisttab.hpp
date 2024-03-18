@@ -33,10 +33,6 @@ PlaylistTab::PlaylistTab (DataBase *_db, QWidget *parent)
     updateIcons();
 }
 
-PlaylistTab::~PlaylistTab () {
-
-}
-
 void PlaylistTab::setEffects (Effects *_effects) {
     effects = _effects;
 }
@@ -265,9 +261,16 @@ void PlaylistTab::onPreviousButtonClicked () {
 }
 
 void PlaylistTab::onPauseButtonClicked () {
-    if (ui.playlistValuesListWidget->currentItem() == nullptr)
+    auto item = ui.playlistValuesListWidget->currentItem();
+    if (item == nullptr)
         return;
+    effects->setAudioList(ui.playlistValuesListWidget);
     effects->togglePipelineState();
+    if (playlistAudioActive) {
+        effects->setCurrentAudio<PlaylistTabPlaylistItem>(item);
+        audioTimer.start();
+        playlistAudioActive = false;
+    }
     emit audioStateChanged();
 }
 
@@ -310,6 +313,12 @@ void PlaylistTab::updateAudioInfo () {
     labelText = labelText.arg(QString::number(durationSeconds),2,QChar('0'));
 
     ui.playlistAudioPositionLabel->setText(labelText);
+}
+
+void PlaylistTab::onAudioStateChanged () {
+    audioTimer.stop();
+    playlistAudioActive = true;
+    ui.playlistPauseButton->setState(0);
 }
 
 #endif // _PLAYLISTTAB_HPP_

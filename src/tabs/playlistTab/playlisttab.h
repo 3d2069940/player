@@ -19,7 +19,7 @@ class PlaylistTab : public QWidget, public ITab {
     Q_OBJECT
 public:
     explicit PlaylistTab (DataBase *_db, QWidget *parent=nullptr);
-    virtual ~PlaylistTab ();
+    virtual ~PlaylistTab () = default;
 
 //  setters
     void setEffects (Effects *_effects);
@@ -35,6 +35,8 @@ private:
     PlaylistItemDelegate delegate;
 
     QTimer audioTimer;
+
+    bool playlistAudioActive = false;
 
     void createWidgets  () override;
     void setupWidgets   () override;
@@ -74,6 +76,9 @@ private slots:
 
 signals:
     void audioStateChanged ();
+
+public slots:
+    void onAudioStateChanged ();
 };
 
 #endif // _PLAYLISTTAB_H_

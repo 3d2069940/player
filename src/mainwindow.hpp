@@ -57,5 +57,6 @@ MainWindowUI::~MainWindowUI () {
 
 void MainWindowUI::connectWidgets () {
     connect(playlistTab.data(), &PlaylistTab::audioStateChanged, playerTab.data(), &PlayerTab::onAudioStateChanged);
+    connect(playerTab.data(), &PlayerTab::audioStateChanged, playlistTab.data(), &PlaylistTab::onAudioStateChanged);
 }
 #endif // _MAINWINDOW_HPP_

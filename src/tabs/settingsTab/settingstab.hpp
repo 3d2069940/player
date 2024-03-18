@@ -9,10 +9,26 @@
 SettingsTab::SettingsTab (QWidget *parent) 
     : QWidget(parent) {
     ui.setupUi(this);
+    createWidgets();
+    setupWidgets();
+    connectWidgets();
 }
 
-SettingsTab::~SettingsTab () {
-    
+void SettingsTab::createWidgets () {
+
+}
+
+void SettingsTab::setupWidgets () {
+    ui.settingsDirectoryListView->hide();
+}
+
+void SettingsTab::connectWidgets () {
+    connect(ui.settingsMediaFoldersButton, &QPushButton::clicked, this, &SettingsTab::onSelectFoldersButtonClicked);
+}
+
+void SettingsTab::onSelectFoldersButtonClicked () {
+    ui.settingsDirectoryListView->setVisible(
+        !ui.settingsDirectoryListView->isVisible());
 }
 
 #endif // _SETTINGSTAB_HPP_
